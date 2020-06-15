@@ -27,10 +27,8 @@ public class CTBMain extends JavaPlugin {
 	 * This is populated from the config. */
 	private List<Material> blocks;
 	
-	/** The {@link Map} of {@link UUID} to {@link Material} of what is assigned to the players */
-	private Map<UUID, Material> assignedBlock;
-	/** The {@link Map} of {@link UUID} to {@link Boolean} of if players have found their block */
-	private Map<UUID, Boolean> foundBlock;
+	/** The {@link List} of {@link CTBPlayer} in the game */
+	private List<CTBPlayer> peoples;
 	
 	/** the {@link ChatColor} of the main text */
 	private ChatColor maincolor = ChatColor.LIGHT_PURPLE;
@@ -105,8 +103,9 @@ public class CTBMain extends JavaPlugin {
     	sbm = Bukkit.getScoreboardManager();
     	board = sbm.getMainScoreboard();
     	rand = new Random();
-    	assignedBlock = new HashMap<UUID, Material>();
-    	foundBlock = new HashMap<UUID, Boolean>();
+    	peoples = new ArrayList<CTBPlayer>();
+//    	assignedBlock = new HashMap<UUID, Material>();
+//    	foundBlock = new HashMap<UUID, Boolean>();
     	getServer().getPluginManager().registerEvents(new CTBEvent(this), this);
     	
     	this.getCommand(Keys.COMMAND_RANDOM_BLOCK_NAME).setExecutor(new RandomBlockCommand(this));
@@ -138,33 +137,14 @@ public class CTBMain extends JavaPlugin {
     protected Material getRandomBlock() {
     	return blocks.get(rand.nextInt(blocks.size()));
     }
-    /**
-     * Assignes a block to a player
-     * @param uuid the {@link UUID} of the player
-     * @param mat the {@link Material} of the block
-     */
-    protected void assignBlock(UUID uuid, Material mat) {
-    	assignedBlock.put(uuid, mat);
-    	foundBlock.put(uuid, false);
-    }
-    /**
-     * Gets the block assigned to a player
-     * @param uuid the {@link UUID} of the player
-     * @return the {@link Material} assigned to the player
-     */
-    protected Material getBlock(UUID uuid) {
-    	if(assignedBlock.containsKey(uuid)) {
-    		return assignedBlock.get(uuid);
-    	}
-    	return null;
-    }
+
     /**
      * Marks that a player found their block and sends the message
      * Also starts the next round if everyone has found their block
      * @param p	the {@link Player} who found their block
      */
-    protected void foundBlock(Player p) {
-    	foundBlock.put(p.getUniqueId(), true);
+    protected void foundBlock(Player pl) {
+    	CTBPlayer p = findTeam(pl);
     	Score s = getScore(p.getName());
     	s.setScore(s.getScore() + 1);
     	for(Player player : Bukkit.getOnlinePlayers()) {
@@ -180,16 +160,13 @@ public class CTBMain extends JavaPlugin {
 			startRound();
 		}
     }
-    /**
-     * Checks if a player has found their block
-     * @param uuid the {@link UUID} of the player
-     * @return boolean of if the player found their block
-     */
-    protected boolean hasFoundBlock(UUID uuid) {
-    	if(foundBlock.containsKey(uuid)) {
-    		return foundBlock.get(uuid);
+    private CTBPlayer findTeam(Player p) {
+    	for(CTBPlayer t : peoples) {
+    		if(t.ifContainsPlayer(p)) {
+    			return t;
+    		}
     	}
-    	return false;
+    	return null;
     }
     /**
      * Checks if everyone has found their block
@@ -197,8 +174,8 @@ public class CTBMain extends JavaPlugin {
      */
     protected boolean hasEveryoneFoundBlock() {
     	boolean found = true;
-    	for(UUID u : foundBlock.keySet()) {
-    		found &= foundBlock.get(u);
+    	for(CTBPlayer p : peoples) {
+    		found &= p.isFound();
     	}
     	return found;
     }
