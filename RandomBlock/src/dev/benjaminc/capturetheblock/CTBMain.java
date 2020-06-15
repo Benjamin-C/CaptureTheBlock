@@ -90,6 +90,7 @@ public class CTBMain extends JavaPlugin {
     			blocks.add(Material.valueOf((String) o));
     		}
     	}
+    	saveDefaultConfig();
 	}
     
 	// -----------------------------------------------
