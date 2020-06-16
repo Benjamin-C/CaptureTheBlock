@@ -244,6 +244,9 @@ public class CTBMain extends JavaPlugin {
     	for(Player pl : getSpectators()) {
     		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 200, 20);
     	}
+    	for(Player pl : getTeammates()) {
+    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 200, 20);
+    	}
     	CTBMain me = this;
         timerid = scheduler.scheduleSyncDelayedTask(this, new Runnable() {
             @Override public void run() {
@@ -346,6 +349,9 @@ public class CTBMain extends JavaPlugin {
     	for(Player p : getPlayers()) {
     		p.sendMessage(plstr);
     	}
+    	for(Player p : getTeammates()) {
+    		p.sendMessage(plstr);
+    	}
     	String spstr = showScoresStr(true);
     	for(Player p : getSpectators()) {
     		p.sendMessage(spstr);
@@ -368,10 +374,23 @@ public class CTBMain extends JavaPlugin {
      * Gets all players in the CTB game. This is not the same as {@link Bukkit#getOnlinePlayers()} because it omitts spectators
      * @return the {@link Collection} of all {@link Player} in the game
      */
+    protected Collection<Player> getTeammates() {
+    	List<Player> peoples = new ArrayList<Player>();
+    	for(Player p : Bukkit.getOnlinePlayers()) {
+    		if(!p.hasPermission(Keys.PERMISSION_TEAMMATE)) {
+    			peoples.add(p);
+    		}
+    	}
+    	return peoples;
+    }
+    /**
+     * Gets all players in the CTB game. This is not the same as {@link Bukkit#getOnlinePlayers()} because it omitts spectators
+     * @return the {@link Collection} of all {@link Player} in the game
+     */
     protected Collection<Player> getPlayers() {
     	List<Player> peoples = new ArrayList<Player>();
     	for(Player p : Bukkit.getOnlinePlayers()) {
-    		if(!p.hasPermission(Keys.PERMISSION_SPECTATE)) {
+    		if(!p.hasPermission(Keys.PERMISSION_SPECTATE) && !p.hasPermission(Keys.PERMISSION_TEAMMATE)) {
     			peoples.add(p);
     		}
     	}
