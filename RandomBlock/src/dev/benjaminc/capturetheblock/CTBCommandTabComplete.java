@@ -21,16 +21,13 @@ public class CTBCommandTabComplete implements TabCompleter {
 		
 		List<String> possible = new ArrayList<String>();
 		
-		
-		possible.add(Keys.COMMAND_CTB_SCORE);
-		
 		switch(args.length) {
 //		case 0: {
 //			options = possible;
 //		} break;
 		case 1: {
 			possible.add(Keys.COMMAND_CTB_TEAM); // add join leave list remove
-
+			possible.add(Keys.COMMAND_CTB_SCORE);
 			if(sender.hasPermission(Keys.PERMISSION_CONTROL)) { 
 				possible.add(Keys.COMMAND_CTB_START);
 				possible.add(Keys.COMMAND_CTB_END);
@@ -41,7 +38,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 			options = getPossibleCompletes(possible, args[0]);
 		} break;
 		case 2: {
-			switch(args[1]) {
+			switch(args[0]) {
 			case Keys.COMMAND_CTB_TEAM: {
 				possible.add(Keys.COMMAND_CTB_TEAM_JOIN); // add join leave list remove
 				possible.add(Keys.COMMAND_CTB_TEAM_LEAVE); // add join leave list remove
@@ -50,19 +47,21 @@ public class CTBCommandTabComplete implements TabCompleter {
 					possible.add(Keys.COMMAND_CTB_TEAM_ADD);
 					possible.add(Keys.COMMAND_CTB_TEAM_REMOVE);
 				}
+			} break;
 			}
-			}
-		}
+			options = getPossibleCompletes(possible, args[1]);
+		} break;
 		case 3: {
-			switch(args[1]) {
+			switch(args[0]) {
 			case Keys.COMMAND_CTB_TEAM: {
-				switch(args[2]) {
+				switch(args[1]) {
 				case Keys.COMMAND_CTB_TEAM_JOIN: {
 					possible.addAll(plugin.getAllTeams().keySet());
+				} break;
 				}
-				}
+			} break;
 			}
-			}
+			options = getPossibleCompletes(possible, args[2]);
 		}
 		}
 		
