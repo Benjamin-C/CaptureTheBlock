@@ -109,7 +109,7 @@ public class CTBMain extends JavaPlugin {
     	
     	this.getCommand(Keys.COMMAND_RANDOM_BLOCK_NAME).setExecutor(new RandomBlockCommand(this));
     	this.getCommand(Keys.COMMAND_CTB_NAME).setExecutor(new CTBGameCommand(this));
-    	this.getCommand(Keys.COMMAND_CTB_NAME).setTabCompleter(new CTBCommandTabComplete());
+    	this.getCommand(Keys.COMMAND_CTB_NAME).setTabCompleter(new CTBCommandTabComplete(this));
     	
     	if(board.getObjective(Keys.SCORE_NAME) == null) {
     		board.registerNewObjective(Keys.SCORE_NAME, "dummy", Keys.SCORE_NAME);
