@@ -2,20 +2,21 @@ package dev.benjaminc.capturetheblock;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-public class CTBPlayer {
+public class Team {
 	
 	private Material target;
-	private boolean found;
 	private boolean givenup;
 	private String name;
-	
 	private List<Player> peoples;
-
-	public CTBPlayer() {
+	private Map<UUID, Boolean> foundBlock;
+	
+	public Team() {
 		peoples = new ArrayList<Player>();
 	}
 	
@@ -27,12 +28,16 @@ public class CTBPlayer {
 		this.target = target;
 	}
 
-	public boolean isFound() {
-		return found;
+	public boolean hasEveryoneFound() {
+		boolean found = true;
+    	for(UUID u : foundBlock.keySet()) {
+    		found &= foundBlock.get(u);
+    	}
+    	return found;
 	}
 
-	public void setFound(boolean found) {
-		this.found = found;
+	public void setFound(UUID uuid, boolean found) {
+		foundBlock.put(uuid, found);
 	}
 
 	public boolean isGivenup() {

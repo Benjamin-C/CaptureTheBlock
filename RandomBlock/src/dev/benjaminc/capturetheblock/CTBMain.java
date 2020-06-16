@@ -27,8 +27,8 @@ public class CTBMain extends JavaPlugin {
 	 * This is populated from the config. */
 	private List<Material> blocks;
 	
-	/** The {@link List} of {@link CTBPlayer} in the game */
-	private List<CTBPlayer> peoples;
+	/** The {@link List} of {@link Team} in the game */
+	private Map<String, Team> teams;
 	
 	/** the {@link ChatColor} of the main text */
 	private ChatColor maincolor = ChatColor.LIGHT_PURPLE;
@@ -103,7 +103,7 @@ public class CTBMain extends JavaPlugin {
     	sbm = Bukkit.getScoreboardManager();
     	board = sbm.getMainScoreboard();
     	rand = new Random();
-    	peoples = new ArrayList<CTBPlayer>();
+    	teams = new HashMap<String, Team>();
 //    	assignedBlock = new HashMap<UUID, Material>();
 //    	foundBlock = new HashMap<UUID, Boolean>();
     	getServer().getPluginManager().registerEvents(new CTBEvent(this), this);
@@ -144,7 +144,7 @@ public class CTBMain extends JavaPlugin {
      * @param p	the {@link Player} who found their block
      */
     protected void foundBlock(Player pl) {
-    	CTBPlayer p = findTeam(pl);
+    	Team p = findTeam(pl);
     	Score s = getScore(p.getName());
     	s.setScore(s.getScore() + 1);
     	for(Player player : Bukkit.getOnlinePlayers()) {
@@ -160,8 +160,8 @@ public class CTBMain extends JavaPlugin {
 			startRound();
 		}
     }
-    private CTBPlayer findTeam(Player p) {
-    	for(CTBPlayer t : peoples) {
+    private Team findTeam(Player p) {
+    	for(Team t : teams.values()) {
     		if(t.ifContainsPlayer(p)) {
     			return t;
     		}
@@ -174,8 +174,8 @@ public class CTBMain extends JavaPlugin {
      */
     protected boolean hasEveryoneFoundBlock() {
     	boolean found = true;
-    	for(CTBPlayer p : peoples) {
-    		found &= p.isFound();
+    	for(Team p : teams.values()) {
+    		found &= p.hasEveryoneFound();
     	}
     	return found;
     }
@@ -210,7 +210,7 @@ public class CTBMain extends JavaPlugin {
     	stopTimer();
     	showScores(true);
     	
-    	for(Player pl : getPlayers()) {
+    	for(Player pl : getPlayers_BUTFIXME()) {
     		Material mat = getRandomBlock();
 			pl.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + board.getObjective(Keys.SCORE_NAME).getScore(pl.getName()).getScore() + colorreset);
 			pl.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
@@ -258,11 +258,11 @@ public class CTBMain extends JavaPlugin {
     
     /**
      * Gets the score of a player
-     * @param player the {@link Player} to check
+     * @param teamname the {@link String} name of the team to check
      * @return the {@link Score} score
      */
-    protected Score getScore(String player) {
-    	return board.getObjective(Keys.SCORE_NAME).getScore(player);
+    protected Score getScore(String teamname) {
+    	return board.getObjective(Keys.SCORE_NAME).getScore(teamname);
     }
     /**
      * Gets a string representation of the scores
@@ -270,18 +270,16 @@ public class CTBMain extends JavaPlugin {
      * @return the String of the scores
      */
     public String showScoresStr(boolean showBlocks) {
-    	Map<UUID, Integer> scoremap = new HashMap<UUID, Integer>();
-    	for(Player p : getPlayers()) {
-    		scoremap.put(p.getUniqueId(), getScore(p.getName()).getScore());
+    	Map<String, Integer> scoremap = new HashMap<String, Integer>();
+    	for(Team t : teams.values()) {
+    		scoremap.put(t.getName(), getScore(t.getName()).getScore());
     	}
-    	Map<UUID, String> msgmap = new HashMap<UUID, String>();
-    	for(Player p : getPlayers()) {
-    		UUID uuid = p.getUniqueId();
-    		
-    		String name = p.getName();
+    	Map<String, String> msgmap = new HashMap<String, String>();
+    	for(Team t : teams.values()) {
+    		String name = t.getName();
     		int sc = getScore(name).getScore();
-    		String scstr = ((hasFoundBlock(uuid)) ? gotcolor : missedcolor) + "" + sc + "-" + name + ((showBlocks) ? ": " + ((getBlock(uuid) != null) ? getBlock(uuid).name() : Strings.NOTHING) : "") + colorreset;
-    		msgmap.put(uuid, scstr);
+    		String scstr = (t.hasEveryoneFound() ? gotcolor : missedcolor) + "" + sc + "-" + name + ((showBlocks) ? ": " + ((t.getTarget() != null) ? t.getTarget().name() : Strings.NOTHING) : "") + colorreset;
+    		msgmap.put(name, scstr);
     	}
     	
     	// Add some fake scores for testing
@@ -319,8 +317,8 @@ public class CTBMain extends JavaPlugin {
      */
     protected void showScores(boolean showBlocks) {
     	String plstr = showScoresStr(showBlocks);
-    	for(Player p : getPlayers()) {
-    		p.sendMessage(plstr);
+    	for(Team t : teams.values()) {
+    		t.sendMessage(plstr);
     	}
     	String spstr = showScoresStr(true);
     	for(Player p : getSpectators()) {
@@ -331,8 +329,8 @@ public class CTBMain extends JavaPlugin {
      * Resets everyone's scores
      */
     protected void resetScores() {
-    	for(Player p : getPlayers()) {
-    		board.getObjective(Keys.SCORE_NAME).getScore(p.getName()).setScore(0);
+    	for(Team t : teams.values()) {
+    		board.getObjective(Keys.SCORE_NAME).getScore(t.getName()).setScore(0);
     	}
     }
     
@@ -341,7 +339,7 @@ public class CTBMain extends JavaPlugin {
 	// -----------------------------------------------
     
     /**
-     * Gets all players in the CTB game. This is not the same as {@link Bukkit#getOnlinePlayers()} because it omitts spectators
+     * Gets all players in the CTB game regardless of team. This is not the same as {@link Bukkit#getOnlinePlayers()} because it omitts spectators
      * @return the {@link Collection} of all {@link Player} in the game
      */
     protected Collection<Player> getPlayers() {
