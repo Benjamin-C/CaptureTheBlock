@@ -354,11 +354,16 @@ public class CTBMain extends JavaPlugin {
     }
     // TODO add javadoc
     protected boolean joinTeam(Player p, String name) {
-    	if(teams.containsKey(name)) {
-    		teams.get(name).addPerson(p);
-    		return true;
+    	boolean ret = false;
+    	for(Team t : teams.values()) {
+    		if(t.getName().equals(name)) {
+    			t.addPerson(p);
+    			ret = true;
+    		} else if(t.ifContainsPlayer(p)) {
+    			t.removePerson(p);
+    		}
     	}
-    	return false;
+    	return ret;
     }
     // TODO add javadoc
     protected Map<String, Team> getAllTeams() {
