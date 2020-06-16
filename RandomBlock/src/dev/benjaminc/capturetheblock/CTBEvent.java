@@ -21,9 +21,11 @@ public class CTBEvent implements Listener {
 		Material m = p.getLocation().getBlock().getType();
 		Material n = p.getLocation().subtract(0, 1, 0).getBlock().getType();
 		Team t = plugin.findTeam(p);
-		Material tgt = t.getTarget();
-		if((m == tgt || n == tgt) && !t.hasEveryoneFound()) {
-			t.setFound(p.getUniqueId(), true);
+		if(t != null) {
+			Material tgt = t.getTarget();
+			if((m == tgt || n == tgt) && !t.hasEveryoneFound()) {
+				t.setFound(p.getUniqueId(), true);
+			}
 		}
 	}
 }

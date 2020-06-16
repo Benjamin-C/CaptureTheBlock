@@ -202,36 +202,42 @@ public class CTBMain extends JavaPlugin {
      * Starts a round of the game
      */
     protected void startRound() {
-    	stopTimer();
-    	showScores(true);
-    	
-    	for(Team t : teams.values()) {
-    		Material mat = getRandomBlock();
-			t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + getScore(t.getName()).getScore() + colorreset);
-			t.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
-			t.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
-			t.setTarget(mat);
-		}
-    	for(Player pl : getSpectators()) {
-    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 200, 20);
+    	if(teams.size() > 0) {
+	    	stopTimer();
+	    	showScores(true);
+	    	
+	    	for(Team t : teams.values()) {
+	    		Material mat = getRandomBlock();
+				t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + getScore(t.getName()).getScore() + colorreset);
+				t.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
+				t.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
+				t.setTarget(mat);
+			}
+	    	for(Player pl : getSpectators()) {
+	    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 200, 20);
+	    	}
+	    	CTBMain me = this;
+	        timerid = scheduler.scheduleSyncDelayedTask(this, new Runnable() {
+	            @Override public void run() {
+	            	sendAllMsg(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
+	            	for(Player p : getSpectators()) {
+	            		p.sendTitle(maincolor + "" + roundwarn + colorreset, null, 0, 20, 5);
+	            	}
+	            	for(Team t : teams.values()) {
+	            		t.sendTitle(maincolor + "" + roundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
+	            	}
+	            	timerid = scheduler.scheduleSyncDelayedTask(me, new Runnable() {
+	                	@Override public void run() {
+							startRound();
+						}
+	                }, roundwarn*TPS);
+	            }
+	        }, (roundtime-roundwarn)*TPS);
+    	} else {
+    		for(Player p : getAdmins()) {
+    			p.sendMessage("There must be at least 1 team to begin");
+    		}
     	}
-    	CTBMain me = this;
-        timerid = scheduler.scheduleSyncDelayedTask(this, new Runnable() {
-            @Override public void run() {
-            	sendAllMsg(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
-            	for(Player p : getSpectators()) {
-            		p.sendTitle(maincolor + "" + roundwarn + colorreset, null, 0, 20, 5);
-            	}
-            	for(Team t : teams.values()) {
-            		t.sendTitle(maincolor + "" + roundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
-            	}
-            	timerid = scheduler.scheduleSyncDelayedTask(me, new Runnable() {
-                	@Override public void run() {
-						startRound();
-					}
-                }, roundwarn*TPS);
-            }
-        }, (roundtime-roundwarn)*TPS);
     }
     /**
      * Stops the game timer, if it is running
@@ -407,7 +413,19 @@ public class CTBMain extends JavaPlugin {
     		p.sendTitle(ttl, sub, fadein, hold, fadeout);
     	}
     }
-    
+    /**
+     * Gets all admins to the CTB game
+     * @return the {@link Collection} of all {@link Player} who are admins
+     */
+    protected Collection<Player> getAdmins() {
+    	List<Player> peoples = new ArrayList<Player>();
+    	for(Player p : Bukkit.getOnlinePlayers()) {
+    		if(p.hasPermission(Keys.PERMISSION_CONTROL)) {
+    			peoples.add(p);
+    		}
+    	}
+    	return peoples;
+    }
     /**
      * Gets all spectators to the CTB game. This does not mean that their gamemode is spectator
      * @return the {@link Collection} of all {@link Player} who are spectating the game

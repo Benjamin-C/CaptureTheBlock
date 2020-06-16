@@ -1,6 +1,7 @@
 package dev.benjaminc.capturetheblock;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,6 +20,7 @@ public class Team {
 	public Team(String name) {
 		this.name = name;
 		peoples = new ArrayList<Player>();
+		foundBlock = new HashMap<UUID, Boolean>();
 	}
 	
 	public Material getTarget() {
