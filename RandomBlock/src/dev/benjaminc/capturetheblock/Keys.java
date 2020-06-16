@@ -21,5 +21,11 @@ public class Keys {
 	public static final String COMMAND_CTB_RESET = "reset";
 	public static final String COMMAND_CTB_BLOCKS = "blocks";
 	public static final String COMMAND_CTB_ALLBLOCKS = "listallblocksbutitisbig";
+	public static final String COMMAND_CTB_TEAM = "team";
+		public static final String COMMAND_CTB_TEAM_LIST = "list";
+		public static final String COMMAND_CTB_TEAM_ADD = "add";
+		public static final String COMMAND_CTB_TEAM_REMOVE = "remove";
+		public static final String COMMAND_CTB_TEAM_JOIN = "join";
+		public static final String COMMAND_CTB_TEAM_LEAVE = "leave";
 	
 }

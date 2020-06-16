@@ -56,10 +56,13 @@ public class Team {
 		this.peoples = peoples;
 	}
 	
-	public void addPerson(Player Player) {
-		peoples.add(Player);
+	public void addPerson(Player p) {
+		peoples.add(p);
 	}
 	
+	public void removePerson(Player p) {
+		peoples.remove(p);
+	}
 	public String getName() {
 		return name;
 	}
@@ -75,6 +78,12 @@ public class Team {
 	public void sendMessage(String msg) {
 		for(Player p : peoples) {
 			p.sendMessage(msg);
+		}
+	}
+	
+	public void sendTitle(String ttl, String sub, int fadein, int hold, int fadeout) {
+		for(Player p : peoples) {
+			p.sendTitle(ttl, sub, fadein, hold, fadeout);
 		}
 	}
 	

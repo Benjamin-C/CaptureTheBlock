@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -23,9 +22,13 @@ import net.md_5.bungee.api.ChatColor;
 
 public class CTBMain extends JavaPlugin {
 	
-	/** The {@link List} of all {@link Material} that could be selected.
-	 * This is populated from the config. */
+	// CONFIGURED VALUES
+	/** The {@link List} of all {@link Material} that could be selected. */
 	private List<Material> blocks;
+	/** The int time in seconds the game runs for. Loaded from config. */
+	private int roundtime = 300;
+	/** The int warning time before the round is over in seconds */
+	private int roundwarn = 10;
 	
 	/** The {@link List} of {@link Team} in the game */
 	private Map<String, Team> teams;
@@ -47,10 +50,6 @@ public class CTBMain extends JavaPlugin {
 	private BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 	/** The int id of the current game timer */
 	private int timerid;
-	/** The int time in seconds the game runs for. Loaded from config. */
-	private int roundtime = 300;
-	/** The int warning time before the round is over in seconds */
-	private int roundwarn = 10;
 	
 	/** the {@link Random} used for random numbers */
 	private Random rand;
@@ -147,20 +146,16 @@ public class CTBMain extends JavaPlugin {
     	Team p = findTeam(pl);
     	Score s = getScore(p.getName());
     	s.setScore(s.getScore() + 1);
-    	for(Player player : Bukkit.getOnlinePlayers()) {
-            if(player == p){
-            	p.sendMessage(maincolor + Strings.YOU_FOUND_BLOCK + colorreset);
-            } else {
-            	player.sendMessage(maincolor + p.getName() + " " + Strings.THEY_FOUND_BLOCK + maincolor);
-            }
-        }
-    	
+    	pl.sendMessage(maincolor + Strings.YOU_FOUND_BLOCK + colorreset);
+    	sendAllMsg(maincolor + p.getName() + " " + Strings.THEY_FOUND_BLOCK + maincolor);
     	
     	if(hasEveryoneFoundBlock()) {
 			startRound();
 		}
     }
-    private Team findTeam(Player p) {
+    
+    // TODO add javadoc
+    protected Team findTeam(Player p) {
     	for(Team t : teams.values()) {
     		if(t.ifContainsPlayer(p)) {
     			return t;
@@ -199,8 +194,8 @@ public class CTBMain extends JavaPlugin {
      * Prints the start of game messages, and starts a round
      */
     protected void startGame() {
-    	Bukkit.broadcastMessage(maincolor + Strings.GAME_BEGUN + colorreset);
-		Bukkit.broadcastMessage(maincolor + Strings.GAME_INFO + colorreset);
+    	sendAllMsg(maincolor + Strings.GAME_BEGUN + colorreset);
+		sendAllMsg(maincolor + Strings.GAME_INFO + colorreset);
 		startRound();
     }
     /**
@@ -210,12 +205,12 @@ public class CTBMain extends JavaPlugin {
     	stopTimer();
     	showScores(true);
     	
-    	for(Player pl : getPlayers_BUTFIXME()) {
+    	for(Team t : teams.values()) {
     		Material mat = getRandomBlock();
-			pl.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + board.getObjective(Keys.SCORE_NAME).getScore(pl.getName()).getScore() + colorreset);
-			pl.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
-			pl.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
-			assignBlock(pl.getUniqueId(), mat);
+			t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + getScore(t.getName()).getScore() + colorreset);
+			t.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
+			t.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
+			t.setTarget(mat);
 		}
     	for(Player pl : getSpectators()) {
     		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 200, 20);
@@ -223,9 +218,12 @@ public class CTBMain extends JavaPlugin {
     	CTBMain me = this;
         timerid = scheduler.scheduleSyncDelayedTask(this, new Runnable() {
             @Override public void run() {
-            	Bukkit.broadcastMessage(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
-            	for(Player pl : getServer().getOnlinePlayers()) {
-            		pl.sendTitle(maincolor + "" + roundwarn + colorreset, (hasFoundBlock(pl.getUniqueId()) || isSpectator(pl)) ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
+            	sendAllMsg(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
+            	for(Player p : getSpectators()) {
+            		p.sendTitle(maincolor + "" + roundwarn + colorreset, null, 0, 20, 5);
+            	}
+            	for(Team t : teams.values()) {
+            		t.sendTitle(maincolor + "" + roundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
             	}
             	timerid = scheduler.scheduleSyncDelayedTask(me, new Runnable() {
                 	@Override public void run() {
@@ -248,7 +246,7 @@ public class CTBMain extends JavaPlugin {
      */
     public void endRound() {
     	stopTimer();
-    	Bukkit.broadcastMessage(maincolor + Strings.GAME_OVER + colorreset);
+    	sendAllMsg(maincolor + Strings.GAME_OVER + colorreset);
     	showScores(true);
 	}
     
@@ -338,19 +336,73 @@ public class CTBMain extends JavaPlugin {
 	// PLAYERS
 	// -----------------------------------------------
     
-    /**
-     * Gets all players in the CTB game regardless of team. This is not the same as {@link Bukkit#getOnlinePlayers()} because it omitts spectators
-     * @return the {@link Collection} of all {@link Player} in the game
-     */
-    protected Collection<Player> getPlayers() {
-    	List<Player> peoples = new ArrayList<Player>();
-    	for(Player p : Bukkit.getOnlinePlayers()) {
-    		if(!p.hasPermission(Keys.PERMISSION_SPECTATE)) {
-    			peoples.add(p);
-    		}
+    // TODO add javadoc
+    protected boolean addTeam(String name) {
+    	if(!teams.containsKey(name)) {
+    		teams.put(name, new Team());
+    		return true;
     	}
-    	return peoples;
+    	return false;
     }
+    // TODO add javadoc
+    protected boolean removeTeam(String name) {
+    	if(teams.containsKey(name)) {
+    		teams.remove(name);
+    		return true;
+    	}
+    	return false;
+    }
+    // TODO add javadoc
+    protected boolean joinTeam(Player p, String name) {
+    	if(teams.containsKey(name)) {
+    		teams.get(name).addPerson(p);
+    		return true;
+    	}
+    	return false;
+    }
+    // TODO add javadoc
+    protected Map<String, Team> getAllTeams() {
+    	return teams;
+    }
+    // TODO add javadoc
+    protected String listTeam(Team t) {
+    	String team = t.getName();
+    	for(Player p : t.getPeoples()) {
+    		team += "\n  " + p.getName();
+    	}
+    	return team;
+    }
+    
+    // TODO javadoc
+    protected boolean leaveTeam(Player p) {
+    	Team t = findTeam(p);
+    	if(t != null) {
+    		t.removePerson(p);
+    		return true;
+    	}
+    	return false;
+    }
+    
+    // TODO add javadoc
+    protected void sendAllMsg(String msg) {
+    	for(Team t : teams.values()) {
+    		t.sendMessage(msg);
+    	}
+    	for(Player p : getSpectators()) {
+    		p.sendMessage(msg);
+    	}
+    }
+    
+    // TODO add javadoc
+    protected void sendAllTitle(String ttl, String sub, int fadein, int hold, int fadeout) {
+    	for(Team t : teams.values()) {
+    		t.sendTitle(ttl, sub, fadein, hold, fadeout);
+    	}
+    	for(Player p : getSpectators()) {
+    		p.sendTitle(ttl, sub, fadein, hold, fadeout);
+    	}
+    }
+    
     /**
      * Gets all spectators to the CTB game. This does not mean that their gamemode is spectator
      * @return the {@link Collection} of all {@link Player} who are spectating the game
@@ -358,7 +410,7 @@ public class CTBMain extends JavaPlugin {
     protected Collection<Player> getSpectators() {
     	List<Player> peoples = new ArrayList<Player>();
     	for(Player p : Bukkit.getOnlinePlayers()) {
-    		if(p.hasPermission(Keys.PERMISSION_SPECTATE)) {
+    		if(isSpectator(p)) {
     			peoples.add(p);
     		}
     	}

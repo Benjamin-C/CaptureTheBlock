@@ -1,8 +1,13 @@
 package dev.benjaminc.capturetheblock;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 public class CTBGameCommand implements CommandExecutor {
 
@@ -14,6 +19,7 @@ public class CTBGameCommand implements CommandExecutor {
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+		boolean isAdmin = sender.hasPermission(Keys.PERMISSION_CONTROL);
 		String acts = Keys.COMMAND_CTB_SCORE;
 		if(sender.hasPermission(Keys.PERMISSION_CONTROL)) {
 			acts += ", " + Keys.COMMAND_CTB_START + ", "
@@ -22,12 +28,93 @@ public class CTBGameCommand implements CommandExecutor {
 					+ Keys.COMMAND_CTB_BLOCKS + ", "
 					+ Keys.COMMAND_CTB_ALLBLOCKS;
 		}
+		
 		if(args.length >= 1) {
-			if(args[0].equals(Keys.COMMAND_CTB_SCORE)) {
+			switch(args[0]) {
+			case Keys.COMMAND_CTB_SCORE: {
 				sender.sendMessage(plugin.showScoresStr(false));
 				return true;
 			}
-			if(sender.hasPermission(Keys.PERMISSION_CONTROL)) {
+			case Keys.COMMAND_CTB_TEAM: {
+				if(args.length >= 2) {
+					switch(args[1]) {
+					case Keys.COMMAND_CTB_TEAM_JOIN: {
+						if(args.length >= 3) {
+							if(args.length >= 4 && isAdmin) { // If a player was specified
+								Player pl = Bukkit.getPlayer(args[3]);
+								if(pl != null) {
+									boolean success = plugin.joinTeam(pl, args[2]);
+									if(!success) {
+										sender.sendMessage("That is not a team!");
+									}
+								} else {
+									sender.sendMessage(args[3] + " is not a player and can not join the team");
+								}
+							} else { // If the sender is trying to join a team
+								if(sender instanceof Player) {
+									boolean success = plugin.joinTeam((Player) sender, args[2]);
+									if(!success) {
+										sender.sendMessage("That is not a team!");
+									}
+								} else {
+									sender.sendMessage("You are not a player, so you can not join a team");
+								}
+							}
+						} else {
+							sender.sendMessage("You need to specify what you want to do");
+						}
+						return true;
+					}
+					case Keys.COMMAND_CTB_TEAM_LEAVE: {
+						// KICK SOMEONE ELSE OFF TEAM HERE
+						if(args.length >= 3 && isAdmin) { // If a player was specified
+							Player pl = Bukkit.getPlayer(args[2]);
+							if(pl != null) {
+								boolean success = plugin.leaveTeam(pl);
+								if(!success) {
+									sender.sendMessage("That player can not leave a team");
+								}
+							} else {
+								sender.sendMessage(args[2] + " is not a player and can not join the team");
+							}
+						} else { // If the sender is trying to leave a team
+							if(sender instanceof Player) {
+								boolean success = plugin.leaveTeam((Player) sender);
+								if(!success) {
+									sender.sendMessage("You can't leave a team!");
+								}
+							} else {
+								sender.sendMessage("You are not a player, so you can not leave a team");
+							}
+						}
+						return true;
+					}
+					case Keys.COMMAND_CTB_TEAM_LIST: {
+						List<Team> ts = new ArrayList<Team>();
+						if(isAdmin) {
+							ts.addAll(plugin.getAllTeams().values());
+						} else {
+							if(sender instanceof Player) {
+								ts.add(plugin.findTeam((Player) sender));
+							}
+						}
+						String msg = "";
+						boolean first = true;
+						for(Team t : ts) {
+							if(first) {
+								first = false;
+							} else {
+								msg += "/n";
+							}
+							msg += plugin.listTeam(t);
+						}
+						sender.sendMessage(msg);
+					}
+					}
+				}
+			}
+			}
+			if(isAdmin) {
 				switch(args[0]) {
 				case Keys.COMMAND_CTB_START: {
 					plugin.startGame();
@@ -48,6 +135,28 @@ public class CTBGameCommand implements CommandExecutor {
 				}
 				case Keys.COMMAND_CTB_ALLBLOCKS: {
 					sender.sendMessage(plugin.listAllBlocks());
+				}
+				case Keys.COMMAND_CTB_TEAM: {
+					if(args.length >= 2) {
+						switch(args[1]) {
+						case Keys.COMMAND_CTB_TEAM_ADD: {
+							if(args.length >= 3) {
+								plugin.addTeam(args[2]);
+								return true;
+							} else {
+								sender.sendMessage("Please specify a team name to add");
+							}
+						}
+						case Keys.COMMAND_CTB_TEAM_REMOVE: {
+							if(args.length >= 3) {
+								plugin.removeTeam(args[2]);
+								return true;
+							} else {
+								sender.sendMessage("Please specify a team name to remove");
+							}
+						}
+						}
+					}
 				}
 				}
 			}
