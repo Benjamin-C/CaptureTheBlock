@@ -16,7 +16,8 @@ public class Team {
 	private List<Player> peoples;
 	private Map<UUID, Boolean> foundBlock;
 	
-	public Team() {
+	public Team(String name) {
+		this.name = name;
 		peoples = new ArrayList<Player>();
 	}
 	

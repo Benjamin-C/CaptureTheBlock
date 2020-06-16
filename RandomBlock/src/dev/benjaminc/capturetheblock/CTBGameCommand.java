@@ -46,6 +46,8 @@ public class CTBGameCommand implements CommandExecutor {
 									boolean success = plugin.joinTeam(pl, args[2]);
 									if(!success) {
 										sender.sendMessage("That is not a team!");
+									} else {
+										sender.sendMessage(args[3] + " is now on " + args[2]);
 									}
 								} else {
 									sender.sendMessage(args[3] + " is not a player and can not join the team");
@@ -55,6 +57,8 @@ public class CTBGameCommand implements CommandExecutor {
 									boolean success = plugin.joinTeam((Player) sender, args[2]);
 									if(!success) {
 										sender.sendMessage("That is not a team!");
+									} else {
+										sender.sendMessage("You have joined " + args[2]);
 									}
 								} else {
 									sender.sendMessage("You are not a player, so you can not join a team");
@@ -73,6 +77,8 @@ public class CTBGameCommand implements CommandExecutor {
 								boolean success = plugin.leaveTeam(pl);
 								if(!success) {
 									sender.sendMessage("That player can not leave a team");
+								} else {
+									sender.sendMessage(args[2] + " has been removed from their team.");
 								}
 							} else {
 								sender.sendMessage(args[2] + " is not a player and can not join the team");
@@ -82,6 +88,8 @@ public class CTBGameCommand implements CommandExecutor {
 								boolean success = plugin.leaveTeam((Player) sender);
 								if(!success) {
 									sender.sendMessage("You can't leave a team!");
+								} else {
+									sender.sendMessage("You have been removed from your team");
 								}
 							} else {
 								sender.sendMessage("You are not a player, so you can not leave a team");
@@ -109,6 +117,7 @@ public class CTBGameCommand implements CommandExecutor {
 							msg += plugin.listTeam(t);
 						}
 						sender.sendMessage(msg);
+						return true;
 					}
 					}
 				}
@@ -142,6 +151,7 @@ public class CTBGameCommand implements CommandExecutor {
 						case Keys.COMMAND_CTB_TEAM_ADD: {
 							if(args.length >= 3) {
 								plugin.addTeam(args[2]);
+								sender.sendMessage("Team " + args[2] + " has been added");
 								return true;
 							} else {
 								sender.sendMessage("Please specify a team name to add");
@@ -150,6 +160,7 @@ public class CTBGameCommand implements CommandExecutor {
 						case Keys.COMMAND_CTB_TEAM_REMOVE: {
 							if(args.length >= 3) {
 								plugin.removeTeam(args[2]);
+								sender.sendMessage("Team " + args[2] + " has been removed");
 								return true;
 							} else {
 								sender.sendMessage("Please specify a team name to remove");

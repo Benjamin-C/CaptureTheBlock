@@ -339,7 +339,7 @@ public class CTBMain extends JavaPlugin {
     // TODO add javadoc
     protected boolean addTeam(String name) {
     	if(!teams.containsKey(name)) {
-    		teams.put(name, new Team());
+    		teams.put(name, new Team(name));
     		return true;
     	}
     	return false;
