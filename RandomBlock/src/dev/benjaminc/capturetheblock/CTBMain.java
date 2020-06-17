@@ -19,8 +19,13 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.scoreboard.ScoreboardManager;
 
 import net.md_5.bungee.api.ChatColor;
+import peterTimer.TimeRunnable;
+import peterTimer.Timer;
 
 public class CTBMain extends JavaPlugin {
+	
+	// Me, for use in runnables
+	CTBMain me = this;
 	
 	// CONFIGURED VALUES
 	/** The {@link List} of all {@link Material} that could be selected. */
@@ -47,9 +52,10 @@ public class CTBMain extends JavaPlugin {
 	/** the final int ticks per second the server is expected to have */
 	public static final int TPS = 20;
 	/** The {@link BukkitScheduler} used to schedult tasks in the future */
-	private BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
+//	private BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 	/** The int id of the current game timer */
-	private int timerid;
+//	private int timerid;
+	private Timer timer;
 	
 	/** the {@link Random} used for random numbers */
 	private Random rand;
@@ -87,6 +93,7 @@ public class CTBMain extends JavaPlugin {
     			blocks.add(Material.valueOf((String) o));
     		}
     	}
+    	saveDefaultConfig();
 	}
     
 	// -----------------------------------------------
@@ -216,23 +223,26 @@ public class CTBMain extends JavaPlugin {
 	    	for(Player pl : getSpectators()) {
 	    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 200, 20);
 	    	}
-	    	CTBMain me = this;
-	        timerid = scheduler.scheduleSyncDelayedTask(this, new Runnable() {
-	            @Override public void run() {
-	            	sendAllMsg(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
+	    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
+	    	clbk.put(roundwarn, new TimeRunnable() { // Warn the players time is almost up
+	    		@Override
+	    		public void run(Timer timer) {
+	    			sendAllMsg(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
 	            	for(Player p : getSpectators()) {
 	            		p.sendTitle(maincolor + "" + roundwarn + colorreset, null, 0, 20, 5);
 	            	}
 	            	for(Team t : teams.values()) {
 	            		t.sendTitle(maincolor + "" + roundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
 	            	}
-	            	timerid = scheduler.scheduleSyncDelayedTask(me, new Runnable() {
-	                	@Override public void run() {
-							startRound();
-						}
-	                }, roundwarn*TPS);
-	            }
-	        }, (roundtime-roundwarn)*TPS);
+	    		}
+	    	});
+	    	clbk.put(0, new TimeRunnable() { // When the timer is done
+	    		@Override
+	    		public void run(Timer timer) {
+	    			startRound();
+	    		}
+	    	});
+	    	timer = new Timer(roundtime*TPS, clbk, true, this);
     	} else {
     		for(Player p : getAdmins()) {
     			p.sendMessage("There must be at least 1 team to begin");
@@ -243,9 +253,7 @@ public class CTBMain extends JavaPlugin {
      * Stops the game timer, if it is running
      */
     private void stopTimer() {
-    	if(scheduler.isQueued(timerid)) {
-    		scheduler.cancelTask(timerid);
-    	}
+    	timer.stop();
     }
     /**
      * Ends a round by stopping the timer, broadcasting a game over message, and showing the scores
