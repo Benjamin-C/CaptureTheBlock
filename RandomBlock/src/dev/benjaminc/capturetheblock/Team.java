@@ -61,6 +61,7 @@ public class Team {
 	
 	public void addPerson(Player p) {
 		peoples.add(p);
+		foundBlock.put(p.getUniqueId(), false);
 	}
 	
 	public void removePerson(Player p) {
@@ -90,4 +91,14 @@ public class Team {
 		}
 	}
 	
+	@Override
+	public String toString() {
+		return "Team[" + name + "]";
+	}
+
+	public void clearFound() {
+		for(UUID u : foundBlock.keySet()) {
+			foundBlock.put(u, false);
+		}
+	}
 }

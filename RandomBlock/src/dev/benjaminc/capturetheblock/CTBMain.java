@@ -149,13 +149,15 @@ public class CTBMain extends JavaPlugin {
      * Also starts the next round if everyone has found their block
      * @param p	the {@link Player} who found their block
      */
-    protected void foundBlock(Player pl) {
-    	Team p = findTeam(pl);
-    	Score s = getScore(p.getName());
-    	s.setScore(s.getScore() + 1);
+    protected void foundBlock(Player pl, Team t) {
     	pl.sendMessage(maincolor + Strings.YOU_FOUND_BLOCK + colorreset);
-    	sendAllMsg(maincolor + p.getName() + " " + Strings.THEY_FOUND_BLOCK + maincolor);
-    	
+    	sendAllMsg(maincolor + pl.getName() + " " + Strings.THEY_FOUND_BLOCK + colorreset);
+    	t.setFound(pl.getUniqueId(), true);
+    	if(t.hasEveryoneFound()) {
+    		Score s = getScore(t.getName());
+    		s.setScore(s.getScore() + 1);
+    		sendAllMsg(maincolor + t.getName() + " has all found their block" + colorreset);
+    	}
     	if(hasEveryoneFoundBlock()) {
 			startRound();
 		}
@@ -179,6 +181,7 @@ public class CTBMain extends JavaPlugin {
     	for(Team p : teams.values()) {
     		found &= p.hasEveryoneFound();
     	}
+    	Bukkit.broadcastMessage("Everyone found their block? " + found);
     	return found;
     }
     /**
@@ -219,12 +222,13 @@ public class CTBMain extends JavaPlugin {
 				t.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
 				t.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
 				t.setTarget(mat);
+				t.clearFound();
 			}
 	    	for(Player pl : getSpectators()) {
-	    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 200, 20);
+	    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 100, 20);
 	    	}
 	    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
-	    	clbk.put(roundwarn, new TimeRunnable() { // Warn the players time is almost up
+	    	clbk.put(roundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
 	    		@Override
 	    		public void run(Timer timer) {
 	    			sendAllMsg(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
@@ -243,6 +247,7 @@ public class CTBMain extends JavaPlugin {
 	    		}
 	    	});
 	    	timer = new Timer(roundtime*TPS, clbk, true, this);
+	    	timer.start();
     	} else {
     		for(Player p : getAdmins()) {
     			p.sendMessage("There must be at least 1 team to begin");
@@ -253,7 +258,9 @@ public class CTBMain extends JavaPlugin {
      * Stops the game timer, if it is running
      */
     private void stopTimer() {
-    	timer.stop();
+    	if(timer != null) {
+    		timer.stop();
+    	}
     }
     /**
      * Ends a round by stopping the timer, broadcasting a game over message, and showing the scores

@@ -24,7 +24,7 @@ public class CTBEvent implements Listener {
 		if(t != null) {
 			Material tgt = t.getTarget();
 			if((m == tgt || n == tgt) && !t.hasEveryoneFound()) {
-				t.setFound(p.getUniqueId(), true);
+				plugin.foundBlock(p, t);
 			}
 		}
 	}
