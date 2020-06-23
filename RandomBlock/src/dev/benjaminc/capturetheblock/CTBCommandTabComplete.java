@@ -60,6 +60,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 			case Keys.COMMAND_CTB_TEAM: {
 				switch(args[1]) {
 				case Keys.COMMAND_CTB_TEAM_CLEAR:
+				case Keys.COMMAND_CTB_TEAM_REMOVE:
 				case Keys.COMMAND_CTB_TEAM_JOIN: {
 					possible.addAll(plugin.getAllTeams().keySet());
 				} break;
