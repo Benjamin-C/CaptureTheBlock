@@ -15,13 +15,13 @@ public class Team {
 	private boolean givenup;
 	private String name;
 	private List<Player> peoples;
-	private List<UUID> uuids;
+	private Map<UUID, String> uuids;
 	private Map<UUID, Boolean> foundBlock;
 	
 	public Team(String name) {
 		this.name = name;
 		peoples = new ArrayList<Player>();
-		uuids = new ArrayList<UUID>();
+		uuids = new HashMap<UUID, String>();
 		foundBlock = new HashMap<UUID, Boolean>();
 	}
 	
@@ -53,17 +53,30 @@ public class Team {
 		this.givenup = givenup;
 	}
 
-	public List<Player> getPeoples() {
+	public List<Player> getOnlinePeoples() {
 		return peoples;
 	}
+	
+	public Map<UUID, String> getAllPeoples() {
+		return uuids;
+	}
 
+	public boolean isOnline(UUID u) {
+		for(Player p : peoples) {
+			if(p.getUniqueId().equals(u)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public void setPeoples(List<Player> peoples) {
 		this.peoples = peoples;
 	}
 	
 	public void addPerson(Player p) {
 		peoples.add(p);
-		uuids.add(p.getUniqueId());
+		uuids.put(p.getUniqueId(), p.getName());
 		foundBlock.put(p.getUniqueId(), false);
 	}
 	
@@ -77,8 +90,8 @@ public class Team {
 	}
 	public void reconnectPerson(Player p) {
 		peoples.add(p);
-		if(uuids.contains(p.getUniqueId()) ) {
-			uuids.add(p.getUniqueId());
+		if(uuids.containsKey(p.getUniqueId()) ) {
+			uuids.put(p.getUniqueId(), p.getName());
 		}
 	}
 	
@@ -90,7 +103,7 @@ public class Team {
 		return peoples.contains(p);
 	}
 	public boolean ifContainsUUID(UUID u) {
-		return uuids.contains(u);
+		return uuids.containsKey(u);
 	}
 	
 	public void setName(String newName) {
@@ -139,5 +152,9 @@ public class Team {
 		peoples.clear();
 		uuids.clear();
 		foundBlock.clear();
+	}
+	
+	public String getPlayerName(UUID u) {
+		return uuids.get(u);
 	}
 }

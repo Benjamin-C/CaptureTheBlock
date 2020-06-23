@@ -367,7 +367,7 @@ public class CTBMain extends JavaPlugin {
     }
     
 	// -----------------------------------------------
-	// PLAYERS
+	// TEAMS & PLAYERS
 	// -----------------------------------------------
     
     // TODO add javadoc
@@ -416,12 +416,14 @@ public class CTBMain extends JavaPlugin {
     	return teams;
     }
     
-    // TODO fix newlies
     // TODO add javadoc
     protected String listTeam(Team t) {
     	String team = t.getName();
-    	for(Player p : t.getPeoples()) {
-    		team += "\n  " + p.getName();
+    	for(UUID u : t.getAllPeoples().keySet()) {
+    		team += "\n  " + t.getPlayerName(u);
+    		if(!t.isOnline(u)) {
+    			team += " (offline)";
+    		}
     	}
     	return team;
     }
