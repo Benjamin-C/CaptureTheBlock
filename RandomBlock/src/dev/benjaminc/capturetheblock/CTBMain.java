@@ -243,74 +243,38 @@ public class CTBMain extends JavaPlugin {
 	    	for(Player pl : getSpectators()) {
 	    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 100, 20);
 	    	}
-	    	setupTimers();
+	    	
+	    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
+	    	clbk.put(roundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
+//	    		@Override
+	    		public void run(Timer timer) {
+	    			sendAllMsg(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
+	            	for(Player p : getSpectators()) {
+	            		p.sendTitle(maincolor + "" + roundwarn + colorreset, null, 0, 20, 5);
+	            	}
+	            	for(Team t : teams.values()) {
+	            		t.sendTitle(maincolor + "" + roundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
+	            	}
+	    		}
+	    	});
+	    	clbk.put(0, new TimeRunnable() { // When the timer is done
+//	    		@Override
+	    		public void run(Timer timer) {
+	    			startRound();
+	    		}
+	    	});
+	    	gameTimer = new Timer(roundtime*TPS, "timername", clbk, false, this);
+			
+	    	gameTimer.addAllPlayers();
+	    	gameTimer.start();
+	    	sendAdminMessage("Game Started");
     	} else {
     		for(Player p : getAdmins()) {
     			p.sendMessage("There must be at least 1 team to begin");
     		}
     	}
     }
-    // TODO add javadoc
-    public void setupTimers() {
-    	Field tnameFieldtmp = null;
-    	
-    	try {
-			tnameFieldtmp = Timer.class.getDeclaredField("name");
-			tnameFieldtmp.setAccessible(true);
-		} catch (NoSuchFieldException | SecurityException | IllegalArgumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 
-    	final Field tnameField = tnameFieldtmp;
-    	
-    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
-    	for(int i = 0; i < 20; i++) {
-    		final int sec = i;
-	    	clbk.put(((roundtime-i)*TPS)-5, new TimeRunnable() { // Warn the players time is almost up
-//	    		@Override
-	    		public void run(Timer timer) {
-	    			if(tnameField != null) {
-	    				try {
-//	    					BossBar bb = (BossBar) barField.get(timer);
-//	    					bb.setTitle(sec + " sec in!" + bb.getTitle());
-	    					sendAdminMessage((String) tnameField.get(timer)); 
-							tnameField.set(timer, sec + " sec in!");
-						} catch (IllegalArgumentException | IllegalAccessException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-	    			} else {
-	    				sendAdminMessage("Name Field failed");
-	    			}
-	    			sendAdminMessage("Callback " + sec);
-	    		}
-	    	});
-    	}
-    	clbk.put(roundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
-//    		@Override
-    		public void run(Timer timer) {
-    			sendAllMsg(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
-            	for(Player p : getSpectators()) {
-            		p.sendTitle(maincolor + "" + roundwarn + colorreset, null, 0, 20, 5);
-            	}
-            	for(Team t : teams.values()) {
-            		t.sendTitle(maincolor + "" + roundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
-            	}
-    		}
-    	});
-    	clbk.put(0, new TimeRunnable() { // When the timer is done
-//    		@Override
-    		public void run(Timer timer) {
-    			startRound();
-    		}
-    	});
-    	gameTimer = new Timer(roundtime*TPS, "timername", clbk, false, this);
-		
-    	gameTimer.addAllPlayers();
-    	gameTimer.start();
-    	sendAdminMessage("Game Started");
-    }
     /**
      * Stops the game timer, if it is running
      */
