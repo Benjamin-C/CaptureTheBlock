@@ -1,5 +1,7 @@
 package dev.benjaminc.capturetheblock;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -10,6 +12,7 @@ import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -56,7 +59,7 @@ public class CTBMain extends JavaPlugin {
 //	private BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
 	/** The int id of the current game timer */
 //	private int timerid;
-	private Timer timer;
+	private Timer gameTimer;
 	
 	/** the {@link Random} used for random numbers */
 	private Random rand;
@@ -131,7 +134,7 @@ public class CTBMain extends JavaPlugin {
     @Override
     public void onDisable() {
     	board.clearSlot(DisplaySlot.PLAYER_LIST);
-    	timer.stop();
+    	gameTimer.stop();
     }
     
 	// -----------------------------------------------
@@ -240,7 +243,46 @@ public class CTBMain extends JavaPlugin {
 	    	for(Player pl : getSpectators()) {
 	    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 100, 20);
 	    	}
+	    	
+	    	Field tnameFieldtmp = null;
+	    	Field barFieldTmp = null;
+	    	
+	    	try {
+				tnameFieldtmp = Timer.class.getDeclaredField("name");
+				tnameFieldtmp.setAccessible(true);
+				barFieldTmp = Timer.class.getDeclaredField("bar");
+				barFieldTmp.setAccessible(true);
+			} catch (NoSuchFieldException | SecurityException | IllegalArgumentException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+	    	final Field tnameField = tnameFieldtmp;
+	    	final Field barField = barFieldTmp;
+	    	
 	    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
+	    	for(int i = 0; i < 20; i++) {
+	    		final int sec = i;
+		    	clbk.put(((roundtime-i)*TPS)-5, new TimeRunnable() { // Warn the players time is almost up
+	//	    		@Override
+		    		public void run(Timer timer) {
+		    			if(tnameField != null) {
+		    				try {
+//		    					BossBar bb = (BossBar) barField.get(timer);
+//		    					bb.setTitle(sec + " sec in!" + bb.getTitle());
+		    					sendAdminMessage((String) tnameField.get(timer)); 
+								tnameField.set(timer, sec + " sec in!");
+							} catch (IllegalArgumentException | IllegalAccessException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+		    			} else {
+		    				sendAdminMessage("Name Field failed");
+		    			}
+		    			sendAdminMessage("Callback " + sec);
+		    		}
+		    	});
+	    	}
 	    	clbk.put(roundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
 //	    		@Override
 	    		public void run(Timer timer) {
@@ -259,8 +301,22 @@ public class CTBMain extends JavaPlugin {
 	    			startRound();
 	    		}
 	    	});
-	    	timer = new Timer(roundtime*TPS, clbk, true, this);
-	    	timer.start();
+	    	gameTimer = new Timer(roundtime*TPS, "timername", clbk, false, this);
+	    	
+	    	String tname;
+			try {
+				tname = (String) tnameFieldtmp.get(gameTimer);
+				sendAdminMessage(tname);
+				tnameFieldtmp.set(gameTimer, "NAMETEXT");
+			} catch (IllegalArgumentException | IllegalAccessException | SecurityException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			
+	    	gameTimer.addAllPlayers();
+	    	gameTimer.start();
+	    	sendAdminMessage("Game Started");
     	} else {
     		for(Player p : getAdmins()) {
     			p.sendMessage("There must be at least 1 team to begin");
@@ -271,8 +327,8 @@ public class CTBMain extends JavaPlugin {
      * Stops the game timer, if it is running
      */
     private void stopTimer() {
-    	if(timer != null) {
-    		timer.stop();
+    	if(gameTimer != null) {
+    		gameTimer.stop();
     	}
     }
     /**
