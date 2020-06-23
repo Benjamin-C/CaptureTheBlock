@@ -9,6 +9,8 @@ import java.util.UUID;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
+import peterTimer.Timer;
+
 public class Team {
 	
 	private Material target;
@@ -17,6 +19,7 @@ public class Team {
 	private List<Player> peoples;
 	private Map<UUID, String> uuids;
 	private Map<UUID, Boolean> foundBlock;
+	private Timer timer;
 	
 	public Team(String name) {
 		this.name = name;
