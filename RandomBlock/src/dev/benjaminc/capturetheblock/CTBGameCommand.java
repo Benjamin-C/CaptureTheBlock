@@ -112,7 +112,7 @@ public class CTBGameCommand implements CommandExecutor {
 							if(first) {
 								first = false;
 							} else {
-								msg += "/n";
+								msg += "\n";
 							}
 							msg += plugin.listTeam(t);
 						}
@@ -160,6 +160,15 @@ public class CTBGameCommand implements CommandExecutor {
 						case Keys.COMMAND_CTB_TEAM_REMOVE: {
 							if(args.length >= 3) {
 								plugin.removeTeam(args[2]);
+								sender.sendMessage("Team " + args[2] + " has been removed");
+								return true;
+							} else {
+								sender.sendMessage("Please specify a team name to remove");
+							}
+						}
+						case Keys.COMMAND_CTB_TEAM_CLEAR: {
+							if(args.length >= 3) {
+								plugin.clearTeam(args[2]);
 								sender.sendMessage("Team " + args[2] + " has been removed");
 								return true;
 							} else {

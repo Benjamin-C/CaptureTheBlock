@@ -3,9 +3,11 @@ package dev.benjaminc.capturetheblock;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 
 public class CTBCommandTabComplete implements TabCompleter {
 	
@@ -46,6 +48,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				if(sender.hasPermission(Keys.PERMISSION_CONTROL)) { 
 					possible.add(Keys.COMMAND_CTB_TEAM_ADD);
 					possible.add(Keys.COMMAND_CTB_TEAM_REMOVE);
+					possible.add(Keys.COMMAND_CTB_TEAM_CLEAR);
 				}
 			} break;
 			}
@@ -55,8 +58,24 @@ public class CTBCommandTabComplete implements TabCompleter {
 			switch(args[0]) {
 			case Keys.COMMAND_CTB_TEAM: {
 				switch(args[1]) {
+				case Keys.COMMAND_CTB_TEAM_CLEAR:
 				case Keys.COMMAND_CTB_TEAM_JOIN: {
 					possible.addAll(plugin.getAllTeams().keySet());
+				} break;
+				case Keys.COMMAND_CTB_TEAM_LEAVE: {
+					possible.addAll(getAllPlayers());
+				} break;
+				}
+			} break;
+			}
+			options = getPossibleCompletes(possible, args[2]);
+		}
+		case 4: {
+			switch(args[0]) {
+			case Keys.COMMAND_CTB_TEAM: {
+				switch(args[1]) {
+				case Keys.COMMAND_CTB_TEAM_JOIN: {
+					possible.addAll(getAllPlayers());
 				} break;
 				}
 			} break;
@@ -68,6 +87,13 @@ public class CTBCommandTabComplete implements TabCompleter {
 		return options;
 	}
 
+	private List<String> getAllPlayers() {
+		List<String> l = new ArrayList<String>();
+		for(Player p : Bukkit.getOnlinePlayers()) {
+			l.add(p.getName());
+		}
+		return l;
+	}
 	private List<String> getPossibleCompletes(List<String> possible, String part) {
 		List<String> options = new ArrayList<String>();
 		for(String s : possible) {

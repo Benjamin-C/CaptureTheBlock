@@ -27,5 +27,6 @@ public class Keys {
 		public static final String COMMAND_CTB_TEAM_REMOVE = "remove";
 		public static final String COMMAND_CTB_TEAM_JOIN = "join";
 		public static final String COMMAND_CTB_TEAM_LEAVE = "leave";
+		public static final String COMMAND_CTB_TEAM_CLEAR = "clear";
 	
 }
