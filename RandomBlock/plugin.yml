@@ -2,6 +2,7 @@ name: CaptureTheBlock
 main: dev.benjaminc.capturetheblock.CTBMain
 version: 2.0
 api-version: 1.15
+depend: [PeterTimer]
 commands:
   randomblock:
     description: Tells everyone a random block
