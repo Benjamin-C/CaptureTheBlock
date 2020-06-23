@@ -49,6 +49,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 					possible.add(Keys.COMMAND_CTB_TEAM_ADD);
 					possible.add(Keys.COMMAND_CTB_TEAM_REMOVE);
 					possible.add(Keys.COMMAND_CTB_TEAM_CLEAR);
+					possible.add(Keys.COMMAND_CTB_TEAM_ADDALL);
 				}
 			} break;
 			}

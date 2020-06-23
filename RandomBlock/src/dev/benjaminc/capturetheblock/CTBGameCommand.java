@@ -1,6 +1,7 @@
 package dev.benjaminc.capturetheblock;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -152,11 +153,10 @@ public class CTBGameCommand implements CommandExecutor {
 							if(args.length >= 3) {
 								plugin.addTeam(args[2]);
 								sender.sendMessage("Team " + args[2] + " has been added");
-								return true;
 							} else {
 								sender.sendMessage("Please specify a team name to add");
 							}
-						}
+						} break;
 						case Keys.COMMAND_CTB_TEAM_REMOVE: {
 							if(args.length >= 3) {
 								plugin.removeTeam(args[2]);
@@ -165,7 +165,7 @@ public class CTBGameCommand implements CommandExecutor {
 							} else {
 								sender.sendMessage("Please specify a team name to remove");
 							}
-						}
+						} break;
 						case Keys.COMMAND_CTB_TEAM_CLEAR: {
 							if(args.length >= 3) {
 								plugin.clearTeam(args[2]);
@@ -174,8 +174,23 @@ public class CTBGameCommand implements CommandExecutor {
 							} else {
 								sender.sendMessage("Please specify a team name to remove");
 							}
+						} break;
+						case Keys.COMMAND_CTB_TEAM_ADDALL: {
+							for(Player p : Bukkit.getOnlinePlayers()) {
+								Collection<Player> specs = plugin.getSpectators();
+								if(!specs.contains(p) && plugin.findTeam(p) == null) {
+									if(plugin.findTeam(p.getUniqueId()) != null) {
+										plugin.findTeam(p.getUniqueId()).addPerson(p);
+									} else {
+										plugin.addTeam(p.getName());
+										plugin.joinTeam(p, p.getName());
+									}
+								}
+							}
+							sender.sendMessage("All players not on a team have been added to a team");
+						} break;
 						}
-						}
+						return true;
 					}
 				}
 				}
