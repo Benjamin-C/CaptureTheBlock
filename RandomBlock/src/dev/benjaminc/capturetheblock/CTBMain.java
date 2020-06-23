@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 import org.bukkit.scoreboard.DisplaySlot;
 import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
@@ -35,6 +35,7 @@ public class CTBMain extends JavaPlugin {
 	/** The int warning time before the round is over in seconds */
 	private int roundwarn = 10;
 	
+	// TODO save teams
 	/** The {@link List} of {@link Team} in the game */
 	private Map<String, Team> teams;
 	
@@ -130,6 +131,7 @@ public class CTBMain extends JavaPlugin {
     @Override
     public void onDisable() {
     	board.clearSlot(DisplaySlot.PLAYER_LIST);
+    	timer.stop();
     }
     
 	// -----------------------------------------------
@@ -150,23 +152,34 @@ public class CTBMain extends JavaPlugin {
      * @param p	the {@link Player} who found their block
      */
     protected void foundBlock(Player pl, Team t) {
-    	pl.sendMessage(maincolor + Strings.YOU_FOUND_BLOCK + colorreset);
-    	sendAllMsg(maincolor + pl.getName() + " " + Strings.THEY_FOUND_BLOCK + colorreset);
-    	t.setFound(pl.getUniqueId(), true);
-    	if(t.hasEveryoneFound()) {
-    		Score s = getScore(t.getName());
-    		s.setScore(s.getScore() + 1);
-    		sendAllMsg(maincolor + t.getName() + " has all found their block" + colorreset);
+    	if(!t.hasFound(pl)) {
+	    	pl.sendMessage(maincolor + Strings.YOU_FOUND_BLOCK + colorreset);
+	    	sendAllMsg(maincolor + pl.getName() + " " + Strings.THEY_FOUND_BLOCK + colorreset);
+	    	t.setFound(pl.getUniqueId(), true);
+	    	if(t.hasEveryoneFound()) {
+	    		Score s = getScore(t.getName());
+	    		s.setScore(s.getScore() + 1);
+	    		sendAllMsg(maincolor + t.getName() + " has all found their block" + colorreset);
+	    	}
+	    	if(hasEveryoneFoundBlock()) {
+				startRound();
+			}
     	}
-    	if(hasEveryoneFoundBlock()) {
-			startRound();
-		}
     }
     
     // TODO add javadoc
     protected Team findTeam(Player p) {
     	for(Team t : teams.values()) {
     		if(t.ifContainsPlayer(p)) {
+    			return t;
+    		}
+    	}
+    	return null;
+    }
+ // TODO add javadoc
+    protected Team findTeam(UUID u) {
+    	for(Team t : teams.values()) {
+    		if(t.ifContainsUUID(u)) {
     			return t;
     		}
     	}
@@ -181,7 +194,7 @@ public class CTBMain extends JavaPlugin {
     	for(Team p : teams.values()) {
     		found &= p.hasEveryoneFound();
     	}
-    	Bukkit.broadcastMessage("Everyone found their block? " + found);
+//    	Bukkit.broadcastMessage("Everyone found their block? " + found);
     	return found;
     }
     /**
@@ -229,7 +242,7 @@ public class CTBMain extends JavaPlugin {
 	    	}
 	    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
 	    	clbk.put(roundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
-	    		@Override
+//	    		@Override
 	    		public void run(Timer timer) {
 	    			sendAllMsg(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
 	            	for(Player p : getSpectators()) {
@@ -241,7 +254,7 @@ public class CTBMain extends JavaPlugin {
 	    		}
 	    	});
 	    	clbk.put(0, new TimeRunnable() { // When the timer is done
-	    		@Override
+//	    		@Override
 	    		public void run(Timer timer) {
 	    			startRound();
 	    		}
@@ -373,6 +386,17 @@ public class CTBMain extends JavaPlugin {
     	}
     	return false;
     }
+    
+    
+    // TODO add javadoc
+    protected boolean clearTeam(String name) {
+    	if(teams.containsKey(name)) {
+    		teams.get(name).clearPlayers();
+    		return true;
+    	}
+    	return false;
+    }
+    
     // TODO add javadoc
     protected boolean joinTeam(Player p, String name) {
     	boolean ret = false;
@@ -386,10 +410,13 @@ public class CTBMain extends JavaPlugin {
     	}
     	return ret;
     }
+    
     // TODO add javadoc
     protected Map<String, Team> getAllTeams() {
     	return teams;
     }
+    
+    // TODO fix newlies
     // TODO add javadoc
     protected String listTeam(Team t) {
     	String team = t.getName();
@@ -428,6 +455,12 @@ public class CTBMain extends JavaPlugin {
     		p.sendTitle(ttl, sub, fadein, hold, fadeout);
     	}
     }
+    // TODO add javadoc
+    public void sendAdminMessage(String msg) {
+    	for(Player p : getAdmins()) {
+    		p.sendMessage(msg);
+    	}
+    }
     /**
      * Gets all admins to the CTB game
      * @return the {@link Collection} of all {@link Player} who are admins
@@ -460,6 +493,6 @@ public class CTBMain extends JavaPlugin {
      * @return the boolean of is the player is a spectator
      */
     protected boolean isSpectator(Player p) {
-    	return p.hasPermission(Keys.PERMISSION_SPECTATE);
+    	return p.hasPermission(Keys.PERMISSION_SPECTATE) && findTeam(p) == null;
     }
 }

@@ -4,7 +4,9 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 public class CTBEvent implements Listener {
 	
@@ -26,6 +28,30 @@ public class CTBEvent implements Listener {
 			if((m == tgt || n == tgt) && !t.hasEveryoneFound()) {
 				plugin.foundBlock(p, t);
 			}
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerConnect(PlayerJoinEvent e) {
+		Player p = e.getPlayer();
+		Team t = plugin.findTeam(p.getUniqueId());
+		if(t != null) {
+			t.reconnectPerson(p);
+			plugin.sendAdminMessage(p.getName() + " joined the game, and was put on team " + t.getName());
+		} else {
+			plugin.sendAdminMessage(p.getName() + " joined the game and was not on a team");
+		}
+	}
+	
+	@EventHandler
+	public void onPlayerDisconnect(PlayerQuitEvent e) {
+		Player p = e.getPlayer();
+		Team t = plugin.findTeam(p);
+		if(t != null) {
+			t.disconnectPerson(p);
+			plugin.sendAdminMessage(p.getName() + " left the game, and was taken from team " + t.getName());
+		} else {
+			plugin.sendAdminMessage(p.getName() + " left the game and was not on a team");
 		}
 	}
 }
