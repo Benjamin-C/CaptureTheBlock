@@ -35,6 +35,8 @@ public class CTBMain extends JavaPlugin {
 	/** The int warning time before the round is over in seconds */
 	private int roundwarn = 10;
 	
+	// TODO add javadoc
+	private int roundcount = 0;
 	// TODO save teams
 	/** The {@link List} of {@link Team} in the game */
 	private Map<String, Team> teams;
@@ -227,7 +229,7 @@ public class CTBMain extends JavaPlugin {
     	if(teams.size() > 0) {
 	    	stopTimer();
 	    	showScores(true);
-	    	
+	    	roundcount++;
 	    	for(Team t : teams.values()) {
 	    		Material mat = getRandomBlock();
 				t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + t.getScore() + colorreset);
@@ -335,7 +337,7 @@ public class CTBMain extends JavaPlugin {
     	for(int i = 0; i < uuids.length; i++) {
     		scorestr += msgmap.get(uuids[i]) + "\n";
     	}
-    	scorestr += maincolor + "--- --- --- --- ---\n" + colorreset;
+    	scorestr += maincolor + "--- Of " + roundcount + " rounds ---\n" + colorreset;
     	return scorestr;
     }
     
