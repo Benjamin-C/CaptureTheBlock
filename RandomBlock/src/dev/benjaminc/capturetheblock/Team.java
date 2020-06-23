@@ -19,7 +19,7 @@ public class Team {
 	private List<Player> peoples;
 	private Map<UUID, String> uuids;
 	private Map<UUID, Boolean> foundBlock;
-	private Timer timer;
+	private int score;
 	
 	public Team(String name) {
 		this.name = name;
@@ -64,6 +64,15 @@ public class Team {
 		return uuids;
 	}
 
+	public void setScore(int score) {
+		this.score = score;
+	}
+	public int getScore() {
+		return score;
+	}
+	public void addScore(int add) {
+		score += add;
+	}
 	public boolean isOnline(UUID u) {
 		for(Player p : peoples) {
 			if(p.getUniqueId().equals(u)) {

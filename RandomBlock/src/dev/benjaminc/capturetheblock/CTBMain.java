@@ -13,10 +13,10 @@ import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scoreboard.DisplaySlot;
-import org.bukkit.scoreboard.Score;
+//import org.bukkit.scoreboard.DisplaySlot;
+//import org.bukkit.scoreboard.Score;
 import org.bukkit.scoreboard.Scoreboard;
-import org.bukkit.scoreboard.ScoreboardManager;
+//import org.bukkit.scoreboard.ScoreboardManager;
 
 import net.md_5.bungee.api.ChatColor;
 import peterTimer.TimeRunnable;
@@ -62,9 +62,9 @@ public class CTBMain extends JavaPlugin {
 	private Random rand;
 	
 	/** The {@link ScoreboardManager} to manage the scoreboards */
-	private ScoreboardManager sbm;
+//	private ScoreboardManager sbm;
 	/** The {@link Scoreboard} that the game score is stored on */
-	private Scoreboard board;
+//	private Scoreboard board;
 	
 	private FileConfiguration cfg = this.getConfig();
 	// Fired when plugin is first enabled
@@ -107,8 +107,8 @@ public class CTBMain extends JavaPlugin {
     @Override
     public void onEnable() {
     	loadMyConfig();
-    	sbm = Bukkit.getScoreboardManager();
-    	board = sbm.getMainScoreboard();
+//    	sbm = Bukkit.getScoreboardManager();
+//    	board = sbm.getMainScoreboard();
     	rand = new Random();
     	teams = new HashMap<String, Team>();
 //    	assignedBlock = new HashMap<UUID, Material>();
@@ -119,10 +119,10 @@ public class CTBMain extends JavaPlugin {
     	this.getCommand(Keys.COMMAND_CTB_NAME).setExecutor(new CTBGameCommand(this));
     	this.getCommand(Keys.COMMAND_CTB_NAME).setTabCompleter(new CTBCommandTabComplete(this));
     	
-    	if(board.getObjective(Keys.SCORE_NAME) == null) {
-    		board.registerNewObjective(Keys.SCORE_NAME, "dummy", Keys.SCORE_NAME);
-    	}
-    	board.getObjective(Keys.SCORE_NAME).setDisplaySlot(DisplaySlot.PLAYER_LIST);
+//    	if(board.getObjective(Keys.SCORE_NAME) == null) {
+//    		board.registerNewObjective(Keys.SCORE_NAME, "dummy", Keys.SCORE_NAME);
+//    	}
+//    	board.getObjective(Keys.SCORE_NAME).setDisplaySlot(DisplaySlot.PLAYER_LIST);
     }
     
     /*
@@ -130,7 +130,7 @@ public class CTBMain extends JavaPlugin {
      */
     @Override
     public void onDisable() {
-    	board.clearSlot(DisplaySlot.PLAYER_LIST);
+//    	board.clearSlot(DisplaySlot.PLAYER_LIST);
     	gameTimer.stop();
     }
     
@@ -157,8 +157,7 @@ public class CTBMain extends JavaPlugin {
 	    	sendAllMsg(maincolor + pl.getName() + " " + Strings.THEY_FOUND_BLOCK + colorreset);
 	    	t.setFound(pl.getUniqueId(), true);
 	    	if(t.hasEveryoneFound()) {
-	    		Score s = getScore(t.getName());
-	    		s.setScore(s.getScore() + 1);
+	    		t.addScore(1);
 	    		sendAllMsg(maincolor + t.getName() + " has all found their block" + colorreset);
 	    	}
 	    	if(hasEveryoneFoundBlock()) {
@@ -231,7 +230,7 @@ public class CTBMain extends JavaPlugin {
 	    	
 	    	for(Team t : teams.values()) {
 	    		Material mat = getRandomBlock();
-				t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + getScore(t.getName()).getScore() + colorreset);
+				t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + t.getScore() + colorreset);
 				t.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
 				t.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
 				t.setTarget(mat);
@@ -260,7 +259,7 @@ public class CTBMain extends JavaPlugin {
 	    			startRound();
 	    		}
 	    	});
-	    	gameTimer = new Timer(roundtime*TPS, "timername", clbk, false, this);
+	    	gameTimer = new Timer(roundtime*TPS, "Find you block!", clbk, false, this);
 			
 	    	gameTimer.addAllPlayers();
 	    	gameTimer.start();
@@ -294,14 +293,6 @@ public class CTBMain extends JavaPlugin {
 	// -----------------------------------------------
     
     /**
-     * Gets the score of a player
-     * @param teamname the {@link String} name of the team to check
-     * @return the {@link Score} score
-     */
-    protected Score getScore(String teamname) {
-    	return board.getObjective(Keys.SCORE_NAME).getScore(teamname);
-    }
-    /**
      * Gets a string representation of the scores
      * @param showBlocks the boolean of wether to show the currently assigned block or not
      * @return the String of the scores
@@ -309,12 +300,12 @@ public class CTBMain extends JavaPlugin {
     public String showScoresStr(boolean showBlocks) {
     	Map<String, Integer> scoremap = new HashMap<String, Integer>();
     	for(Team t : teams.values()) {
-    		scoremap.put(t.getName(), getScore(t.getName()).getScore());
+    		scoremap.put(t.getName(), t.getScore());
     	}
     	Map<String, String> msgmap = new HashMap<String, String>();
     	for(Team t : teams.values()) {
     		String name = t.getName();
-    		int sc = getScore(name).getScore();
+    		int sc = t.getScore();
     		String scstr = (t.hasEveryoneFound() ? gotcolor : missedcolor) + "" + sc + "-" + name + ((showBlocks) ? ": " + ((t.getTarget() != null) ? t.getTarget().name() : Strings.NOTHING) : "") + colorreset;
     		msgmap.put(name, scstr);
     	}
@@ -367,7 +358,7 @@ public class CTBMain extends JavaPlugin {
      */
     protected void resetScores() {
     	for(Team t : teams.values()) {
-    		board.getObjective(Keys.SCORE_NAME).getScore(t.getName()).setScore(0);
+    		t.setScore(0);
     	}
     }
     
