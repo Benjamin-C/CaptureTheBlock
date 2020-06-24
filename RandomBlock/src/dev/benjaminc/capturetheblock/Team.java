@@ -6,11 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
-
-import peterTimer.Timer;
 
 public class Team {
 	
@@ -97,7 +97,11 @@ public class Team {
 		foundBlock.put(p.getUniqueId(), false);
 	}
 	public void addPerson(UUID u) {
-		uuids.put(u, u.toString());
+		uuids.put(u, null);
+		foundBlock.put(u, false);
+	}
+	public void addPerson(UUID u, String name) {
+		uuids.put(u, name);
 		foundBlock.put(u, false);
 	}
 	
@@ -176,7 +180,17 @@ public class Team {
 	}
 	
 	public String getPlayerName(UUID u) {
-		return uuids.get(u);
+		if(uuids.get(u) != null) {
+			return uuids.get(u);
+		} else {
+			OfflinePlayer op = Bukkit.getOfflinePlayer(u);
+			if(op != null) {
+				return op.getName();
+			} else {
+				return u.toString();
+			}
+		}
+		
 	}
 
 	public Color getColor() {

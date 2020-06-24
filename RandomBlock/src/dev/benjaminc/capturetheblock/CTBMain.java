@@ -401,18 +401,22 @@ public class CTBMain extends JavaPlugin {
     protected void loadAllTeams() {
     	File folder = getDataFolder();
     	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_TEAM_SUFFIX))) {
-    		sendAdminMessage("Loading " + f.getName());
     		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
         	String tname = c.getString(Keys.TEAM_NAME);
         	Team t = new Team(tname);
         	for(String u : c.getStringList(Keys.TEAM_MEMBERS)) {
-        		t.addPerson(UUID.fromString(u));
+        		String pname = null;
+        		String ustr = u;
+        		if(u.contains("{") && u.contains("}")) {
+        			pname = u.substring(u.indexOf("{")+1, u.indexOf("}"));
+        			ustr = u.substring(0, u.indexOf("{"));
+        		}
+        		t.addPerson(UUID.fromString(ustr), pname);
         	}
         	t.setScore(c.getInt(Keys.TEAM_SCORE));
         	t.setColor(c.getColor(Keys.TEAM_COLOR));
         	teams.put(tname, t);
     	}
-    	sendAdminMessage("Done loading teams");
     }
     
     // TODO add javadoc
@@ -423,7 +427,7 @@ public class CTBMain extends JavaPlugin {
     		String uuids[] = new String[t.getAllPeoples().size()];
     		int i = 0;
     		for(UUID u : t.getAllPeoples().keySet()) {
-    			uuids[i++] = u.toString();
+    			uuids[i++] = u.toString() + "{" + t.getAllPeoples().get(u) + "}";
     		}
     		c.set(Keys.TEAM_MEMBERS, uuids);
     		c.set(Keys.TEAM_SCORE, t.getScore());
