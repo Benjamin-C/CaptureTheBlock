@@ -390,6 +390,7 @@ public class CTBMain extends JavaPlugin {
 		} else {
 			sendAdminMessage(p.getName() + " joined the game and was not on a team");
 		}
+		gameTimer.addPlayer(p);
     }
     
     // TODO add javadoc
