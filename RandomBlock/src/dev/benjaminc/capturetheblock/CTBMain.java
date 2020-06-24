@@ -111,6 +111,9 @@ public class CTBMain extends JavaPlugin {
 	 */
     @Override
     public void onEnable() {
+    	rand = new Random();
+    	teams = new HashMap<String, Team>();
+    	
     	loadMyConfig();
     	
     	loadAllTeams();
@@ -120,15 +123,13 @@ public class CTBMain extends JavaPlugin {
     	
 //    	sbm = Bukkit.getScoreboardManager();
 //    	board = sbm.getMainScoreboard();
-    	rand = new Random();
-    	teams = new HashMap<String, Team>();
+
 //    	assignedBlock = new HashMap<UUID, Material>();
 //    	foundBlock = new HashMap<UUID, Boolean>();
     	getServer().getPluginManager().registerEvents(new CTBEvent(this), this);
-    	
-    	this.getCommand(Keys.COMMAND_RANDOM_BLOCK_NAME).setExecutor(new RandomBlockCommand(this));
-    	this.getCommand(Keys.COMMAND_CTB_NAME).setExecutor(new CTBGameCommand(this));
-    	this.getCommand(Keys.COMMAND_CTB_NAME).setTabCompleter(new CTBCommandTabComplete(this));
+    	getCommand(Keys.COMMAND_RANDOM_BLOCK_NAME).setExecutor(new RandomBlockCommand(this));
+    	getCommand(Keys.COMMAND_CTB_NAME).setExecutor(new CTBGameCommand(this));
+    	getCommand(Keys.COMMAND_CTB_NAME).setTabCompleter(new CTBCommandTabComplete(this));
     	
 //    	if(board.getObjective(Keys.SCORE_NAME) == null) {
 //    		board.registerNewObjective(Keys.SCORE_NAME, "dummy", Keys.SCORE_NAME);
@@ -143,7 +144,9 @@ public class CTBMain extends JavaPlugin {
     public void onDisable() {
 //    	board.clearSlot(DisplaySlot.PLAYER_LIST);
     	saveAllTeams();
-    	gameTimer.stop();
+    	if(gameTimer != null) {
+    		gameTimer.stop();
+    	}
     }
     
 	// -----------------------------------------------
@@ -398,6 +401,7 @@ public class CTBMain extends JavaPlugin {
     protected void loadAllTeams() {
     	File folder = getDataFolder();
     	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_TEAM_SUFFIX))) {
+    		sendAdminMessage("Loading " + f.getName());
     		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
         	String tname = c.getString(Keys.TEAM_NAME);
         	Team t = new Team(tname);
@@ -406,7 +410,9 @@ public class CTBMain extends JavaPlugin {
         	}
         	t.setScore(c.getInt(Keys.TEAM_SCORE));
         	t.setColor(c.getColor(Keys.TEAM_COLOR));
+        	teams.put(tname, t);
     	}
+    	sendAdminMessage("Done loading teams");
     }
     
     // TODO add javadoc
@@ -414,7 +420,12 @@ public class CTBMain extends JavaPlugin {
     	for(Team t : teams.values()) {
     		YamlConfiguration c = YamlConfiguration.loadConfiguration(getTeamFile(t.getName()));
     		c.set(Keys.TEAM_NAME, t.getName());
-    		c.set(Keys.TEAM_MEMBERS, t.getAllPeoples().keySet());
+    		String uuids[] = new String[t.getAllPeoples().size()];
+    		int i = 0;
+    		for(UUID u : t.getAllPeoples().keySet()) {
+    			uuids[i++] = u.toString();
+    		}
+    		c.set(Keys.TEAM_MEMBERS, uuids);
     		c.set(Keys.TEAM_SCORE, t.getScore());
     		c.set(Keys.TEAM_COLOR, t.getColor());
     		try {
