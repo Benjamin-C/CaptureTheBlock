@@ -71,7 +71,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 			} break;
 			}
 			options = getPossibleCompletes(possible, args[2]);
-		}
+		} break;
 		case 4: {
 			switch(args[0]) {
 			case Keys.COMMAND_CTB_TEAM: {
