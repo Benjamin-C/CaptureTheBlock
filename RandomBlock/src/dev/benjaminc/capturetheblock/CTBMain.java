@@ -1,5 +1,7 @@
 package dev.benjaminc.capturetheblock;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -11,6 +13,7 @@ import java.util.UUID;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 //import org.bukkit.scoreboard.DisplaySlot;
@@ -109,6 +112,12 @@ public class CTBMain extends JavaPlugin {
     @Override
     public void onEnable() {
     	loadMyConfig();
+    	
+    	loadAllTeams();
+    	for(Player p : Bukkit.getOnlinePlayers()) {
+    		reconnectPlayer(p);
+    	}
+    	
 //    	sbm = Bukkit.getScoreboardManager();
 //    	board = sbm.getMainScoreboard();
     	rand = new Random();
@@ -133,6 +142,7 @@ public class CTBMain extends JavaPlugin {
     @Override
     public void onDisable() {
 //    	board.clearSlot(DisplaySlot.PLAYER_LIST);
+    	saveAllTeams();
     	gameTimer.stop();
     }
     
@@ -369,6 +379,53 @@ public class CTBMain extends JavaPlugin {
 	// -----------------------------------------------
     
     // TODO add javadoc
+    protected void reconnectPlayer(Player p) {
+		Team t = findTeam(p.getUniqueId());
+		if(t != null) {
+			t.reconnectPerson(p);
+			sendAdminMessage(p.getName() + " joined the game, and was put on team " + t.getName());
+		} else {
+			sendAdminMessage(p.getName() + " joined the game and was not on a team");
+		}
+    }
+    
+    // TODO add javadoc
+    protected File getTeamFile(String name) {
+    	return new File(getDataFolder(), name + Keys.FILE_TEAM_SUFFIX);
+    }
+    
+    // TODO add javadoc
+    protected void loadAllTeams() {
+    	File folder = getDataFolder();
+    	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_TEAM_SUFFIX))) {
+    		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
+        	String tname = c.getString(Keys.TEAM_NAME);
+        	Team t = new Team(tname);
+        	for(String u : c.getStringList(Keys.TEAM_MEMBERS)) {
+        		t.addPerson(UUID.fromString(u));
+        	}
+        	t.setScore(c.getInt(Keys.TEAM_SCORE));
+        	t.setColor(c.getColor(Keys.TEAM_COLOR));
+    	}
+    }
+    
+    // TODO add javadoc
+    protected void saveAllTeams() {
+    	for(Team t : teams.values()) {
+    		YamlConfiguration c = YamlConfiguration.loadConfiguration(getTeamFile(t.getName()));
+    		c.set(Keys.TEAM_NAME, t.getName());
+    		c.set(Keys.TEAM_MEMBERS, t.getAllPeoples().keySet());
+    		c.set(Keys.TEAM_SCORE, t.getScore());
+    		c.set(Keys.TEAM_COLOR, t.getColor());
+    		try {
+				c.save(getTeamFile(t.getName()));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+    	}
+    }
+    
+    // TODO add javadoc
     protected boolean addTeam(String name) {
     	if(!teams.containsKey(name)) {
     		teams.put(name, new Team(name));
@@ -380,6 +437,7 @@ public class CTBMain extends JavaPlugin {
     protected boolean removeTeam(String name) {
     	if(teams.containsKey(name)) {
     		teams.remove(name);
+    		getTeamFile(name).delete();
     		return true;
     	}
     	return false;

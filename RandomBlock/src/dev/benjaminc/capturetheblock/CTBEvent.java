@@ -33,14 +33,7 @@ public class CTBEvent implements Listener {
 	
 	@EventHandler
 	public void onPlayerConnect(PlayerJoinEvent e) {
-		Player p = e.getPlayer();
-		Team t = plugin.findTeam(p.getUniqueId());
-		if(t != null) {
-			t.reconnectPerson(p);
-			plugin.sendAdminMessage(p.getName() + " joined the game, and was put on team " + t.getName());
-		} else {
-			plugin.sendAdminMessage(p.getName() + " joined the game and was not on a team");
-		}
+		plugin.reconnectPlayer(e.getPlayer());
 	}
 	
 	@EventHandler

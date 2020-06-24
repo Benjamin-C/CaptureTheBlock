@@ -12,6 +12,13 @@ public class Keys {
 	public static final String CONFIG_WARN_TIME = "warntime";
 	public static final String CONFIG_BLOCK_LIST = "blocks";
 	
+	public static final String FILE_TEAM_SUFFIX = ".team";
+	
+	public static final String TEAM_NAME = "name";
+	public static final String TEAM_MEMBERS = "members";
+	public static final String TEAM_SCORE = "score";
+	public static final String TEAM_COLOR = "color";
+	
 	public static final String COMMAND_RANDOM_BLOCK_NAME = "randomblock";
 	public static final String COMMAND_CTB_NAME = "capturetheblock";
 	
@@ -29,5 +36,4 @@ public class Keys {
 		public static final String COMMAND_CTB_TEAM_LEAVE = "leave";
 		public static final String COMMAND_CTB_TEAM_CLEAR = "clear";
 		public static final String COMMAND_CTB_TEAM_ADDALL = "addall";
-	
 }

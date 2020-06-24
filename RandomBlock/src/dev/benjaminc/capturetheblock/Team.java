@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -13,13 +14,17 @@ import peterTimer.Timer;
 
 public class Team {
 	
+	// data to save
+	private String name;
+	private Map<UUID, String> uuids;
+	private int score;
+	private Color color;
+	
+	// data to not save
 	private Material target;
 	private boolean givenup;
-	private String name;
 	private List<Player> peoples;
-	private Map<UUID, String> uuids;
 	private Map<UUID, Boolean> foundBlock;
-	private int score;
 	
 	public Team(String name) {
 		this.name = name;
@@ -90,6 +95,10 @@ public class Team {
 		peoples.add(p);
 		uuids.put(p.getUniqueId(), p.getName());
 		foundBlock.put(p.getUniqueId(), false);
+	}
+	public void addPerson(UUID u) {
+		uuids.put(u, u.toString());
+		foundBlock.put(u, false);
 	}
 	
 	public void removePerson(Player p) {
@@ -169,4 +178,14 @@ public class Team {
 	public String getPlayerName(UUID u) {
 		return uuids.get(u);
 	}
+
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
+	}
+	
+	
 }
