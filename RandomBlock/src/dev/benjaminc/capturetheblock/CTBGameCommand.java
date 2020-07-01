@@ -139,6 +139,10 @@ public class CTBGameCommand implements CommandExecutor {
 					plugin.resetScores();
 					return true;
 				}
+				case Keys.COMMAND_CTB_RELOADCONFIG: {
+					plugin.reloadMyConfig();
+					sender.sendMessage("Config reloaded. The game changes will take effect next new block.");
+				} return true;
 				case Keys.COMMAND_CTB_BLOCKS: {
 					sender.sendMessage(plugin.showScoresStr(true));
 					return true;

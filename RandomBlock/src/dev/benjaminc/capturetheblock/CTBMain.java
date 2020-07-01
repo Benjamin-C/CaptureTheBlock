@@ -40,7 +40,6 @@ public class CTBMain extends JavaPlugin {
 	
 	// TODO add javadoc
 	private int roundcount = 0;
-	// TODO save teams
 	/** The {@link List} of {@link Team} in the game */
 	private Map<String, Team> teams;
 	
@@ -256,15 +255,16 @@ public class CTBMain extends JavaPlugin {
 	    	}
 	    	
 	    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
-	    	clbk.put(roundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
+	    	final int thisroundwarn = roundwarn;
+	    	clbk.put(thisroundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
 //	    		@Override
 	    		public void run(Timer timer) {
-	    			sendAllMsg(maincolor + "" + roundwarn + " " + Strings.SECONDS + "!" + colorreset);
+	    			sendAllMsg(maincolor + "" + thisroundwarn + " " + Strings.SECONDS + "!" + colorreset);
 	            	for(Player p : getSpectators()) {
-	            		p.sendTitle(maincolor + "" + roundwarn + colorreset, null, 0, 20, 5);
+	            		p.sendTitle(maincolor + "" + thisroundwarn + colorreset, null, 0, 20, 5);
 	            	}
 	            	for(Team t : teams.values()) {
-	            		t.sendTitle(maincolor + "" + roundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
+	            		t.sendTitle(maincolor + "" + thisroundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
 	            	}
 	    		}
 	    	});

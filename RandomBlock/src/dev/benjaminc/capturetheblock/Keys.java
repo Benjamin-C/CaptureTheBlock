@@ -26,6 +26,7 @@ public class Keys {
 	public static final String COMMAND_CTB_START = "start";
 	public static final String COMMAND_CTB_END = "stop";
 	public static final String COMMAND_CTB_RESET = "reset";
+	public static final String COMMAND_CTB_RELOADCONFIG = "reloadconfig";
 	public static final String COMMAND_CTB_BLOCKS = "blocks";
 	public static final String COMMAND_CTB_ALLBLOCKS = "listallblocksbutitisbig";
 	public static final String COMMAND_CTB_TEAM = "team";
