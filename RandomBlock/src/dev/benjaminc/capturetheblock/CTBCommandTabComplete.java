@@ -53,6 +53,14 @@ public class CTBCommandTabComplete implements TabCompleter {
 					possible.add(Keys.COMMAND_CTB_TEAM_ADDALL);
 				}
 			} break;
+			case Keys.COMMAND_CTB_SET: {
+				possible.add(Keys.COMMAND_CTB_SET);
+				possible.add(Keys.COMMAND_CTB_SET_ADD);
+				possible.add(Keys.COMMAND_CTB_SET_REMOVE);
+				possible.add(Keys.COMMAND_CTB_SET_LIST );
+				possible.add(Keys.COMMAND_CTB_SET_LISTALL);
+				possible.add(Keys.COMMAND_CTB_SET_CLEAR);
+			}
 			}
 			options = getPossibleCompletes(possible, args[1]);
 		} break;
@@ -69,6 +77,12 @@ public class CTBCommandTabComplete implements TabCompleter {
 					possible.addAll(getAllPlayers());
 				} break;
 				}
+			} break;
+			case Keys.COMMAND_CTB_SET_ADD: {
+				possible.addAll(plugin.getDisabledSets());
+			} break;
+			case Keys.COMMAND_CTB_SET_REMOVE: {
+				possible.addAll(plugin.getEnabledSets());
 			} break;
 			}
 			options = getPossibleCompletes(possible, args[2]);

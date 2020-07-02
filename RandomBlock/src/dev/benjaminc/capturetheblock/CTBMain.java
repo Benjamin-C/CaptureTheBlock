@@ -32,7 +32,11 @@ public class CTBMain extends JavaPlugin {
 	
 	// CONFIGURED VALUES
 	/** The {@link List} of all {@link Material} that could be selected. */
-	private List<Material> blocks;
+	private Map<String, List<Material>> sets;
+	// TODO add javadoc
+	private List<Material> activeBlocks;
+	// TODO add javadoc
+	private List<String> enabledSets;
 	/** The int time in seconds the game runs for. Loaded from config. */
 	private int roundtime = 300;
 	/** The int warning time before the round is over in seconds */
@@ -91,16 +95,76 @@ public class CTBMain extends JavaPlugin {
     	cfg = this.getConfig();
     	roundtime = cfg.getInt(Keys.CONFIG_ROUND_TIME);
     	roundwarn = cfg.getInt(Keys.CONFIG_WARN_TIME);
-    	List<?> blkstr = cfg.getList(Keys.CONFIG_BLOCK_LIST);
-    	blocks = new ArrayList<Material>();
-    	for(Object o : blkstr) {
-    		if(o instanceof String) {
-    			blocks.add(Material.valueOf((String) o));
-    		}
-    	}
     	saveDefaultConfig();
 	}
+	
+	// TODO add javadoc
+	public void loadAllBlocks() {
+    	File folder = getDataFolder();
+    	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_BLOCKLIST_SUFFIX))) {
+    		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
+    		String lname = f.getName().substring(0, f.getName().indexOf("."));
+    		
+    		List<?> blkstr = c.getList(Keys.CONFIG_BLOCK_LIST);
+        	List<Material> myBlocks = new ArrayList<Material>();
+        	for(Object o : blkstr) {
+        		if(o instanceof String) {
+        			myBlocks.add(Material.valueOf((String) o));
+        		}
+        	}
+        	sets.put(lname, myBlocks);
+    	}
+	}
     
+	// TODO add javadoc
+	public boolean enableSet(String name) {
+		if(!sets.containsKey(name)) {
+			enabledSets.add(name);
+			updatePossibleBlocks();
+			return true;
+		} else {
+			return false;
+		}
+	}
+	// TODO add javadoc
+	public boolean disableSet(String name) {
+		if(enabledSets.contains(name)) {
+			enabledSets.remove(name);
+			updatePossibleBlocks();
+			return true;
+		} else {
+			return false;
+		}
+	}
+	// TODO add javadoc
+	public void updatePossibleBlocks() {
+		activeBlocks.clear();
+		for(String s : enabledSets) {
+			activeBlocks.addAll(sets.get(s));
+		}
+	}
+	// TODO add javadoc
+	public List<String> getEnabledSets() {
+		return enabledSets;
+	}
+	// TODO add javadoc
+	public List<String> getDisabledSets() {
+		List<String> setstrs = new ArrayList<String>();
+		for(String s : sets.keySet()) {
+			if(!enabledSets.contains(s)) {
+				setstrs.add(s);
+			}
+		}return setstrs;
+	}
+	// TODO add javadoc
+	public Map<String, List<Material>> getAllSets() {
+		return sets;
+	}
+	// TODO add javadoc
+	public void clearSets() {
+		sets.clear();
+	}
+	
 	// -----------------------------------------------
 	// PLUGIN
 	// -----------------------------------------------
@@ -115,10 +179,15 @@ public class CTBMain extends JavaPlugin {
     	
     	loadMyConfig();
     	
+    	enabledSets = new ArrayList<String>();
+    	activeBlocks = new ArrayList<Material>();
+    	
     	loadAllTeams();
     	for(Player p : Bukkit.getOnlinePlayers()) {
     		reconnectPlayer(p);
     	}
+    	
+    	loadAllBlocks();
     	
 //    	sbm = Bukkit.getScoreboardManager();
 //    	board = sbm.getMainScoreboard();
@@ -157,7 +226,7 @@ public class CTBMain extends JavaPlugin {
      * @return the {@link Material} of the random block from the blocks list.
      */
     protected Material getRandomBlock() {
-    	return blocks.get(rand.nextInt(blocks.size()));
+    	return activeBlocks.get(rand.nextInt(activeBlocks.size()));
     }
 
     /**
@@ -216,8 +285,8 @@ public class CTBMain extends JavaPlugin {
      */
     public String listAllBlocks() {
     	String l = "";
-    	for(int i = 0; i < blocks.size(); i++) {
-    		l += i + " " + blocks.get(i) + "\n";
+    	for(int i = 0; i < sets.size(); i++) {
+    		l += i + " " + sets.get(i) + "\n";
     	}
     	return l;
     }

@@ -197,6 +197,38 @@ public class CTBGameCommand implements CommandExecutor {
 						return true;
 					}
 				}
+				case Keys.COMMAND_CTB_SET: {
+					if(args.length > 1) {
+						switch(args[1]) {
+						case Keys.COMMAND_CTB_SET_ADD: {
+							if(args.length > 2) {
+								// TODO add better messages
+								sender.sendMessage(plugin.enableSet(args[2]) ? "It worked" : "That set " + args[2] + "doesn't exist");
+							}
+						}
+						case Keys.COMMAND_CTB_SET_REMOVE: {
+							if(args.length > 2) {
+								// TODO add better messages
+								sender.sendMessage(plugin.disableSet(args[2]) ? "It worked" : "That set " + args[2] + "doesn't exist");
+							}
+						}
+						case Keys.COMMAND_CTB_SET_LIST : {
+							for(String s : plugin.getEnabledSets()) {
+								sender.sendMessage(s);
+							}
+						}
+						case Keys.COMMAND_CTB_SET_LISTALL: {
+							for(String s : plugin.getAllSets().keySet()) {
+								sender.sendMessage(s);
+							}
+						}
+						case Keys.COMMAND_CTB_SET_CLEAR: {
+							plugin.clearSets();
+						}
+						}
+					}
+					return true;
+				}
 				}
 			}
 			sender.sendMessage("Please specify a valid action. Valid actions are " + acts);
