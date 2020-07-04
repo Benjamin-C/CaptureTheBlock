@@ -32,11 +32,12 @@ public class CTBMain extends JavaPlugin {
 	
 	// CONFIGURED VALUES
 	/** The {@link List} of all {@link Material} that could be selected. */
-	private Map<String, List<Material>> sets;
+	private Map<String, List<Material>> allSets;
 	// TODO add javadoc
 	private List<Material> activeBlocks;
 	// TODO add javadoc
 	private List<String> enabledSets;
+	
 	/** The int time in seconds the game runs for. Loaded from config. */
 	private int roundtime = 300;
 	/** The int warning time before the round is over in seconds */
@@ -60,10 +61,7 @@ public class CTBMain extends JavaPlugin {
 	
 	/** the final int ticks per second the server is expected to have */
 	public static final int TPS = 20;
-	/** The {@link BukkitScheduler} used to schedult tasks in the future */
-//	private BukkitScheduler scheduler = Bukkit.getServer().getScheduler();
-	/** The int id of the current game timer */
-//	private int timerid;
+	// TODO add javadoc
 	private Timer gameTimer;
 	
 	/** the {@link Random} used for random numbers */
@@ -112,13 +110,13 @@ public class CTBMain extends JavaPlugin {
         			myBlocks.add(Material.valueOf((String) o));
         		}
         	}
-        	sets.put(lname, myBlocks);
+        	allSets.put(lname, myBlocks);
     	}
 	}
     
 	// TODO add javadoc
 	public boolean enableSet(String name) {
-		if(!sets.containsKey(name)) {
+		if(!allSets.containsKey(name)) {
 			enabledSets.add(name);
 			updatePossibleBlocks();
 			return true;
@@ -140,7 +138,7 @@ public class CTBMain extends JavaPlugin {
 	public void updatePossibleBlocks() {
 		activeBlocks.clear();
 		for(String s : enabledSets) {
-			activeBlocks.addAll(sets.get(s));
+			activeBlocks.addAll(allSets.get(s));
 		}
 	}
 	// TODO add javadoc
@@ -150,7 +148,7 @@ public class CTBMain extends JavaPlugin {
 	// TODO add javadoc
 	public List<String> getDisabledSets() {
 		List<String> setstrs = new ArrayList<String>();
-		for(String s : sets.keySet()) {
+		for(String s : allSets.keySet()) {
 			if(!enabledSets.contains(s)) {
 				setstrs.add(s);
 			}
@@ -158,11 +156,11 @@ public class CTBMain extends JavaPlugin {
 	}
 	// TODO add javadoc
 	public Map<String, List<Material>> getAllSets() {
-		return sets;
+		return allSets;
 	}
 	// TODO add javadoc
 	public void clearSets() {
-		sets.clear();
+		allSets.clear();
 	}
 	
 	// -----------------------------------------------
@@ -249,7 +247,11 @@ public class CTBMain extends JavaPlugin {
     	}
     }
     
-    // TODO add javadoc
+    /**
+     * Finds the team that a {@link Player} is on
+     * @param p the {@link Player} to find
+     * @return the {@link Team} they are on
+     */
     protected Team findTeam(Player p) {
     	for(Team t : teams.values()) {
     		if(t.ifContainsPlayer(p)) {
@@ -258,7 +260,11 @@ public class CTBMain extends JavaPlugin {
     	}
     	return null;
     }
- // TODO add javadoc
+    /**
+     * Finds the team that a {@link Player} is on by their {@link UUID}
+     * @param u the {@link UUID} of the {@link Player} to find
+     * @return the {@link Team} they are on
+     */
     protected Team findTeam(UUID u) {
     	for(Team t : teams.values()) {
     		if(t.ifContainsUUID(u)) {
@@ -268,7 +274,7 @@ public class CTBMain extends JavaPlugin {
     	return null;
     }
     /**
-     * Checks if everyone has found their block
+     * Checks if all {@link Team} have found their block
      * @return the boolean of if everyone has found their block
      */
     protected boolean hasEveryoneFoundBlock() {
@@ -285,8 +291,8 @@ public class CTBMain extends JavaPlugin {
      */
     public String listAllBlocks() {
     	String l = "";
-    	for(int i = 0; i < sets.size(); i++) {
-    		l += i + " " + sets.get(i) + "\n";
+    	for(int i = 0; i < allSets.size(); i++) {
+    		l += i + " " + allSets.get(i) + "\n";
     	}
     	return l;
     }
@@ -450,7 +456,10 @@ public class CTBMain extends JavaPlugin {
 	// TEAMS & PLAYERS
 	// -----------------------------------------------
     
-    // TODO add javadoc
+   /**
+    * Marks the {@link Player} connected to the server so that they get the timer and requested block
+    * @param p the {@link Player} who connected
+    */
     protected void reconnectPlayer(Player p) {
 		Team t = findTeam(p.getUniqueId());
 		if(t != null) {
@@ -464,12 +473,18 @@ public class CTBMain extends JavaPlugin {
 		}
     }
     
-    // TODO add javadoc
+    /**
+     * Gets the {@link File} for with info about a {@link Team}
+     * @param name the {@link String} name of the team
+     * @return the {@link File} for teh team, null if it doesn't exist
+     */
     protected File getTeamFile(String name) {
     	return new File(getDataFolder(), name + Keys.FILE_TEAM_SUFFIX);
     }
     
-    // TODO add javadoc
+    /**
+     * Load all teams 
+     */
     protected void loadAllTeams() {
     	File folder = getDataFolder();
     	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_TEAM_SUFFIX))) {
@@ -491,7 +506,9 @@ public class CTBMain extends JavaPlugin {
     	}
     }
     
-    // TODO add javadoc
+    /**
+     * Save all teams to files
+     */
     protected void saveAllTeams() {
     	for(Team t : teams.values()) {
     		YamlConfiguration c = YamlConfiguration.loadConfiguration(getTeamFile(t.getName()));
@@ -512,7 +529,11 @@ public class CTBMain extends JavaPlugin {
     	}
     }
     
-    // TODO add javadoc
+    /**
+     * Creates a new team and add it to the list of teams
+     * @param name the {@link String} name of the team
+     * @return the boolean of sucess, returns false if the team already exists1
+     */
     protected boolean addTeam(String name) {
     	if(!teams.containsKey(name)) {
     		teams.put(name, new Team(name));
