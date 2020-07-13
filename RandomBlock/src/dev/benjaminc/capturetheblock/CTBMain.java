@@ -98,26 +98,34 @@ public class CTBMain extends JavaPlugin {
 	
 	// TODO add javadoc
 	public void loadAllBlocks() {
+		allSets = new HashMap<String, List<Material>>();
     	File folder = getDataFolder();
     	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_BLOCKLIST_SUFFIX))) {
-    		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
-    		String lname = f.getName().substring(0, f.getName().indexOf("."));
-    		
-    		List<?> blkstr = c.getList(Keys.CONFIG_BLOCK_LIST);
-        	List<Material> myBlocks = new ArrayList<Material>();
-        	for(Object o : blkstr) {
-        		if(o instanceof String) {
-        			myBlocks.add(Material.valueOf((String) o));
-        		}
-        	}
-        	allSets.put(lname, myBlocks);
+    		try {
+	    		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
+	    		String lname = f.getName().substring(0, f.getName().indexOf("."));
+	    		
+	    		List<?> blkstr = c.getList(Keys.CONFIG_BLOCK_LIST);
+	        	List<Material> myBlocks = new ArrayList<Material>();
+	        	for(Object o : blkstr) {
+	        		if(o instanceof String) {
+	        			myBlocks.add(Material.valueOf((String) o));
+	        		}
+	        	}
+	        	allSets.put(lname, myBlocks);
+    		} catch(Exception e) {
+    			e.printStackTrace();
+    			sendAdminMessage("Could not load file " + f.getName() + ". See log for details.");
+    		}
     	}
 	}
     
 	// TODO add javadoc
 	public boolean enableSet(String name) {
-		if(!allSets.containsKey(name)) {
-			enabledSets.add(name);
+		if(allSets.containsKey(name)) {
+			if(!enabledSets.contains(name)) {
+				enabledSets.add(name);
+			}
 			updatePossibleBlocks();
 			return true;
 		} else {
@@ -314,46 +322,52 @@ public class CTBMain extends JavaPlugin {
      */
     protected void startRound() {
     	if(teams.size() > 0) {
-	    	stopTimer();
-	    	showScores(true);
-	    	roundcount++;
-	    	for(Team t : teams.values()) {
-	    		Material mat = getRandomBlock();
-				t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + t.getScore() + colorreset);
-				t.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
-				t.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
-				t.setTarget(mat);
-				t.clearFound();
-			}
-	    	for(Player pl : getSpectators()) {
-	    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 100, 20);
-	    	}
-	    	
-	    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
-	    	final int thisroundwarn = roundwarn;
-	    	clbk.put(thisroundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
-//	    		@Override
-	    		public void run(Timer timer) {
-	    			sendAllMsg(maincolor + "" + thisroundwarn + " " + Strings.SECONDS + "!" + colorreset);
-	            	for(Player p : getSpectators()) {
-	            		p.sendTitle(maincolor + "" + thisroundwarn + colorreset, null, 0, 20, 5);
-	            	}
-	            	for(Team t : teams.values()) {
-	            		t.sendTitle(maincolor + "" + thisroundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
-	            	}
-	    		}
-	    	});
-	    	clbk.put(0, new TimeRunnable() { // When the timer is done
-//	    		@Override
-	    		public void run(Timer timer) {
-	    			startRound();
-	    		}
-	    	});
-	    	gameTimer = new Timer(roundtime*TPS, "Find you block!", clbk, false, this);
-			
-	    	gameTimer.addAllPlayers();
-	    	gameTimer.start();
-	    	sendAdminMessage("Game Started");
+    		if(enabledSets.size() > 0) {
+		    	stopTimer();
+		    	showScores(true);
+		    	roundcount++;
+		    	for(Team t : teams.values()) {
+		    		Material mat = getRandomBlock();
+					t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + t.getScore() + colorreset);
+					t.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
+					t.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
+					t.setTarget(mat);
+					t.clearFound();
+				}
+		    	for(Player pl : getSpectators()) {
+		    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 100, 20);
+		    	}
+		    	
+		    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
+		    	final int thisroundwarn = roundwarn;
+		    	clbk.put(thisroundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
+	//	    		@Override
+		    		public void run(Timer timer) {
+		    			sendAllMsg(maincolor + "" + thisroundwarn + " " + Strings.SECONDS + "!" + colorreset);
+		            	for(Player p : getSpectators()) {
+		            		p.sendTitle(maincolor + "" + thisroundwarn + colorreset, null, 0, 20, 5);
+		            	}
+		            	for(Team t : teams.values()) {
+		            		t.sendTitle(maincolor + "" + thisroundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
+		            	}
+		    		}
+		    	});
+		    	clbk.put(0, new TimeRunnable() { // When the timer is done
+	//	    		@Override
+		    		public void run(Timer timer) {
+		    			startRound();
+		    		}
+		    	});
+		    	gameTimer = new Timer(roundtime*TPS, "Find you block!", clbk, false, this);
+				
+		    	gameTimer.addAllPlayers();
+		    	gameTimer.start();
+		    	sendAdminMessage("Game Started");
+    		} else {
+        		for(Player p : getAdmins()) {
+        			p.sendMessage("There must be at least 1 set to begin");
+        		}
+        	}
     	} else {
     		for(Player p : getAdmins()) {
     			p.sendMessage("There must be at least 1 team to begin");

@@ -203,28 +203,35 @@ public class CTBGameCommand implements CommandExecutor {
 						case Keys.COMMAND_CTB_SET_ADD: {
 							if(args.length > 2) {
 								// TODO add better messages
-								sender.sendMessage(plugin.enableSet(args[2]) ? "It worked" : "That set " + args[2] + "doesn't exist");
+								sender.sendMessage(plugin.enableSet(args[2]) ? "It worked" : "That set " + args[2] + " doesn't exist");
+							} else {
+								sender.sendMessage("Please specify a set");
 							}
-						}
+						} break;
 						case Keys.COMMAND_CTB_SET_REMOVE: {
 							if(args.length > 2) {
 								// TODO add better messages
-								sender.sendMessage(plugin.disableSet(args[2]) ? "It worked" : "That set " + args[2] + "doesn't exist");
+								sender.sendMessage(plugin.disableSet(args[2]) ? "It worked" : "That set " + args[2] + " doesn't exist");
+							} else {
+								sender.sendMessage("Please specify a set");
 							}
-						}
+						} break;
 						case Keys.COMMAND_CTB_SET_LIST : {
+							sender.sendMessage("Enabled Sets");
 							for(String s : plugin.getEnabledSets()) {
 								sender.sendMessage(s);
 							}
-						}
+						} break;
 						case Keys.COMMAND_CTB_SET_LISTALL: {
+							sender.sendMessage("All sets:");
 							for(String s : plugin.getAllSets().keySet()) {
 								sender.sendMessage(s);
 							}
-						}
+						} break;
 						case Keys.COMMAND_CTB_SET_CLEAR: {
 							plugin.clearSets();
-						}
+							sender.sendMessage("Cleared");
+						} break;
 						}
 					}
 					return true;

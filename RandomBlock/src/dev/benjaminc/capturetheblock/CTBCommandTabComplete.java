@@ -34,6 +34,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_START);
 				possible.add(Keys.COMMAND_CTB_END);
 				possible.add(Keys.COMMAND_CTB_RESET);
+				possible.add(Keys.COMMAND_CTB_SET);
 				possible.add(Keys.COMMAND_CTB_RELOADCONFIG);
 				possible.add(Keys.COMMAND_CTB_BLOCKS);
 				possible.add(Keys.COMMAND_CTB_ALLBLOCKS);
