@@ -203,7 +203,9 @@ public class CTBGameCommand implements CommandExecutor {
 						case Keys.COMMAND_CTB_SET_ADD: {
 							if(args.length > 2) {
 								// TODO add better messages
-								sender.sendMessage(plugin.enableSet(args[2]) ? "It worked" : "That set " + args[2] + " doesn't exist");
+								for(int i = 2; i < args.length; i++) {
+									sender.sendMessage(plugin.enableSet(args[2]) ? "It worked" : "That set " + args[2] + " doesn't exist");
+								}
 							} else {
 								sender.sendMessage("Please specify a set");
 							}
@@ -211,7 +213,9 @@ public class CTBGameCommand implements CommandExecutor {
 						case Keys.COMMAND_CTB_SET_REMOVE: {
 							if(args.length > 2) {
 								// TODO add better messages
-								sender.sendMessage(plugin.disableSet(args[2]) ? "It worked" : "That set " + args[2] + " doesn't exist");
+								for(int i = 2; i < args.length; i++) {
+									sender.sendMessage(plugin.disableSet(args[i]) ? "It worked" : "That set " + args[i] + " doesn't exist");
+								}
 							} else {
 								sender.sendMessage("Please specify a set");
 							}

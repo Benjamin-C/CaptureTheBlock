@@ -183,6 +183,8 @@ public class CTBMain extends JavaPlugin {
     	rand = new Random();
     	teams = new HashMap<String, Team>();
     	
+    	saveResource(Keys.FILE_DEFAULTBLOCKS_NAME, false);
+    	
     	loadMyConfig();
     	
     	enabledSets = new ArrayList<String>();
