@@ -114,7 +114,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 	private List<String> getPossibleCompletes(List<String> possible, String part) {
 		List<String> options = new ArrayList<String>();
 		for(String s : possible) {
-			if(part.equals(s.substring(0, Math.min(part.length(), s.length())))) {
+			if(part.equalsIgnoreCase(s.substring(0, Math.min(part.length(), s.length())))) {
 				options.add(s);
 			}
 		}
