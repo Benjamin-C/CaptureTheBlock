@@ -130,6 +130,7 @@ public class CTBGameCommand implements CommandExecutor {
 					plugin.startGame();
 					return true;
 				}
+				case Keys.COMMAND_CTB_ENDALT:
 				case Keys.COMMAND_CTB_END: {
 					plugin.endRound();
 					return true;
