@@ -107,7 +107,7 @@ public class CTBGameCommand implements CommandExecutor {
 								ts.add(plugin.findTeam((Player) sender));
 							}
 						}
-						String msg = "";
+						String msg = "CTB teams:\n";
 						boolean first = true;
 						for(Team t : ts) {
 							if(first) {
@@ -177,6 +177,37 @@ public class CTBGameCommand implements CommandExecutor {
 								return true;
 							} else {
 								sender.sendMessage("Please specify a team name to remove");
+							}
+						} break;
+						case Keys.COMMAND_CTB_TEAM_SCORE: {
+							switch(args.length) {
+							case 3: {
+								sender.sendMessage("Please specify a team name to remove");
+							} break;
+							case 4: {
+								sender.sendMessage("Please specify a score action <add|remove|set>");
+							} break;
+							default: {
+								try {
+									switch(args[3]) {
+									case Keys.COMMAND_CTB_TEAM_SCORE_ADD: {
+										plugin.getAllTeams().get(args[2]).addScore(Integer.parseInt(args[4]));
+										sender.sendMessage("Added " + args[4] + " points to " + args[2]);
+									} break;
+									case Keys.COMMAND_CTB_TEAM_SCORE_REMOVE: {
+										plugin.getAllTeams().get(args[2]).subtractScore(Integer.parseInt(args[4]));
+										sender.sendMessage("Subtracted " + args[4] + " points from " + args[2]);
+									} break;
+									case Keys.COMMAND_CTB_TEAM_SCORE_SET: {
+										plugin.getAllTeams().get(args[2]).setScore(Integer.parseInt(args[4]));
+										sender.sendMessage("Set " + args[2] + "'s score to " + args[4]);
+									} break;
+									}
+								} catch(NumberFormatException e) {
+									sender.sendMessage(args[4] + " is not a valid number");
+								}
+								
+							}
 							}
 						} break;
 						case Keys.COMMAND_CTB_TEAM_ADDALL: {

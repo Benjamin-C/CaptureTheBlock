@@ -40,6 +40,10 @@ public class Keys {
 		public static final String COMMAND_CTB_TEAM_LEAVE = "leave";
 		public static final String COMMAND_CTB_TEAM_CLEAR = "clear";
 		public static final String COMMAND_CTB_TEAM_ADDALL = "addall";
+		public static final String COMMAND_CTB_TEAM_SCORE = "score";
+			public static final String COMMAND_CTB_TEAM_SCORE_ADD = "add";
+			public static final String COMMAND_CTB_TEAM_SCORE_REMOVE = "remove";
+			public static final String COMMAND_CTB_TEAM_SCORE_SET = "set";
 	public static final String COMMAND_CTB_SET = "set";
 		public static final String COMMAND_CTB_SET_ADD = "add";
 		public static final String COMMAND_CTB_SET_REMOVE = "remove";

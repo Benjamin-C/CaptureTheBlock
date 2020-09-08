@@ -44,7 +44,11 @@ public class Team {
 	public boolean hasEveryoneFound() {
 		boolean found = true;
     	for(UUID u : foundBlock.keySet()) {
-    		found &= foundBlock.get(u);
+    		if(!foundBlock.get(u)) {
+    			if(Bukkit.getServer().getPlayer(u) != null) {
+    				found = false;
+    			}
+    		}
     	}
     	return found;
 	}
@@ -77,6 +81,9 @@ public class Team {
 	}
 	public void addScore(int add) {
 		score += add;
+	}
+	public void subtractScore(int sub) {
+		score -= sub;
 	}
 	public boolean isOnline(UUID u) {
 		for(Player p : peoples) {

@@ -32,7 +32,7 @@ public class CTBMain extends JavaPlugin {
 	
 	// CONFIGURED VALUES
 	/** The {@link List} of all {@link Material} that could be selected. */
-	private Map<String, List<Material>> allSets;
+	private Map<String, BlockSet> allSets;
 	// TODO add javadoc
 	private List<Material> activeBlocks;
 	// TODO add javadoc
@@ -96,9 +96,13 @@ public class CTBMain extends JavaPlugin {
     	saveDefaultConfig();
 	}
 	
+	public Map<String, BlockSet> getAllSets() {
+		return allSets;
+	}
+	
 	// TODO add javadoc
 	public void loadAllBlocks() {
-		allSets = new HashMap<String, List<Material>>();
+		allSets = new HashMap<String, BlockSet>();
     	File folder = getDataFolder();
     	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_BLOCKLIST_SUFFIX))) {
     		try {
@@ -106,18 +110,23 @@ public class CTBMain extends JavaPlugin {
 	    		String lname = f.getName().substring(0, f.getName().indexOf("."));
 	    		
 	    		List<?> blkstr = c.getList(Keys.CONFIG_BLOCK_LIST);
-	        	List<Material> myBlocks = new ArrayList<Material>();
+	        	BlockSet set = new BlockSet(this, lname, null, null);
 	        	for(Object o : blkstr) {
 	        		if(o instanceof String) {
-	        			myBlocks.add(Material.valueOf((String) o));
+	        			String s = (String) o;
+	        			if(s.startsWith("INCLUDE_")) {
+	        				set.addSet(s.substring(s.indexOf("_") + 1, s.length()).toLowerCase());
+	        			} else {
+	        				set.addBlock(Material.valueOf(s.toUpperCase()));
+	        			}
 	        		}
 	        	}
-	        	allSets.put(lname, myBlocks);
+	        	allSets.put(lname, set);
     		} catch(Exception e) {
     			e.printStackTrace();
     			sendAdminMessage("Could not load file " + f.getName() + ". See log for details.");
     		}
-    	}
+	}
 	}
     
 	// TODO add javadoc
@@ -146,7 +155,7 @@ public class CTBMain extends JavaPlugin {
 	public void updatePossibleBlocks() {
 		activeBlocks.clear();
 		for(String s : enabledSets) {
-			activeBlocks.addAll(allSets.get(s));
+			activeBlocks.addAll(allSets.get(s).getAllBlocks(null));
 		}
 	}
 	// TODO add javadoc
@@ -160,12 +169,10 @@ public class CTBMain extends JavaPlugin {
 			if(!enabledSets.contains(s)) {
 				setstrs.add(s);
 			}
-		}return setstrs;
+		}
+		return setstrs;
 	}
-	// TODO add javadoc
-	public Map<String, List<Material>> getAllSets() {
-		return allSets;
-	}
+
 	// TODO add javadoc
 	public void clearSets() {
 		allSets.clear();
@@ -194,6 +201,8 @@ public class CTBMain extends JavaPlugin {
     	for(Player p : Bukkit.getOnlinePlayers()) {
     		reconnectPlayer(p);
     	}
+    	
+    	sendAdminMessage("I_WANT_A_MELLON");
     	
     	loadAllBlocks();
     	
@@ -250,6 +259,7 @@ public class CTBMain extends JavaPlugin {
 	    	if(t.hasEveryoneFound()) {
 	    		t.addScore(1);
 	    		sendAllMsg(maincolor + t.getName() + " has all found their block" + colorreset);
+	    		gameTimer.setTitle("Find your block! " + ChatColor.GREEN + t.getTarget() + ChatColor.RESET, t.getName());
 	    	}
 	    	if(hasEveryoneFoundBlock()) {
 				startRound();
@@ -301,8 +311,8 @@ public class CTBMain extends JavaPlugin {
      */
     public String listAllBlocks() {
     	String l = "";
-    	for(int i = 0; i < allSets.size(); i++) {
-    		l += i + " " + allSets.get(i) + "\n";
+    	for(BlockSet b : allSets.values()) {
+    		l += b.toString() + "\n";
     	}
     	return l;
     }
@@ -360,9 +370,18 @@ public class CTBMain extends JavaPlugin {
 		    			startRound();
 		    		}
 		    	});
-		    	gameTimer = new Timer(roundtime*TPS, "Find you block!", clbk, false, this);
+
+		    	gameTimer = new Timer(roundtime*TPS, "Find your block! ", clbk, false, this);
 				
-		    	gameTimer.addAllPlayers();
+//		    	gameTimer.addAllPlayers();
+		    	
+		    	String ts = "";
+		    	for(Team t : teams.values()) {
+		    		ts += " " + t.getName() + ":" + t.getTarget();
+		    		gameTimer.addBar(t.getName(), "Find your block! " + ChatColor.RED + t.getTarget() + ChatColor.RESET);
+		    		gameTimer.addPlayer(t.getOnlinePeoples(), t.getName());
+		    	}
+		    	gameTimer.setTitle(ts, "main");
 		    	gameTimer.start();
 		    	sendAdminMessage("Game Started");
     		} else {
@@ -481,13 +500,28 @@ public class CTBMain extends JavaPlugin {
 		if(t != null) {
 			t.reconnectPerson(p);
 			sendAdminMessage(p.getName() + " joined the game, and was put on team " + t.getName());
+			if(gameTimer != null) {
+				gameTimer.addPlayer(p, t.getName());
+			}
 		} else {
 			sendAdminMessage(p.getName() + " joined the game and was not on a team");
+			if(gameTimer != null) {
+				gameTimer.addPlayer(p);
+			}
 		}
-		if(gameTimer != null) {
-			gameTimer.addPlayer(p);
-		}
+		
     }
+    
+    public void disconnectPlayer(Player p) {
+		Team t = findTeam(p);
+		if(t != null) {
+			t.disconnectPerson(p);
+//			gameTimer.removePlayer(p, t.getName());
+			sendAdminMessage(p.getName() + " left the game, and was taken from team " + t.getName());
+		} else {
+			sendAdminMessage(p.getName() + " left the game and was not on a team");
+		}
+	}
     
     /**
      * Gets the {@link File} for with info about a {@link Team}
@@ -502,23 +536,27 @@ public class CTBMain extends JavaPlugin {
      * Load all teams 
      */
     protected void loadAllTeams() {
-    	File folder = getDataFolder();
-    	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_TEAM_SUFFIX))) {
-    		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
-        	String tname = c.getString(Keys.TEAM_NAME);
-        	Team t = new Team(tname);
-        	for(String u : c.getStringList(Keys.TEAM_MEMBERS)) {
-        		String pname = null;
-        		String ustr = u;
-        		if(u.contains("{") && u.contains("}")) {
-        			pname = u.substring(u.indexOf("{")+1, u.indexOf("}"));
-        			ustr = u.substring(0, u.indexOf("{"));
-        		}
-        		t.addPerson(UUID.fromString(ustr), pname);
-        	}
-        	t.setScore(c.getInt(Keys.TEAM_SCORE));
-        	t.setColor(c.getColor(Keys.TEAM_COLOR));
-        	teams.put(tname, t);
+    	File folder = new File(getDataFolder().getAbsolutePath() + File.separatorChar + Bukkit.getServer().getWorlds().get(0).getName());
+    	if(folder.exists()) {
+	    	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_TEAM_SUFFIX))) {
+	    		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
+	        	String tname = c.getString(Keys.TEAM_NAME);
+	        	Team t = new Team(tname);
+	        	for(String u : c.getStringList(Keys.TEAM_MEMBERS)) {
+	        		String pname = null;
+	        		String ustr = u;
+	        		if(u.contains("{") && u.contains("}")) {
+	        			pname = u.substring(u.indexOf("{")+1, u.indexOf("}"));
+	        			ustr = u.substring(0, u.indexOf("{"));
+	        		}
+	        		t.addPerson(UUID.fromString(ustr), pname);
+	        	}
+	        	t.setScore(c.getInt(Keys.TEAM_SCORE));
+	        	t.setColor(c.getColor(Keys.TEAM_COLOR));
+	        	teams.put(tname, t);
+	    	}
+    	} else {
+    		folder.mkdirs();
     	}
     }
     
@@ -526,6 +564,10 @@ public class CTBMain extends JavaPlugin {
      * Save all teams to files
      */
     protected void saveAllTeams() {
+    	File folder = new File(getDataFolder().getAbsolutePath() + File.separatorChar + Bukkit.getServer().getWorlds().get(0).getName());
+    	if(!folder.exists()) {
+    		folder.mkdirs();
+    	}
     	for(Team t : teams.values()) {
     		YamlConfiguration c = YamlConfiguration.loadConfiguration(getTeamFile(t.getName()));
     		c.set(Keys.TEAM_NAME, t.getName());
@@ -538,7 +580,8 @@ public class CTBMain extends JavaPlugin {
     		c.set(Keys.TEAM_SCORE, t.getScore());
     		c.set(Keys.TEAM_COLOR, t.getColor());
     		try {
-				c.save(getTeamFile(t.getName()));
+				c.save(getTeamFile(Bukkit.getServer().getWorlds().get(0).getName() + File.separatorChar + t.getName()));
+				sendAdminMessage(Bukkit.getServer().getWorlds().get(0).getName());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

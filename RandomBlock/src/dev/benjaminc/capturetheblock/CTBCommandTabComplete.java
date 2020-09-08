@@ -51,6 +51,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 					possible.add(Keys.COMMAND_CTB_TEAM_ADD);
 					possible.add(Keys.COMMAND_CTB_TEAM_REMOVE);
 					possible.add(Keys.COMMAND_CTB_TEAM_CLEAR);
+					possible.add(Keys.COMMAND_CTB_TEAM_SCORE);
 					possible.add(Keys.COMMAND_CTB_TEAM_ADDALL);
 				}
 			} break;
@@ -69,6 +70,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 			switch(args[0]) {
 			case Keys.COMMAND_CTB_TEAM: {
 				switch(args[1]) {
+				case Keys.COMMAND_CTB_TEAM_SCORE:
 				case Keys.COMMAND_CTB_TEAM_CLEAR:
 				case Keys.COMMAND_CTB_TEAM_REMOVE:
 				case Keys.COMMAND_CTB_TEAM_JOIN: {
@@ -78,15 +80,20 @@ public class CTBCommandTabComplete implements TabCompleter {
 					possible.addAll(getAllPlayers());
 				} break;
 				}
+				options = getPossibleCompletes(possible, args[2]);
 			} break;
-			case Keys.COMMAND_CTB_SET_ADD: {
-				possible.addAll(plugin.getDisabledSets());
-			} break;
-			case Keys.COMMAND_CTB_SET_REMOVE: {
-				possible.addAll(plugin.getEnabledSets());
-			} break;
+			case Keys.COMMAND_CTB_SET: {
+				switch(args[1]) {
+				case Keys.COMMAND_CTB_SET_ADD: {
+					possible.addAll(plugin.getDisabledSets());
+				} break;
+				case Keys.COMMAND_CTB_SET_REMOVE: {
+					possible.addAll(plugin.getEnabledSets());
+				} break;
+				}
+				options = getPossibleCompletes(possible, args[2]);
 			}
-			options = getPossibleCompletes(possible, args[2]);
+			}
 		} break;
 		case 4: {
 			switch(args[0]) {
@@ -95,13 +102,17 @@ public class CTBCommandTabComplete implements TabCompleter {
 				case Keys.COMMAND_CTB_TEAM_JOIN: {
 					possible.addAll(getAllPlayers());
 				} break;
+				case Keys.COMMAND_CTB_TEAM_SCORE: {
+					possible.add(Keys.COMMAND_CTB_TEAM_SCORE_ADD);
+					possible.add(Keys.COMMAND_CTB_TEAM_SCORE_REMOVE);
+					possible.add(Keys.COMMAND_CTB_TEAM_SCORE_SET);
+				} break;
 				}
 			} break;
 			}
-			options = getPossibleCompletes(possible, args[2]);
+			options = getPossibleCompletes(possible, args[3]);
 		}
 		}
-		
 		return options;
 	}
 

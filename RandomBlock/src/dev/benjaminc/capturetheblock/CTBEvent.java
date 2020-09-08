@@ -38,13 +38,6 @@ public class CTBEvent implements Listener {
 	
 	@EventHandler
 	public void onPlayerDisconnect(PlayerQuitEvent e) {
-		Player p = e.getPlayer();
-		Team t = plugin.findTeam(p);
-		if(t != null) {
-			t.disconnectPerson(p);
-			plugin.sendAdminMessage(p.getName() + " left the game, and was taken from team " + t.getName());
-		} else {
-			plugin.sendAdminMessage(p.getName() + " left the game and was not on a team");
-		}
+		plugin.disconnectPlayer(e.getPlayer());
 	}
 }
