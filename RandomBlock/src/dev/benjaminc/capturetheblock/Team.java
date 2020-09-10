@@ -42,15 +42,15 @@ public class Team {
 	}
 
 	public boolean hasEveryoneFound() {
-		boolean found = true;
-    	for(UUID u : foundBlock.keySet()) {
-    		if(!foundBlock.get(u)) {
-    			if(Bukkit.getServer().getPlayer(u) != null) {
-    				found = false;
-    			}
+		if(peoples.size() < 1) {
+			return false;
+		}
+		for(Player p : peoples) {
+			if(!foundBlock.get(p.getUniqueId())) {
+				return false;
     		}
-    	}
-    	return found;
+		}
+    	return true;
 	}
 
 	public void setFound(UUID uuid, boolean found) {

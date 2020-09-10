@@ -113,11 +113,11 @@ public class CTBMain extends JavaPlugin {
 	        	BlockSet set = new BlockSet(this, lname, null, null);
 	        	for(Object o : blkstr) {
 	        		if(o instanceof String) {
-	        			String s = (String) o;
+	        			String s = ((String) o).toUpperCase();
 	        			if(s.startsWith("INCLUDE_")) {
 	        				set.addSet(s.substring(s.indexOf("_") + 1, s.length()).toLowerCase());
 	        			} else {
-	        				set.addBlock(Material.valueOf(s.toUpperCase()));
+	        				set.addBlock(Material.valueOf(s));
 	        			}
 	        		}
 	        	}
@@ -256,10 +256,12 @@ public class CTBMain extends JavaPlugin {
 	    	pl.sendMessage(maincolor + Strings.YOU_FOUND_BLOCK + colorreset);
 	    	sendAllMsg(maincolor + pl.getName() + " " + Strings.THEY_FOUND_BLOCK + colorreset);
 	    	t.setFound(pl.getUniqueId(), true);
+	    	gameTimer.removePlayer(pl, t.getName());
+	    	gameTimer.addPlayer(pl, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
 	    	if(t.hasEveryoneFound()) {
 	    		t.addScore(1);
 	    		sendAllMsg(maincolor + t.getName() + " has all found their block" + colorreset);
-	    		gameTimer.setTitle("Find your block! " + ChatColor.GREEN + t.getTarget() + ChatColor.RESET, t.getName());
+	    		gameTimer.setTitle("Find your block! " + ChatColor.GREEN + t.getTarget() + ChatColor.RESET, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
 	    	}
 	    	if(hasEveryoneFoundBlock()) {
 				startRound();
@@ -379,6 +381,7 @@ public class CTBMain extends JavaPlugin {
 		    	for(Team t : teams.values()) {
 		    		ts += " " + t.getName() + ":" + t.getTarget();
 		    		gameTimer.addBar(t.getName(), "Find your block! " + ChatColor.RED + t.getTarget() + ChatColor.RESET);
+		    		gameTimer.addBar(t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX, "Find your block! " + ChatColor.GOLD + t.getTarget() + ChatColor.RESET);
 		    		gameTimer.addPlayer(t.getOnlinePeoples(), t.getName());
 		    	}
 		    	gameTimer.setTitle(ts, "main");

@@ -2,6 +2,8 @@ package dev.benjaminc.capturetheblock;
 
 public class Keys {
 	
+	public static final String BOSSBAR_GOTBLOCK_SUFFIX = "-got";
+	
 	public static final String SCORE_NAME = "score";
 	
 	public static final String PERMISSION = "capturetheblock";
