@@ -132,11 +132,29 @@ public class CTBGameCommand implements CommandExecutor {
 				}
 				case Keys.COMMAND_CTB_ENDALT:
 				case Keys.COMMAND_CTB_END: {
-					plugin.endRound();
+					plugin.endGame();
+					return true;
+				}
+				case Keys.COMMAND_CTB_FINAL: {
+					if(args.length >= 2) {
+						try {
+							int left = Integer.parseInt(args[1]);
+							if(left >= -1) {
+								plugin.setRoundsLeft(left);
+							} else {
+								sender.sendMessage(args[1] + " is not a valid number of rounds. Number must be >= -1");
+							}
+							
+						} catch(NumberFormatException e) {
+							sender.sendMessage(args[1] + " is not a valid number of rounds");
+						}
+					} else {
+						sender.sendMessage("Please specify a number of rounds");
+					}
 					return true;
 				}
 				case Keys.COMMAND_CTB_RESET: {
-					plugin.endRound();
+					plugin.endGame();
 					plugin.resetScores();
 					return true;
 				}

@@ -1,5 +1,7 @@
 package dev.benjaminc.capturetheblock;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class Strings {
 
 	public static final String YOU_FOUND_BLOCK = "You found your block!";
@@ -20,6 +22,8 @@ public class Strings {
 	public static final String STARTING_ROUND = "Starting round";
 	public static final String NOW_STAND_ON = "Now stand on";
 	public static final String BETTER_HURRY = "Better hurry";
+	
+	public static final String FINAL_ROUND = "Final Round!";
 	
 	
 }

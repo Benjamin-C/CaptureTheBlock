@@ -38,6 +38,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_RELOADCONFIG);
 				possible.add(Keys.COMMAND_CTB_BLOCKS);
 				possible.add(Keys.COMMAND_CTB_ALLBLOCKS);
+				possible.add(Keys.COMMAND_CTB_FINAL);
 			}
 			options = getPossibleCompletes(possible, args[0]);
 		} break;
@@ -62,7 +63,10 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_SET_LIST );
 				possible.add(Keys.COMMAND_CTB_SET_LISTALL);
 				possible.add(Keys.COMMAND_CTB_SET_CLEAR);
-			}
+			} break;
+			case Keys.COMMAND_CTB_FINAL: {
+				possible.add("0");
+			} break;
 			}
 			options = getPossibleCompletes(possible, args[1]);
 		} break;

@@ -67,6 +67,8 @@ public class CTBMain extends JavaPlugin {
 	/** the {@link Random} used for random numbers */
 	private Random rand;
 	
+	private int roundsLeft = -1;
+	
 	/** The {@link ScoreboardManager} to manage the scoreboards */
 //	private ScoreboardManager sbm;
 	/** The {@link Scoreboard} that the game score is stored on */
@@ -261,7 +263,7 @@ public class CTBMain extends JavaPlugin {
 	    	if(t.hasEveryoneFound()) {
 	    		t.addScore(1);
 	    		sendAllMsg(maincolor + t.getName() + " has all found their block" + colorreset);
-	    		gameTimer.setTitle("Find your block! " + ChatColor.GREEN + t.getTarget() + ChatColor.RESET, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
+	    		gameTimer.setTitle(maincolor + "Find your block! " + ChatColor.GREEN + t.getTarget() + maincolor, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
 	    	}
 	    	if(hasEveryoneFoundBlock()) {
 				startRound();
@@ -339,54 +341,68 @@ public class CTBMain extends JavaPlugin {
     		if(enabledSets.size() > 0) {
 		    	stopTimer();
 		    	showScores(true);
-		    	roundcount++;
-		    	for(Team t : teams.values()) {
-		    		Material mat = getRandomBlock();
-					t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + t.getScore() + colorreset);
-					t.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
-					t.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
-					t.setTarget(mat);
-					t.clearFound();
-				}
-		    	for(Player pl : getSpectators()) {
-		    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 100, 20);
+		    	if(roundsLeft != 0) {
+			    	roundcount++;
+			    	if(roundsLeft != -1) {
+			    		roundsLeft--;
+			    	}
+			    	for(Team t : teams.values()) {
+			    		Material mat = getRandomBlock();
+						t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + t.getScore() + colorreset);
+						t.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
+						if(roundsLeft != -1) {
+							t.sendMessage(maincolor + "There " + ((roundsLeft == 1) ? "is" : "are") + " " + accentcolor + roundsLeft + maincolor + " " + "round" + ((roundsLeft == 1) ? "" : "s") + " left." + colorreset);
+						}
+						t.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
+						t.setTarget(mat);
+						t.clearFound();
+					}
+			    	for(Player pl : getSpectators()) {
+			    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 100, 20);
+			    	}
+			    	if(roundsLeft == 0) {
+			    		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+			    			@Override public void run() {
+			    				msgFinalRound();
+			    			}
+			    		}, 240);
+			    	}
+			    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
+			    	final int thisroundwarn = roundwarn;
+			    	clbk.put(thisroundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
+		//	    		@Override
+			    		public void run(Timer timer) {
+			    			sendAllMsg(maincolor + "" + thisroundwarn + " " + Strings.SECONDS + "!" + colorreset);
+			            	for(Player p : getSpectators()) {
+			            		p.sendTitle(maincolor + "" + thisroundwarn + colorreset, null, 0, 20, 5);
+			            	}
+			            	for(Team t : teams.values()) {
+			            		t.sendTitle(maincolor + "" + thisroundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
+			            	}
+			    		}
+			    	});
+			    	clbk.put(0, new TimeRunnable() { // When the timer is done
+		//	    		@Override
+			    		public void run(Timer timer) {
+			    			startRound();
+			    		}
+			    	});
+	
+			    	gameTimer = new Timer(roundtime*TPS, "Find your block! ", clbk, false, this);
+					
+	//		    	gameTimer.addAllPlayers();
+			    	
+			    	String ts = "";
+			    	for(Team t : teams.values()) {
+			    		ts += " " + t.getName() + ":" + t.getTarget();
+			    		gameTimer.addBar(t.getName(), maincolor + "Find your block! " + ChatColor.RED + t.getTarget() + maincolor);
+			    		gameTimer.addBar(t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX, maincolor + "Find your block! " + ChatColor.GOLD + t.getTarget() + maincolor);
+			    		gameTimer.addPlayer(t.getOnlinePeoples(), t.getName());
+			    	}
+			    	gameTimer.setTitle(ts, "main");
+			    	gameTimer.start();
+			    	sendAdminMessage("Game Started");
 		    	}
-		    	
-		    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
-		    	final int thisroundwarn = roundwarn;
-		    	clbk.put(thisroundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
-	//	    		@Override
-		    		public void run(Timer timer) {
-		    			sendAllMsg(maincolor + "" + thisroundwarn + " " + Strings.SECONDS + "!" + colorreset);
-		            	for(Player p : getSpectators()) {
-		            		p.sendTitle(maincolor + "" + thisroundwarn + colorreset, null, 0, 20, 5);
-		            	}
-		            	for(Team t : teams.values()) {
-		            		t.sendTitle(maincolor + "" + thisroundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
-		            	}
-		    		}
-		    	});
-		    	clbk.put(0, new TimeRunnable() { // When the timer is done
-	//	    		@Override
-		    		public void run(Timer timer) {
-		    			startRound();
-		    		}
-		    	});
-
-		    	gameTimer = new Timer(roundtime*TPS, "Find your block! ", clbk, false, this);
-				
-//		    	gameTimer.addAllPlayers();
-		    	
-		    	String ts = "";
-		    	for(Team t : teams.values()) {
-		    		ts += " " + t.getName() + ":" + t.getTarget();
-		    		gameTimer.addBar(t.getName(), "Find your block! " + ChatColor.RED + t.getTarget() + ChatColor.RESET);
-		    		gameTimer.addBar(t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX, "Find your block! " + ChatColor.GOLD + t.getTarget() + ChatColor.RESET);
-		    		gameTimer.addPlayer(t.getOnlinePeoples(), t.getName());
-		    	}
-		    	gameTimer.setTitle(ts, "main");
-		    	gameTimer.start();
-		    	sendAdminMessage("Game Started");
     		} else {
         		for(Player p : getAdmins()) {
         			p.sendMessage("There must be at least 1 set to begin");
@@ -410,12 +426,23 @@ public class CTBMain extends JavaPlugin {
     /**
      * Ends a round by stopping the timer, broadcasting a game over message, and showing the scores
      */
-    public void endRound() {
+    public void endGame() {
     	stopTimer();
     	sendAllMsg(maincolor + Strings.GAME_OVER + colorreset);
     	showScores(true);
 	}
     
+    private void msgFinalRound() {
+    	for(Team t : teams.values()) {
+			t.sendTitle(maincolor + Strings.FINAL_ROUND + colorreset, "", 20, 200, 20);
+		}
+    }
+    public void setRoundsLeft(int num) {
+    	roundsLeft = num;
+    	if(roundsLeft == 0) {
+    		msgFinalRound();
+    	}
+    }
 	// -----------------------------------------------
 	// SCORE
 	// -----------------------------------------------
