@@ -25,5 +25,16 @@ public class Strings {
 	
 	public static final String FINAL_ROUND = "Final Round!";
 	
-	
+	/** the {@link ChatColor} of the main text */
+	public static final ChatColor COLOR_MAIN = ChatColor.LIGHT_PURPLE;
+	/** The {@link ChatColor} of the accented text */
+	public static final ChatColor COLOR_ACCENT = ChatColor.AQUA;
+	/** the {@link ChatColor} if you found the block */
+	public static final ChatColor COLOR_GOT = ChatColor.GREEN;
+	/** The {@link ChatColor} if you missed the block */
+	public static final ChatColor COLOR_MISSED = ChatColor.RED;
+	/** the {@link ChatColor} if you found the block */
+	public static final ChatColor COLOR_SOME_GOT = ChatColor.GOLD;
+	/** The {@link ChatColor} reset */
+	public static final ChatColor COLOR_RESET = ChatColor.RESET;
 }

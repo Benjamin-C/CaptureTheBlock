@@ -4,10 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +23,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scoreboard.Scoreboard;
 //import org.bukkit.scoreboard.ScoreboardManager;
 
-import net.md_5.bungee.api.ChatColor;
 import peterTimer.TimeRunnable;
 import peterTimer.Timer;
 
@@ -52,17 +49,6 @@ public class CTBMain extends JavaPlugin {
 	/** The {@link List} of {@link Team} in the game */
 	private Map<String, Team> teams;
 	
-	/** the {@link ChatColor} of the main text */
-	private ChatColor maincolor = ChatColor.LIGHT_PURPLE;
-	/** The {@link ChatColor} of the accented text */
-	private ChatColor accentcolor = ChatColor.AQUA;
-	/** the {@link ChatColor} if you found the block */
-	private ChatColor gotcolor = ChatColor.GREEN;
-	/** The {@link ChatColor} if you missed the block */
-	private ChatColor missedcolor = ChatColor.RED;
-	/** The {@link ChatColor} reset */
-	private ChatColor colorreset = ChatColor.RESET;
-	
 	/** the final int ticks per second the server is expected to have */
 	public static final int TPS = 20;
 	// TODO add javadoc
@@ -73,6 +59,8 @@ public class CTBMain extends JavaPlugin {
 	
 	private int roundsLeft = -1;
 	private LocalDateTime endTime = null;
+	
+	private String titlePrefix = "";
 	
 	/** The {@link ScoreboardManager} to manage the scoreboards */
 //	private ScoreboardManager sbm;
@@ -268,15 +256,15 @@ public class CTBMain extends JavaPlugin {
      */
     protected void foundBlock(Player pl, Team t) {
     	if(!t.hasFound(pl)) {
-	    	pl.sendMessage(maincolor + Strings.YOU_FOUND_BLOCK + colorreset);
-	    	sendAllMsg(maincolor + pl.getName() + " " + Strings.THEY_FOUND_BLOCK + colorreset);
+	    	pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_FOUND_BLOCK + Strings.COLOR_RESET);
+	    	sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_FOUND_BLOCK + Strings.COLOR_RESET);
 	    	t.setFound(pl.getUniqueId(), true);
+	    	t.updateTimeBars(gameTimer, titlePrefix);
 	    	gameTimer.removePlayer(pl, t.getName());
 	    	gameTimer.addPlayer(pl, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
-	    	if(t.hasEveryoneFound()) {
+	    	if(t.hasScored()) {
 	    		t.addScore(1);
-	    		sendAllMsg(maincolor + t.getName() + " has all found their block" + colorreset);
-	    		gameTimer.setTitle(maincolor + "Find your block! " + ChatColor.GREEN + t.getTarget() + maincolor, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
+	    		sendAllMsg(Strings.COLOR_MAIN + t.getName() + " has all found their block" + Strings.COLOR_RESET);
 	    	}
 	    	if(hasEveryoneFoundBlock()) {
 				startRound();
@@ -342,8 +330,8 @@ public class CTBMain extends JavaPlugin {
      * Prints the start of game messages, and starts a round
      */
     protected void startGame() {
-    	sendAllMsg(maincolor + Strings.GAME_BEGUN + colorreset);
-		sendAllMsg(maincolor + Strings.GAME_INFO + colorreset);
+    	sendAllMsg(Strings.COLOR_MAIN + Strings.GAME_BEGUN + Strings.COLOR_RESET);
+		sendAllMsg(Strings.COLOR_MAIN + Strings.GAME_INFO + Strings.COLOR_RESET);
 		running = true;
 		startRound();
     }
@@ -375,19 +363,21 @@ public class CTBMain extends JavaPlugin {
     			if(cont) {
 			    	for(Team t : teams.values()) {
 			    		Material mat = getRandomBlock();
-						t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + t.getScore() + colorreset);
-						t.sendMessage(maincolor + Strings.NOW_STAND_ON + " " + accentcolor + mat.name() + colorreset);
+						t.sendMessage(Strings.COLOR_MAIN + Strings.YOUR_SCORE_IS + " " + t.getScore() + Strings.COLOR_RESET);
+						t.sendMessage(Strings.COLOR_MAIN + Strings.NOW_STAND_ON + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET);
 						if(roundsLeft != -1) {
-							t.sendMessage(maincolor + "There " + ((roundsLeft == 1) ? "is" : "are") + " " + accentcolor + roundsLeft + maincolor + " " + "round" + ((roundsLeft == 1) ? "" : "s") + " left." + colorreset);
+							t.sendMessage(Strings.COLOR_MAIN + "There " + ((roundsLeft == 1) ? "is" : "are") + " " + Strings.COLOR_ACCENT + roundsLeft + Strings.COLOR_MAIN + " " + "round" + ((roundsLeft == 1) ? "" : "s") + " left." + Strings.COLOR_RESET);
 						}
-						t.sendTitle(maincolor + Strings.FIND + " " + accentcolor + mat.name() + colorreset, maincolor + Strings.YOU_HAVE + " " + accentcolor + roundtime + maincolor + " " + Strings.SECONDS + "." + colorreset, 20, 200, 20);
+						t.sendTitle(Strings.COLOR_MAIN + Strings.FIND + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET, Strings.COLOR_MAIN + Strings.YOU_HAVE + " " + Strings.COLOR_ACCENT + roundtime + Strings.COLOR_MAIN + " " + Strings.SECONDS + "." + Strings.COLOR_RESET, 20, 200, 20);
 						t.setTarget(mat);
 						t.clearFound();
 					}
 			    	for(Player pl : getSpectators()) {
-			    		pl.sendTitle(maincolor + Strings.STARTING_ROUND + colorreset, null, 20, 100, 20);
+			    		pl.sendTitle(Strings.COLOR_MAIN + Strings.STARTING_ROUND + Strings.COLOR_RESET, null, 20, 100, 20);
 			    	}
+			    	titlePrefix = "Find your block! ";
 			    	if(roundsLeft == 0) {
+			    		titlePrefix = "Final Round! ";
 			    		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 			    			@Override public void run() {
 			    				msgFinalRound();
@@ -399,12 +389,12 @@ public class CTBMain extends JavaPlugin {
 			    	clbk.put(thisroundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
 		//	    		@Override
 			    		public void run(Timer timer) {
-			    			sendAllMsg(maincolor + "" + thisroundwarn + " " + Strings.SECONDS + "!" + colorreset);
+			    			sendAllMsg(Strings.COLOR_MAIN + "" + thisroundwarn + " " + Strings.SECONDS + "!" + Strings.COLOR_RESET);
 			            	for(Player p : getSpectators()) {
-			            		p.sendTitle(maincolor + "" + thisroundwarn + colorreset, null, 0, 20, 5);
+			            		p.sendTitle(Strings.COLOR_MAIN + "" + thisroundwarn + Strings.COLOR_RESET, null, 0, 20, 5);
 			            	}
 			            	for(Team t : teams.values()) {
-			            		t.sendTitle(maincolor + "" + thisroundwarn + colorreset, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
+			            		t.sendTitle(Strings.COLOR_MAIN + "" + thisroundwarn + Strings.COLOR_RESET, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
 			            	}
 			    		}
 			    	});
@@ -422,8 +412,9 @@ public class CTBMain extends JavaPlugin {
 			    	String ts = "";
 			    	for(Team t : teams.values()) {
 			    		ts += " " + t.getName() + ":" + t.getTarget();
-			    		gameTimer.addBar(t.getName(), maincolor + "Find your block! " + ChatColor.RED + t.getTarget() + maincolor);
-			    		gameTimer.addBar(t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX, maincolor + "Find your block! " + ChatColor.GOLD + t.getTarget() + maincolor);
+			    		gameTimer.addBar(t.getName(), "");
+			    		gameTimer.addBar(t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX, "");
+			    		t.updateTimeBars(gameTimer, titlePrefix);
 			    		gameTimer.addPlayer(t.getOnlinePeoples(), t.getName());
 			    	}
 			    	gameTimer.setTitle(ts, "main");
@@ -458,14 +449,14 @@ public class CTBMain extends JavaPlugin {
     public void endGame() {
     	stopTimer();
     	running = false;
-    	sendAllTitle(maincolor + Strings.GAME_OVER + colorreset, "", 0, 20, 5);
-    	sendAllMsg(maincolor + Strings.GAME_OVER + colorreset);
+    	sendAllTitle(Strings.COLOR_MAIN + Strings.GAME_OVER + Strings.COLOR_RESET, "", 0, 20, 5);
+    	sendAllMsg(Strings.COLOR_MAIN + Strings.GAME_OVER + Strings.COLOR_RESET);
     	showScores(true);
 	}
     
     private void msgFinalRound() {
     	for(Team t : teams.values()) {
-			t.sendTitle(maincolor + Strings.FINAL_ROUND + colorreset, "", 20, 200, 20);
+			t.sendTitle(Strings.COLOR_MAIN + Strings.FINAL_ROUND + Strings.COLOR_RESET, "", 20, 200, 20);
 		}
     }
     public void setRoundsLeft(int num) {
@@ -498,7 +489,7 @@ public class CTBMain extends JavaPlugin {
     	for(Team t : teams.values()) {
     		String name = t.getName();
     		int sc = t.getScore();
-    		String scstr = (t.hasEveryoneFound() ? gotcolor : missedcolor) + "" + sc + "-" + name + ((showBlocks) ? ": " + ((t.getTarget() != null) ? t.getTarget().name() : Strings.NOTHING) : "") + colorreset;
+    		String scstr = (t.hasEveryoneFound() ? Strings.COLOR_GOT : Strings.COLOR_MISSED) + "" + sc + "-" + name + ((showBlocks) ? ": " + ((t.getTarget() != null) ? t.getTarget().name() : Strings.NOTHING) : "") + Strings.COLOR_RESET;
     		msgmap.put(name, scstr);
     	}
     	
@@ -523,11 +514,11 @@ public class CTBMain extends JavaPlugin {
     		}
     	}
     	
-    	String scorestr = maincolor + Strings.PLAYER_SCORES + "\n" + colorreset;
+    	String scorestr = Strings.COLOR_MAIN + Strings.PLAYER_SCORES + "\n" + Strings.COLOR_RESET;
     	for(int i = 0; i < uuids.length; i++) {
     		scorestr += msgmap.get(uuids[i]) + "\n";
     	}
-    	scorestr += maincolor + "--- Of " + roundcount + " rounds ---\n" + colorreset;
+    	scorestr += Strings.COLOR_MAIN + "--- Of " + roundcount + " rounds ---\n" + Strings.COLOR_RESET;
     	return scorestr;
     }
     
