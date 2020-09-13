@@ -2,8 +2,12 @@ package dev.benjaminc.capturetheblock;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,11 +72,20 @@ public class CTBMain extends JavaPlugin {
 	private Random rand;
 	
 	private int roundsLeft = -1;
+	private LocalDateTime endTime = null;
 	
 	/** The {@link ScoreboardManager} to manage the scoreboards */
 //	private ScoreboardManager sbm;
 	/** The {@link Scoreboard} that the game score is stored on */
 //	private Scoreboard board;
+	
+	private boolean running = false;
+	
+	public static DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+	
+	public boolean isRunning() {
+		return running;
+	}
 	
 	private FileConfiguration cfg = this.getConfig();
 	// Fired when plugin is first enabled
@@ -96,6 +109,15 @@ public class CTBMain extends JavaPlugin {
     	roundtime = cfg.getInt(Keys.CONFIG_ROUND_TIME);
     	roundwarn = cfg.getInt(Keys.CONFIG_WARN_TIME);
     	saveDefaultConfig();
+    	
+    	loadAllTeams();
+    	for(Player p : Bukkit.getOnlinePlayers()) {
+    		reconnectPlayer(p);
+    	}
+    	
+    	loadAllBlocks();
+    	
+    	sendAdminMessage("I_WANT_A_MELLON");
 	}
 	
 	public Map<String, BlockSet> getAllSets() {
@@ -194,20 +216,11 @@ public class CTBMain extends JavaPlugin {
     	
     	saveResource(Keys.FILE_DEFAULTBLOCKS_NAME, false);
     	
-    	loadMyConfig();
-    	
     	enabledSets = new ArrayList<String>();
     	activeBlocks = new ArrayList<Material>();
     	
-    	loadAllTeams();
-    	for(Player p : Bukkit.getOnlinePlayers()) {
-    		reconnectPlayer(p);
-    	}
-    	
-    	sendAdminMessage("I_WANT_A_MELLON");
-    	
-    	loadAllBlocks();
-    	
+    	loadMyConfig();
+
 //    	sbm = Bukkit.getScoreboardManager();
 //    	board = sbm.getMainScoreboard();
 
@@ -331,8 +344,10 @@ public class CTBMain extends JavaPlugin {
     protected void startGame() {
     	sendAllMsg(maincolor + Strings.GAME_BEGUN + colorreset);
 		sendAllMsg(maincolor + Strings.GAME_INFO + colorreset);
+		running = true;
 		startRound();
     }
+    
     /**
      * Starts a round of the game
      */
@@ -341,11 +356,23 @@ public class CTBMain extends JavaPlugin {
     		if(enabledSets.size() > 0) {
 		    	stopTimer();
 		    	showScores(true);
-		    	if(roundsLeft != 0) {
-			    	roundcount++;
+		    	boolean cont = false;
+		    	if(endTime != null) {
+//		    		sendAdminMessage("Continuing until time " + endTime.format(formatter));
+//		    		sendAdminMessage("How long? " + endTime.until(LocalDateTime.now(), ChronoUnit.SECONDS));
+//		    		sendAdminMessage("Is before? " + endTime.isBefore(LocalDateTime.now()));
+		    		cont = true;
+		    		if(endTime.isBefore(LocalDateTime.now())) {
+		    			endTime = null;
+		    		}
+		    	} else if(roundsLeft != 0) {
+//		    		sendAdminMessage("Continuing for " + roundsLeft);
 			    	if(roundsLeft != -1) {
 			    		roundsLeft--;
 			    	}
+			    	cont = true;
+    			}
+    			if(cont) {
 			    	for(Team t : teams.values()) {
 			    		Material mat = getRandomBlock();
 						t.sendMessage(maincolor + Strings.YOUR_SCORE_IS + " " + t.getScore() + colorreset);
@@ -402,6 +429,8 @@ public class CTBMain extends JavaPlugin {
 			    	gameTimer.setTitle(ts, "main");
 			    	gameTimer.start();
 			    	sendAdminMessage("Game Started");
+		    	} else {
+		    		endGame();
 		    	}
     		} else {
         		for(Player p : getAdmins()) {
@@ -428,6 +457,8 @@ public class CTBMain extends JavaPlugin {
      */
     public void endGame() {
     	stopTimer();
+    	running = false;
+    	sendAllTitle(maincolor + Strings.GAME_OVER + colorreset, "", 0, 20, 5);
     	sendAllMsg(maincolor + Strings.GAME_OVER + colorreset);
     	showScores(true);
 	}
@@ -439,9 +470,15 @@ public class CTBMain extends JavaPlugin {
     }
     public void setRoundsLeft(int num) {
     	roundsLeft = num;
-    	if(roundsLeft == 0) {
+    	if(roundsLeft == 0 && running) {
     		msgFinalRound();
     	}
+    }
+    public int getRoundsLeft() {
+    	return roundsLeft;
+    }
+    public void setEndTime(LocalDateTime end) {
+    	endTime = end;
     }
 	// -----------------------------------------------
 	// SCORE

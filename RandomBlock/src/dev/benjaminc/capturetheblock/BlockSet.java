@@ -92,7 +92,11 @@ public class BlockSet {
 			usedSets.add(name);
 			if(addSet != null) {
 				for(String s : addSet) {
-					mat.addAll(plugin.getAllSets().get(s).getAllBlocks(usedSets));
+					if(plugin.getAllSets().containsKey(s)) {
+						mat.addAll(plugin.getAllSets().get(s).getAllBlocks(usedSets));
+					} else {
+						plugin.sendAdminMessage("Error loading " + name + ": Subet " + s + " does not exist");
+					}
 				}
 			}
 //			if(remove != null) {

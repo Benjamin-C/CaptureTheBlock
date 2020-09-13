@@ -1,7 +1,13 @@
 package dev.benjaminc.capturetheblock;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -153,6 +159,35 @@ public class CTBGameCommand implements CommandExecutor {
 					}
 					return true;
 				}
+				case Keys.COMMAND_CTB_ENDAT: {
+					if(args.length >= 2) {
+						if(args.length > 2 && args[1].charAt(1) == ':') {
+							args[1] = "0" + args[1];
+						}
+						if(args[1].equals("null")) {
+							plugin.setEndTime(null);
+						} else {
+							try {
+								LocalDateTime ldt = LocalDate.now().atTime(LocalTime.parse(args[1]));
+								if(ldt.isAfter(LocalDateTime.now())) {
+									plugin.setEndTime(ldt);
+									if(plugin.getRoundsLeft() != -1) {
+										plugin.setRoundsLeft(1);
+									}
+									sender.sendMessage("Continuing until just after " + ldt.format(CTBMain.formatter));
+								} else {
+									sender.sendMessage(args[1] + " is in the past, try a time in the future");
+								}
+								
+							} catch(DateTimeParseException e) {
+								sender.sendMessage(args[1] + " is not a valid end time");
+							}
+						}
+					} else {
+						sender.sendMessage("Please specify a time to end");
+					}
+					return true;
+				}
 				case Keys.COMMAND_CTB_RESET: {
 					plugin.endGame();
 					plugin.resetScores();
@@ -271,9 +306,15 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 						} break;
 						case Keys.COMMAND_CTB_SET_LIST : {
-							sender.sendMessage("Enabled Sets");
-							for(String s : plugin.getEnabledSets()) {
-								sender.sendMessage(s);
+							if(args.length == 1) {
+								sender.sendMessage("Enabled Sets");
+								for(String s : plugin.getEnabledSets()) {
+									sender.sendMessage(s);
+								}
+							} else {
+								if(plugin.getAllSets().containsKey(args[2])) {
+									sender.sendMessage(plugin.getAllSets().get(args[2]).toString());
+								}
 							}
 						} break;
 						case Keys.COMMAND_CTB_SET_LISTALL: {

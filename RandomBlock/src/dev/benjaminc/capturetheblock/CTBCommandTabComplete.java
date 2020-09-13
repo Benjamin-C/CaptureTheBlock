@@ -39,6 +39,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_BLOCKS);
 				possible.add(Keys.COMMAND_CTB_ALLBLOCKS);
 				possible.add(Keys.COMMAND_CTB_FINAL);
+				possible.add(Keys.COMMAND_CTB_ENDAT);
 			}
 			options = getPossibleCompletes(possible, args[0]);
 		} break;
@@ -67,6 +68,9 @@ public class CTBCommandTabComplete implements TabCompleter {
 			case Keys.COMMAND_CTB_FINAL: {
 				possible.add("0");
 			} break;
+			case Keys.COMMAND_CTB_ENDAT: {
+				possible.add("10:00");
+			} break;
 			}
 			options = getPossibleCompletes(possible, args[1]);
 		} break;
@@ -93,6 +97,9 @@ public class CTBCommandTabComplete implements TabCompleter {
 				} break;
 				case Keys.COMMAND_CTB_SET_REMOVE: {
 					possible.addAll(plugin.getEnabledSets());
+				} break;
+				case Keys.COMMAND_CTB_SET_LIST: {
+					possible.addAll(plugin.getAllSets().keySet());
 				} break;
 				}
 				options = getPossibleCompletes(possible, args[2]);

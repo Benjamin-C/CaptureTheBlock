@@ -36,6 +36,7 @@ public class Keys {
 	public static final String COMMAND_CTB_BLOCKS = "blocks";
 	public static final String COMMAND_CTB_ALLBLOCKS = "listallblocksbutitisbig";
 	public static final String COMMAND_CTB_FINAL = "final";
+	public static final String COMMAND_CTB_ENDAT = "endat";
 	public static final String COMMAND_CTB_TEAM = "team";
 		public static final String COMMAND_CTB_TEAM_LIST = "list";
 		public static final String COMMAND_CTB_TEAM_ADD = "add";
