@@ -40,6 +40,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_ALLBLOCKS);
 				possible.add(Keys.COMMAND_CTB_FINAL);
 				possible.add(Keys.COMMAND_CTB_ENDAT);
+				possible.add(Keys.COMMAND_CTB_TOGGLEDEBUGMSG);
 			}
 			options = getPossibleCompletes(possible, args[0]);
 		} break;
@@ -70,6 +71,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 			} break;
 			case Keys.COMMAND_CTB_ENDAT: {
 				possible.add("10:00");
+				possible.add("null");
 			} break;
 			}
 			options = getPossibleCompletes(possible, args[1]);

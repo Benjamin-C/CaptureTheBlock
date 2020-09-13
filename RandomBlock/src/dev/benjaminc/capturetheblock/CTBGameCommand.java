@@ -3,11 +3,9 @@ package dev.benjaminc.capturetheblock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -141,12 +139,17 @@ public class CTBGameCommand implements CommandExecutor {
 					plugin.endGame();
 					return true;
 				}
+				case Keys.COMMAND_CTB_TOGGLEDEBUGMSG: {
+					plugin.setDebugMsgVisable(!plugin.getDebugMsgVisable());
+					sender.sendMessage("Debug messages are " + ((plugin.getDebugMsgVisable()) ? "now" : "no longer") + " visable");
+				}
 				case Keys.COMMAND_CTB_FINAL: {
 					if(args.length >= 2) {
 						try {
 							int left = Integer.parseInt(args[1]);
 							if(left >= -1) {
 								plugin.setRoundsLeft(left);
+								sender.sendMessage("Ending after " + args[1] + " more rounds");
 							} else {
 								sender.sendMessage(args[1] + " is not a valid number of rounds. Number must be >= -1");
 							}
@@ -166,6 +169,7 @@ public class CTBGameCommand implements CommandExecutor {
 						}
 						if(args[1].equals("null")) {
 							plugin.setEndTime(null);
+							sender.sendMessage("End at time disabled");
 						} else {
 							try {
 								LocalDateTime ldt = LocalDate.now().atTime(LocalTime.parse(args[1]));

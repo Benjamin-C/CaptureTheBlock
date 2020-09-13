@@ -71,6 +71,15 @@ public class CTBMain extends JavaPlugin {
 	
 	public static DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 	
+	private boolean debugmsgvisable = true;
+	
+	public void setDebugMsgVisable(boolean visable) {
+		debugmsgvisable = visable;
+	}
+	
+	public boolean getDebugMsgVisable() {
+		return debugmsgvisable;
+	}
 	public boolean isRunning() {
 		return running;
 	}
@@ -105,7 +114,7 @@ public class CTBMain extends JavaPlugin {
     	
     	loadAllBlocks();
     	
-    	sendAdminMessage("I_WANT_A_MELLON");
+    	sendDebugMessage("I_WANT_A_MELLON");
 	}
 	
 	public Map<String, BlockSet> getAllSets() {
@@ -136,7 +145,7 @@ public class CTBMain extends JavaPlugin {
 	        	allSets.put(lname, set);
     		} catch(Exception e) {
     			e.printStackTrace();
-    			sendAdminMessage("Could not load file " + f.getName() + ". See log for details.");
+    			sendDebugMessage("Could not load file " + f.getName() + ". See log for details.");
     		}
 	}
 	}
@@ -557,12 +566,12 @@ public class CTBMain extends JavaPlugin {
 		Team t = findTeam(p.getUniqueId());
 		if(t != null) {
 			t.reconnectPerson(p);
-			sendAdminMessage(p.getName() + " joined the game, and was put on team " + t.getName());
+			sendDebugMessage(p.getName() + " joined the game, and was put on team " + t.getName());
 			if(gameTimer != null) {
 				gameTimer.addPlayer(p, t.getName());
 			}
 		} else {
-			sendAdminMessage(p.getName() + " joined the game and was not on a team");
+			sendDebugMessage(p.getName() + " joined the game and was not on a team");
 			if(gameTimer != null) {
 				gameTimer.addPlayer(p);
 			}
@@ -575,9 +584,9 @@ public class CTBMain extends JavaPlugin {
 		if(t != null) {
 			t.disconnectPerson(p);
 //			gameTimer.removePlayer(p, t.getName());
-			sendAdminMessage(p.getName() + " left the game, and was taken from team " + t.getName());
+			sendDebugMessage(p.getName() + " left the game, and was taken from team " + t.getName());
 		} else {
-			sendAdminMessage(p.getName() + " left the game and was not on a team");
+			sendDebugMessage(p.getName() + " left the game and was not on a team");
 		}
 	}
     
@@ -639,7 +648,7 @@ public class CTBMain extends JavaPlugin {
     		c.set(Keys.TEAM_COLOR, t.getColor());
     		try {
 				c.save(getTeamFile(Bukkit.getServer().getWorlds().get(0).getName() + File.separatorChar + t.getName()));
-				sendAdminMessage(Bukkit.getServer().getWorlds().get(0).getName());
+				sendDebugMessage(Bukkit.getServer().getWorlds().get(0).getName());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -738,10 +747,19 @@ public class CTBMain extends JavaPlugin {
     		p.sendTitle(ttl, sub, fadein, hold, fadeout);
     	}
     }
-    // TODO add javadoc
+    
     public void sendAdminMessage(String msg) {
     	for(Player p : getAdmins()) {
     		p.sendMessage(msg);
+    	}
+    }
+    
+    // TODO add javadoc
+    public void sendDebugMessage(String msg) {
+    	if(debugmsgvisable) {
+	    	for(Player p : getAdmins()) {
+	    		p.sendMessage(msg);
+	    	}
     	}
     }
     /**

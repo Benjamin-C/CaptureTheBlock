@@ -95,7 +95,7 @@ public class BlockSet {
 					if(plugin.getAllSets().containsKey(s)) {
 						mat.addAll(plugin.getAllSets().get(s).getAllBlocks(usedSets));
 					} else {
-						plugin.sendAdminMessage("Error loading " + name + ": Subet " + s + " does not exist");
+						plugin.sendDebugMessage("Error loading " + name + ": Subet " + s + " does not exist");
 					}
 				}
 			}
