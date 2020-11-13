@@ -49,7 +49,7 @@ public class CTBMain extends JavaPlugin {
 	/** The {@link List} of {@link Team} in the game */
 	private Map<String, Team> teams;
 	
-	/** the final int ticks per second the server is expected to have */
+	/** the final int ticks per second the server is expected to have. Should never change */
 	public static final int TPS = 20;
 	// TODO add javadoc
 	private Timer gameTimer;

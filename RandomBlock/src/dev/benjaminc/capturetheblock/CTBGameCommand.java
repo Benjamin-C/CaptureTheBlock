@@ -142,6 +142,7 @@ public class CTBGameCommand implements CommandExecutor {
 				case Keys.COMMAND_CTB_TOGGLEDEBUGMSG: {
 					plugin.setDebugMsgVisable(!plugin.getDebugMsgVisable());
 					sender.sendMessage("Debug messages are " + ((plugin.getDebugMsgVisable()) ? "now" : "no longer") + " visable");
+					return true;
 				}
 				case Keys.COMMAND_CTB_FINAL: {
 					if(args.length >= 2) {
