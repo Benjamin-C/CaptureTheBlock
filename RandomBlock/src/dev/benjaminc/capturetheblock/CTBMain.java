@@ -147,7 +147,7 @@ public class CTBMain extends JavaPlugin {
     			e.printStackTrace();
     			sendDebugMessage("Could not load file " + f.getName() + ". See log for details.");
     		}
-	}
+    	}
 	}
     
 	// TODO add javadoc
