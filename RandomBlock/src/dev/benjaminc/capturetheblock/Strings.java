@@ -4,8 +4,12 @@ import net.md_5.bungee.api.ChatColor;
 
 public class Strings {
 
+	public static final String FIND_YOUR_BLOCK = "Find your block!";
+	
 	public static final String YOU_FOUND_BLOCK = "You found your block!";
-	public static final String THEY_FOUND_BLOCK = "has found their block!";
+	public static final String THEY_HAS = "has";
+	public static final String THEY_ALL = "all";
+	public static final String THEY_FOUND_BLOCK = "found their block!";
 	
 	public static final String GAME_BEGUN = "Capture The Block has begun!";
 	public static final String GAME_INFO = "Find the specified block and stand on/in it within 5 minutes to get the point!";
@@ -19,11 +23,17 @@ public class Strings {
 	public static final String SECONDS = "seconds";
 	public static final String NOTHING = "nothing";
 	
+	public static final String GAME_STARTED = "Game Started";
 	public static final String STARTING_ROUND = "Starting round";
 	public static final String NOW_STAND_ON = "Now stand on";
 	public static final String BETTER_HURRY = "Better hurry";
 	
 	public static final String FINAL_ROUND = "Final Round!";
+	
+	public static final String NO_SETS_USING_DEFAULT = "No sets were selected, so I'm using the default set.";
+	public static final String NO_SETS_NO_DEFAULT = "No sets were selected, and no default set is present. At least 1 set must be selected to play the game.";
+	public static final String NO_TEAMS = "There must be at least 1 team to begin";
+			
 	
 	/** the {@link ChatColor} of the main text */
 	public static final ChatColor COLOR_MAIN = ChatColor.LIGHT_PURPLE;

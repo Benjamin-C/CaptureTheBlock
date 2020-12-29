@@ -20,11 +20,10 @@ public class CTBEvent implements Listener {
 	public void onPlayerMove(PlayerMoveEvent e) {
 		if(plugin.isRunning()) {
 			Player p = e.getPlayer();
-	//		UUID u = p.getUniqueId();
-			Material m = p.getLocation().getBlock().getType();
-			Material n = p.getLocation().subtract(0, 1, 0).getBlock().getType();
 			Team t = plugin.findTeam(p);
 			if(t != null) {
+				Material m = p.getLocation().getBlock().getType();
+				Material n = p.getLocation().subtract(0, 1, 0).getBlock().getType();
 				Material tgt = t.getTarget();
 				if((m == tgt || n == tgt) && !t.hasEveryoneFound()) {
 					plugin.foundBlock(p, t);

@@ -53,6 +53,7 @@ public class CTBMain extends JavaPlugin {
 	public static final int TPS = 20;
 	// TODO add javadoc
 	private Timer gameTimer;
+	private int messageTaskId;
 	
 	/** the {@link Random} used for random numbers */
 	private Random rand;
@@ -72,6 +73,10 @@ public class CTBMain extends JavaPlugin {
 	public static DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 	
 	private boolean debugmsgvisable = true;
+	
+	private static final int TITLE_FADEIN = 10;
+	private static final int TITLE_HOLD = 100;
+	private static final int TITLE_FADEOUT = 10;
 	
 	public void setDebugMsgVisable(boolean visable) {
 		debugmsgvisable = visable;
@@ -266,18 +271,22 @@ public class CTBMain extends JavaPlugin {
     protected void foundBlock(Player pl, Team t) {
     	if(!t.hasFound(pl)) {
 	    	pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_FOUND_BLOCK + Strings.COLOR_RESET);
-	    	sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_FOUND_BLOCK + Strings.COLOR_RESET);
+	    	sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_FOUND_BLOCK + Strings.COLOR_RESET);
 	    	t.setFound(pl.getUniqueId(), true);
 	    	t.updateTimeBars(gameTimer, titlePrefix);
 	    	gameTimer.removePlayer(pl, t.getName());
 	    	gameTimer.addPlayer(pl, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
 	    	if(t.hasScored()) {
 	    		t.addScore(1);
-	    		sendAllMsg(Strings.COLOR_MAIN + t.getName() + " has all found their block" + Strings.COLOR_RESET);
+	    		sendAllMsg(Strings.COLOR_MAIN + t.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_ALL + " " + Strings.THEY_FOUND_BLOCK + Strings.COLOR_RESET);
 	    	}
-	    	if(hasEveryoneFoundBlock()) {
-				startRound();
-			}
+	    	Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+				@Override public void run() {
+					if(hasEveryoneFoundBlock()) {
+						startRound();
+					}
+				}
+			});
     	}
     }
     
@@ -350,96 +359,101 @@ public class CTBMain extends JavaPlugin {
      */
     protected void startRound() {
     	if(teams.size() > 0) {
-    		if(enabledSets.size() > 0) {
-		    	stopTimer();
-		    	showScores(true);
-		    	boolean cont = false;
-		    	if(endTime != null) {
+    		if(enabledSets.size() <= 0) {
+    			if(allSets.containsKey(Keys.DEFAULT_SET_NAME)) {
+	    			enabledSets.add(Keys.DEFAULT_SET_NAME);
+	    			sendAdminMessage(Strings.NO_SETS_USING_DEFAULT);
+    			} else {
+    				sendAdminMessage(Strings.NO_SETS_NO_DEFAULT);
+    				return;
+    			}
+    		}
+	    	stopTimer();
+	    	showScores(true);
+	    	boolean cont = false;
+	    	if(endTime != null) {
 //		    		sendAdminMessage("Continuing until time " + endTime.format(formatter));
 //		    		sendAdminMessage("How long? " + endTime.until(LocalDateTime.now(), ChronoUnit.SECONDS));
 //		    		sendAdminMessage("Is before? " + endTime.isBefore(LocalDateTime.now()));
-		    		cont = true;
-		    		if(endTime.isBefore(LocalDateTime.now())) {
-		    			endTime = null;
-		    		}
-		    	} else if(roundsLeft != 0) {
+	    		cont = true;
+	    		if(endTime.isBefore(LocalDateTime.now())) {
+	    			endTime = null;
+	    		}
+	    	} else if(roundsLeft != 0) {
 //		    		sendAdminMessage("Continuing for " + roundsLeft);
-			    	if(roundsLeft != -1) {
-			    		roundsLeft--;
-			    	}
-			    	cont = true;
-    			}
-    			if(cont) {
-			    	for(Team t : teams.values()) {
-			    		Material mat = getRandomBlock();
-						t.sendMessage(Strings.COLOR_MAIN + Strings.YOUR_SCORE_IS + " " + t.getScore() + Strings.COLOR_RESET);
-						t.sendMessage(Strings.COLOR_MAIN + Strings.NOW_STAND_ON + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET);
-						if(roundsLeft != -1) {
-							t.sendMessage(Strings.COLOR_MAIN + "There " + ((roundsLeft == 1) ? "is" : "are") + " " + Strings.COLOR_ACCENT + roundsLeft + Strings.COLOR_MAIN + " " + "round" + ((roundsLeft == 1) ? "" : "s") + " left." + Strings.COLOR_RESET);
-						}
-						t.sendTitle(Strings.COLOR_MAIN + Strings.FIND + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET, Strings.COLOR_MAIN + Strings.YOU_HAVE + " " + Strings.COLOR_ACCENT + roundtime + Strings.COLOR_MAIN + " " + Strings.SECONDS + "." + Strings.COLOR_RESET, 20, 200, 20);
-						t.setTarget(mat);
-						t.clearFound();
-					}
-			    	for(Player pl : getSpectators()) {
-			    		pl.sendTitle(Strings.COLOR_MAIN + Strings.STARTING_ROUND + Strings.COLOR_RESET, null, 20, 100, 20);
-			    	}
-			    	titlePrefix = "Find your block! ";
-			    	if(roundsLeft == 0) {
-			    		titlePrefix = "Final Round! ";
-			    		Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-			    			@Override public void run() {
-			    				msgFinalRound();
-			    			}
-			    		}, 240);
-			    	}
-			    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
-			    	final int thisroundwarn = roundwarn;
-			    	clbk.put(thisroundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
-		//	    		@Override
-			    		public void run(Timer timer) {
-			    			sendAllMsg(Strings.COLOR_MAIN + "" + thisroundwarn + " " + Strings.SECONDS + "!" + Strings.COLOR_RESET);
-			            	for(Player p : getSpectators()) {
-			            		p.sendTitle(Strings.COLOR_MAIN + "" + thisroundwarn + Strings.COLOR_RESET, null, 0, 20, 5);
-			            	}
-			            	for(Team t : teams.values()) {
-			            		t.sendTitle(Strings.COLOR_MAIN + "" + thisroundwarn + Strings.COLOR_RESET, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", 0, 20, 5);
-			            	}
-			    		}
-			    	});
-			    	clbk.put(0, new TimeRunnable() { // When the timer is done
-		//	    		@Override
-			    		public void run(Timer timer) {
-			    			startRound();
-			    		}
-			    	});
-	
-			    	gameTimer = new Timer(roundtime*TPS, "Find your block! ", clbk, false, this);
-					
-	//		    	gameTimer.addAllPlayers();
-			    	
-			    	String ts = "";
-			    	for(Team t : teams.values()) {
-			    		ts += " " + t.getName() + ":" + t.getTarget();
-			    		gameTimer.addBar(t.getName(), "");
-			    		gameTimer.addBar(t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX, "");
-			    		t.updateTimeBars(gameTimer, titlePrefix);
-			    		gameTimer.addPlayer(t.getOnlinePeoples(), t.getName());
-			    	}
-			    	gameTimer.setTitle(ts, "main");
-			    	gameTimer.start();
-			    	sendAdminMessage("Game Started");
-		    	} else {
-		    		endGame();
+		    	if(roundsLeft != -1) {
+		    		roundsLeft--;
 		    	}
-    		} else {
-        		for(Player p : getAdmins()) {
-        			p.sendMessage("There must be at least 1 set to begin");
-        		}
-        	}
+		    	cont = true;
+			}
+			if(cont) {
+		    	for(Team t : teams.values()) {
+		    		Material mat = getRandomBlock();
+					t.sendMessage(Strings.COLOR_MAIN + Strings.YOUR_SCORE_IS + " " + t.getScore() + Strings.COLOR_RESET);
+					t.sendMessage(Strings.COLOR_MAIN + Strings.NOW_STAND_ON + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET);
+					if(roundsLeft != -1) {
+						t.sendMessage(Strings.COLOR_MAIN + "There " + ((roundsLeft == 1) ? "is" : "are") + " " + Strings.COLOR_ACCENT + roundsLeft + Strings.COLOR_MAIN + " " + "round" + ((roundsLeft == 1) ? "" : "s") + " left." + Strings.COLOR_RESET);
+					}
+					t.sendTitle(Strings.COLOR_MAIN + Strings.FIND + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET, Strings.COLOR_MAIN + Strings.YOU_HAVE + " " + Strings.COLOR_ACCENT + roundtime + Strings.COLOR_MAIN + " " + Strings.SECONDS + "." + Strings.COLOR_RESET, 20, 200, 20);
+					t.setTarget(mat);
+					t.clearFound();
+				}
+		    	for(Player pl : getSpectators()) {
+		    		pl.sendTitle(Strings.COLOR_MAIN + Strings.STARTING_ROUND + Strings.COLOR_RESET, null, TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
+		    	}
+		    	titlePrefix = Strings.FIND_YOUR_BLOCK + " ";
+		    	if(roundsLeft == 0) {
+		    		titlePrefix = Strings.FINAL_ROUND + " ";
+		    		messageTaskId = Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+		    			@Override public void run() {
+		    				if(running) {
+		    					msgFinalRound();
+		    				}
+		    			}
+		    		},  TITLE_FADEIN+TITLE_HOLD+TITLE_FADEOUT);
+		    	}
+		    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
+		    	final int thisroundwarn = roundwarn;
+		    	clbk.put(thisroundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
+	//	    		@Override
+		    		public void run(Timer timer) {
+		    			sendAllMsg(Strings.COLOR_MAIN + "" + thisroundwarn + " " + Strings.SECONDS + "!" + Strings.COLOR_RESET);
+		            	for(Player p : getSpectators()) {
+		            		p.sendTitle(Strings.COLOR_MAIN + "" + thisroundwarn + Strings.COLOR_RESET, null,  TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
+		            	}
+		            	for(Team t : teams.values()) {
+		            		t.sendTitle(Strings.COLOR_MAIN + "" + thisroundwarn + Strings.COLOR_RESET, t.hasEveryoneFound() ? null : Strings.BETTER_HURRY + "!", TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
+		            	}
+		    		}
+		    	});
+		    	clbk.put(0, new TimeRunnable() { // When the timer is done
+	//	    		@Override
+		    		public void run(Timer timer) {
+		    			startRound();
+		    		}
+		    	});
+
+		    	gameTimer = new Timer(roundtime*TPS, Strings.FIND_YOUR_BLOCK + " ", clbk, false, this);
+				
+//		    	gameTimer.addAllPlayers();
+		    	
+		    	String ts = "";
+		    	for(Team t : teams.values()) {
+		    		ts += " " + t.getName() + ":" + t.getTarget();
+		    		gameTimer.addBar(t.getName(), "");
+		    		gameTimer.addBar(t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX, "");
+		    		t.updateTimeBars(gameTimer, titlePrefix);
+		    		gameTimer.addPlayer(t.getOnlinePeoples(), t.getName());
+		    	}
+		    	gameTimer.setTitle(ts, "main");
+		    	gameTimer.start();
+		    	sendAdminMessage(Strings.GAME_STARTED);
+	    	} else {
+	    		endGame();
+	    	}
     	} else {
     		for(Player p : getAdmins()) {
-    			p.sendMessage("There must be at least 1 team to begin");
+    			p.sendMessage(Strings.NO_TEAMS);
     		}
     	}
     }
@@ -457,15 +471,16 @@ public class CTBMain extends JavaPlugin {
      */
     public void endGame() {
     	stopTimer();
+    	Bukkit.getScheduler().cancelTask(messageTaskId);
     	running = false;
-    	sendAllTitle(Strings.COLOR_MAIN + Strings.GAME_OVER + Strings.COLOR_RESET, "", 0, 20, 5);
+    	sendAllTitle(Strings.COLOR_MAIN + Strings.GAME_OVER + Strings.COLOR_RESET, "", TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
     	sendAllMsg(Strings.COLOR_MAIN + Strings.GAME_OVER + Strings.COLOR_RESET);
     	showScores(true);
 	}
     
     private void msgFinalRound() {
     	for(Team t : teams.values()) {
-			t.sendTitle(Strings.COLOR_MAIN + Strings.FINAL_ROUND + Strings.COLOR_RESET, "", 20, 200, 20);
+			t.sendTitle(Strings.COLOR_MAIN + Strings.FINAL_ROUND + Strings.COLOR_RESET, "", TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
 		}
     }
     public void setRoundsLeft(int num) {
