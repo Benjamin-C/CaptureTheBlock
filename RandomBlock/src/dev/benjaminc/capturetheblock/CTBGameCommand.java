@@ -311,7 +311,13 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 						} break;
 						case Keys.COMMAND_CTB_SET_LIST : {
-							if(args.length == 1) {
+//							sender.sendMessage("Listing sets");
+//							sender.sendMessage("l:" + args.length);
+//							for(int i = 0; i < args.length; i++) {
+//								sender.sendMessage(args[i]);
+//							}
+//							sender.sendMessage(":l");
+							if(args.length == 2) {
 								sender.sendMessage("Enabled Sets");
 								for(String s : plugin.getEnabledSets()) {
 									sender.sendMessage(s);
@@ -319,6 +325,8 @@ public class CTBGameCommand implements CommandExecutor {
 							} else {
 								if(plugin.getAllSets().containsKey(args[2])) {
 									sender.sendMessage(plugin.getAllSets().get(args[2]).toString());
+								} else {
+									sender.sendMessage("Set " + args[2] + " does not exist.");
 								}
 							}
 						} break;

@@ -26,6 +26,8 @@ import org.bukkit.scoreboard.Scoreboard;
 import peterTimer.TimeRunnable;
 import peterTimer.Timer;
 
+// TODO switch player timers when changing teams
+// TODO change title bar wording after you find block
 public class CTBMain extends JavaPlugin {
 	
 	// Me, for use in runnables
@@ -260,7 +262,14 @@ public class CTBMain extends JavaPlugin {
      * @return the {@link Material} of the random block from the blocks list.
      */
     protected Material getRandomBlock() {
-    	return activeBlocks.get(rand.nextInt(activeBlocks.size()));
+    	if(activeBlocks.size() > 0) {
+    		return activeBlocks.get(rand.nextInt(activeBlocks.size()));
+    	} else {
+    		Exception e = new Exception("There are no active blocks");
+    		e.printStackTrace();
+    		sendAdminMessage("Something goofed, activeBlocks was empty");
+    		return Material.AIR;
+    	}
     }
 
     /**
@@ -359,9 +368,9 @@ public class CTBMain extends JavaPlugin {
      */
     protected void startRound() {
     	if(teams.size() > 0) {
-    		if(enabledSets.size() <= 0) {
+    		if(activeBlocks.size() <= 0) {
     			if(allSets.containsKey(Keys.DEFAULT_SET_NAME)) {
-	    			enabledSets.add(Keys.DEFAULT_SET_NAME);
+    				activeBlocks.addAll(allSets.get(Keys.DEFAULT_SET_NAME).getAllBlocks());
 	    			sendAdminMessage(Strings.NO_SETS_USING_DEFAULT);
     			} else {
     				sendAdminMessage(Strings.NO_SETS_NO_DEFAULT);
@@ -663,7 +672,6 @@ public class CTBMain extends JavaPlugin {
     		c.set(Keys.TEAM_COLOR, t.getColor());
     		try {
 				c.save(getTeamFile(Bukkit.getServer().getWorlds().get(0).getName() + File.separatorChar + t.getName()));
-				sendDebugMessage(Bukkit.getServer().getWorlds().get(0).getName());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
