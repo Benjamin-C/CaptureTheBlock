@@ -6,7 +6,7 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="PeterTimer2.0.jar"/>
-	<classpathentry kind="lib" path="spigot-api-1.16.4-R0.1-SNAPSHOT-shaded.jar"/>
+	<classpathentry kind="lib" path="spigot-api-1.17.1-R0.1-SNAPSHOT-shaded.jar"/>
+	<classpathentry kind="lib" path="PeterTimer-1.17-v2.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
