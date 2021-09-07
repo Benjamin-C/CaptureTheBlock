@@ -23,6 +23,8 @@ public class CTBCommandTabComplete implements TabCompleter {
 		
 		List<String> possible = new ArrayList<String>();
 		
+		boolean isAdmin = sender.hasPermission(Keys.PERMISSION_CONTROL);
+		
 		switch(args.length) {
 //		case 0: {
 //			options = possible;
@@ -30,7 +32,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 		case 1: {
 			possible.add(Keys.COMMAND_CTB_TEAM); // add join leave list remove
 			possible.add(Keys.COMMAND_CTB_SCORE);
-			if(sender.hasPermission(Keys.PERMISSION_CONTROL)) { 
+			if(isAdmin) { 
 				possible.add(Keys.COMMAND_CTB_START);
 				possible.add(Keys.COMMAND_CTB_END);
 				possible.add(Keys.COMMAND_CTB_RESET);
@@ -50,7 +52,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_TEAM_JOIN); // add join leave list remove
 				possible.add(Keys.COMMAND_CTB_TEAM_LEAVE); // add join leave list remove
 				possible.add(Keys.COMMAND_CTB_TEAM_LIST);
-				if(sender.hasPermission(Keys.PERMISSION_CONTROL)) { 
+				if(isAdmin) { 
 					possible.add(Keys.COMMAND_CTB_TEAM_ADD);
 					possible.add(Keys.COMMAND_CTB_TEAM_REMOVE);
 					possible.add(Keys.COMMAND_CTB_TEAM_CLEAR);
@@ -88,6 +90,11 @@ public class CTBCommandTabComplete implements TabCompleter {
 				} break;
 				case Keys.COMMAND_CTB_TEAM_LEAVE: {
 					possible.addAll(getAllPlayers());
+				} break;
+				case Keys.COMMAND_CTB_TEAM_LIST: {
+					if(isAdmin) {
+						possible.addAll(plugin.getAllTeams().keySet());
+					}
 				} break;
 				}
 				options = getPossibleCompletes(possible, args[2]);

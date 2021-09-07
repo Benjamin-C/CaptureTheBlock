@@ -731,7 +731,7 @@ public class CTBMain extends JavaPlugin {
     
     // TODO add javadoc
     protected String listTeam(Team t) {
-    	String team = t.getName();
+    	String team = t.getName() + " (" + t.getOnlinePeoples().size() + "/" + t.getAllPeoples().size() + ")";
     	for(UUID u : t.getAllPeoples().keySet()) {
     		team += "\n  " + t.getPlayerName(u);
     		if(!t.isOnline(u)) {

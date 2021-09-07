@@ -105,13 +105,21 @@ public class CTBGameCommand implements CommandExecutor {
 					case Keys.COMMAND_CTB_TEAM_LIST: {
 						List<Team> ts = new ArrayList<Team>();
 						if(isAdmin) {
-							ts.addAll(plugin.getAllTeams().values());
+							if(args.length >= 3) {
+								if(plugin.getAllTeams().containsKey(args[2])) {
+									ts.add(plugin.getAllTeams().get(args[2]));
+								} else {
+									sender.sendMessage(Strings.TEAM_DOESNT_EXIST);
+								}
+							} else {
+								ts.addAll(plugin.getAllTeams().values());
+							}
 						} else {
 							if(sender instanceof Player) {
 								ts.add(plugin.findTeam((Player) sender));
 							}
 						}
-						String msg = "CTB teams:\n";
+						String msg = "CTB team list:\n";
 						boolean first = true;
 						for(Team t : ts) {
 							if(first) {

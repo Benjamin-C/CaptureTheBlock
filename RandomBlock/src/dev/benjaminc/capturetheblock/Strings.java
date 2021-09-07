@@ -33,6 +33,8 @@ public class Strings {
 	public static final String NO_SETS_USING_DEFAULT = "No sets were selected, so I'm using the default set.";
 	public static final String NO_SETS_NO_DEFAULT = "No sets were selected, and no default set is present. At least 1 set must be selected to play the game.";
 	public static final String NO_TEAMS = "There must be at least 1 team to begin";
+	
+	public static final String TEAM_DOESNT_EXIST = "That team does not exist.";
 			
 	
 	/** the {@link ChatColor} of the main text */
