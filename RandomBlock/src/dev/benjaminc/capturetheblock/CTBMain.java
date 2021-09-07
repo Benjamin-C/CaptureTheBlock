@@ -20,7 +20,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 //import org.bukkit.scoreboard.DisplaySlot;
 //import org.bukkit.scoreboard.Score;
-import org.bukkit.scoreboard.Scoreboard;
+//import org.bukkit.scoreboard.Scoreboard;
 //import org.bukkit.scoreboard.ScoreboardManager;
 
 import peterTimer.TimeRunnable;
@@ -65,9 +65,9 @@ public class CTBMain extends JavaPlugin {
 	
 	private String titlePrefix = "";
 	
-	/** The {@link ScoreboardManager} to manage the scoreboards */
+//	/** The {@link ScoreboardManager} to manage the scoreboards */
 //	private ScoreboardManager sbm;
-	/** The {@link Scoreboard} that the game score is stored on */
+//	/** The {@link Scoreboard} that the game score is stored on */
 //	private Scoreboard board;
 	
 	private boolean running = false;
@@ -363,6 +363,15 @@ public class CTBMain extends JavaPlugin {
 		startRound();
     }
     
+    protected void regenTeamTargetBlock(Team t) {
+    	Material mat = getRandomBlock();
+		t.sendMessage(Strings.COLOR_MAIN + Strings.NOW_STAND_ON + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET);
+		t.sendTitle(Strings.COLOR_MAIN + Strings.FIND + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET, Strings.COLOR_MAIN + Strings.YOU_HAVE + " " + Strings.COLOR_ACCENT + roundtime + Strings.COLOR_MAIN + " " + Strings.SECONDS + "." + Strings.COLOR_RESET, 20, 200, 20);
+		t.setTarget(mat);
+		t.clearFound();
+		t.updateTimeBars(gameTimer, titlePrefix);
+    }
+    
     /**
      * Starts a round of the game
      */
@@ -397,15 +406,12 @@ public class CTBMain extends JavaPlugin {
 			}
 			if(cont) {
 		    	for(Team t : teams.values()) {
-		    		Material mat = getRandomBlock();
 					t.sendMessage(Strings.COLOR_MAIN + Strings.YOUR_SCORE_IS + " " + t.getScore() + Strings.COLOR_RESET);
-					t.sendMessage(Strings.COLOR_MAIN + Strings.NOW_STAND_ON + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET);
+					regenTeamTargetBlock(t);
 					if(roundsLeft != -1) {
 						t.sendMessage(Strings.COLOR_MAIN + "There " + ((roundsLeft == 1) ? "is" : "are") + " " + Strings.COLOR_ACCENT + roundsLeft + Strings.COLOR_MAIN + " " + "round" + ((roundsLeft == 1) ? "" : "s") + " left." + Strings.COLOR_RESET);
 					}
-					t.sendTitle(Strings.COLOR_MAIN + Strings.FIND + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET, Strings.COLOR_MAIN + Strings.YOU_HAVE + " " + Strings.COLOR_ACCENT + roundtime + Strings.COLOR_MAIN + " " + Strings.SECONDS + "." + Strings.COLOR_RESET, 20, 200, 20);
-					t.setTarget(mat);
-					t.clearFound();
+
 				}
 		    	for(Player pl : getSpectators()) {
 		    		pl.sendTitle(Strings.COLOR_MAIN + Strings.STARTING_ROUND + Strings.COLOR_RESET, null, TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);

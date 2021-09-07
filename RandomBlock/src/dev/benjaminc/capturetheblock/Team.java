@@ -36,23 +36,25 @@ public class Team {
 	}
 	
 	public void updateTimeBars(Timer timer, String titleprefix) {
-		String got_str = "";
-		int gotnum = 0;
-		for(Player p : peoples) {
-			if(foundBlock.get(p.getUniqueId()) == true) {
-				gotnum++;
+		if(timer != null) {
+			String got_str = "";
+			int gotnum = 0;
+			for(Player p : peoples) {
+				if(foundBlock.get(p.getUniqueId()) == true) {
+					gotnum++;
+				}
 			}
+			if(gotnum == 0) {
+				got_str += Strings.COLOR_MISSED;
+			} else if(gotnum < peoples.size()) {
+				got_str += Strings.COLOR_SOME_GOT;
+			} else {
+				got_str += Strings.COLOR_GOT;
+			}
+			got_str += gotnum + "/" + peoples.size();
+			timer.setTitle(Strings.COLOR_MAIN + titleprefix + Strings.COLOR_MISSED + target + " " + got_str + Strings.COLOR_MAIN, name);
+			timer.setTitle(Strings.COLOR_MAIN + titleprefix + ((gotnum == peoples.size()) ? Strings.COLOR_GOT : Strings.COLOR_SOME_GOT) + target + " " + got_str + Strings.COLOR_MAIN, name + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
 		}
-		if(gotnum == 0) {
-			got_str += Strings.COLOR_MISSED;
-		} else if(gotnum < peoples.size()) {
-			got_str += Strings.COLOR_SOME_GOT;
-		} else {
-			got_str += Strings.COLOR_GOT;
-		}
-		got_str += gotnum + "/" + peoples.size();
-		timer.setTitle(Strings.COLOR_MAIN + titleprefix + Strings.COLOR_MISSED + target + " " + got_str + Strings.COLOR_MAIN, name);
-		timer.setTitle(Strings.COLOR_MAIN + titleprefix + ((gotnum == peoples.size()) ? Strings.COLOR_GOT : Strings.COLOR_SOME_GOT) + target + " " + got_str + Strings.COLOR_MAIN, name + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
 	}
 	
 	public Material getTarget() {

@@ -37,6 +37,7 @@ public class Keys {
 	public static final String COMMAND_CTB_RELOADCONFIG = "reloadconfig";
 	public static final String COMMAND_CTB_BLOCKS = "blocks";
 	public static final String COMMAND_CTB_ALLBLOCKS = "listallblocksbutitisbig";
+	public static final String COMMAND_CTB_MOVEON = "moveon";
 	public static final String COMMAND_CTB_FINAL = "final";
 	public static final String COMMAND_CTB_ENDAT = "endat";
 	public static final String COMMAND_CTB_TOGGLEDEBUGMSG = "toggledebugmsg";
@@ -48,6 +49,7 @@ public class Keys {
 		public static final String COMMAND_CTB_TEAM_LEAVE = "leave";
 		public static final String COMMAND_CTB_TEAM_CLEAR = "clear";
 		public static final String COMMAND_CTB_TEAM_ADDALL = "addall";
+		public static final String COMMAND_CTB_TEAM_SKIP = "skip";
 		public static final String COMMAND_CTB_TEAM_SCORE = "score";
 			public static final String COMMAND_CTB_TEAM_SCORE_ADD = "add";
 			public static final String COMMAND_CTB_TEAM_SCORE_REMOVE = "remove";

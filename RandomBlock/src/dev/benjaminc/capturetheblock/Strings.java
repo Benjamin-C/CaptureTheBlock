@@ -30,6 +30,8 @@ public class Strings {
 	
 	public static final String FINAL_ROUND = "Final Round!";
 	
+	public static final String SKIPPING_BLOCK = "This block has been skipped";
+	
 	public static final String NO_SETS_USING_DEFAULT = "No sets were selected, so I'm using the default set.";
 	public static final String NO_SETS_NO_DEFAULT = "No sets were selected, and no default set is present. At least 1 set must be selected to play the game.";
 	public static final String NO_TEAMS = "There must be at least 1 team to begin";

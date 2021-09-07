@@ -43,6 +43,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_FINAL);
 				possible.add(Keys.COMMAND_CTB_ENDAT);
 				possible.add(Keys.COMMAND_CTB_TOGGLEDEBUGMSG);
+				possible.add(Keys.COMMAND_CTB_MOVEON);
 			}
 			options = getPossibleCompletes(possible, args[0]);
 		} break;
@@ -58,6 +59,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 					possible.add(Keys.COMMAND_CTB_TEAM_CLEAR);
 					possible.add(Keys.COMMAND_CTB_TEAM_SCORE);
 					possible.add(Keys.COMMAND_CTB_TEAM_ADDALL);
+					possible.add(Keys.COMMAND_CTB_TEAM_SKIP);
 				}
 			} break;
 			case Keys.COMMAND_CTB_SET: {
@@ -91,6 +93,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				case Keys.COMMAND_CTB_TEAM_LEAVE: {
 					possible.addAll(getAllPlayers());
 				} break;
+				case Keys.COMMAND_CTB_TEAM_SKIP:
 				case Keys.COMMAND_CTB_TEAM_LIST: {
 					if(isAdmin) {
 						possible.addAll(plugin.getAllTeams().keySet());

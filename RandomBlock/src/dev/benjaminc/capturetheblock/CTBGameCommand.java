@@ -216,6 +216,15 @@ public class CTBGameCommand implements CommandExecutor {
 				}
 				case Keys.COMMAND_CTB_ALLBLOCKS: {
 					sender.sendMessage(plugin.listAllBlocks());
+					return true;
+				}
+				case Keys.COMMAND_CTB_MOVEON: {
+					if(plugin.isRunning()) {
+						plugin.startRound();
+					} else {
+						sender.sendMessage("You can only move to the next round if the game is running");
+					}
+					return true;
 				}
 				case Keys.COMMAND_CTB_TEAM: {
 					if(args.length >= 2) {
@@ -244,6 +253,41 @@ public class CTBGameCommand implements CommandExecutor {
 								return true;
 							} else {
 								sender.sendMessage("Please specify a team name to remove");
+							}
+						} break;
+						case Keys.COMMAND_CTB_TEAM_SKIP: {
+
+							Team toSkip = null;
+
+							switch(args.length) {
+							case 2: {
+								if(sender instanceof Player) {
+									toSkip = plugin.findTeam((Player) sender);
+								} else {
+									sender.sendMessage("Please specify a team name to skip");
+								}
+							} break;
+							case 3: {
+								String teamname = args[2];
+								if(plugin.getAllTeams().containsKey(teamname)) {
+									toSkip = plugin.getAllTeams().get(teamname);
+								} else {
+									sender.sendMessage("Please specify a team name to skip");
+								}
+							} break;
+							default: {
+								sender.sendMessage("Error, wrong number of args, expected " );
+							} break;
+							}
+							
+							if(toSkip != null) {
+								if(!toSkip.hasEveryoneFound()) {
+									plugin.regenTeamTargetBlock(toSkip);
+								} else {
+									sender.sendMessage("Can't skip once you've all found your block, just wait for your next block.");
+								}
+							} else {
+								sender.sendMessage("toSkip was null");
 							}
 						} break;
 						case Keys.COMMAND_CTB_TEAM_SCORE: {
