@@ -1,0 +1,25 @@
+name: CaptureTheBlock
+main: dev.benjaminc.capturetheblock.CTBMain
+version: 3.0-SNAPSHOT6
+api-version: 1.20
+depend: [PeterTimer]
+commands:
+  randomblock:
+    description: Tells everyone a random block
+    usage: /randomblock
+  capturetheblock:
+    description: Controls the capturetheblock game
+    usage: /capturetheblock <start|end>
+    aliases: [ctb]
+permissions:
+  capturetheblock.*:
+    description: Gives access to all CTB features
+    children:
+      nametaghider.control: true
+      nametaghider.spectate: false
+  capturetheblock.control:
+    description: Allows players to control the CTB game
+    default: op
+  capturetheblock.spectate:
+    description: Allows players to spectate the CTB gamet
+    default: not op
