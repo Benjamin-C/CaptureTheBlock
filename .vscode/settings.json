@@ -1,3 +1,5 @@
 {
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "cSpell.showAutocompleteSuggestions": true,
+    "cSpell.suggestionMenuType": "quickFix"
 }

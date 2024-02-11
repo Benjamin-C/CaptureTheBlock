@@ -1,5 +1,5 @@
 name: CaptureTheBlock
-main: dev.benjaminc.capturetheblock.CTBMain
+main: dev.orangeben.capturetheblock.CTBMain
 version: 3.0-SNAPSHOT6
 api-version: 1.20
 depend: [PeterTimer]

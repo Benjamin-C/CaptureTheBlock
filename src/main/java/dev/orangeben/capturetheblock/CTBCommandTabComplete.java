@@ -44,6 +44,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_ENDAT);
 				possible.add(Keys.COMMAND_CTB_TOGGLEDEBUGMSG);
 				possible.add(Keys.COMMAND_CTB_MOVEON);
+                possible.add(Keys.COMMAND_CTB_MARK);
 			}
 			options = getPossibleCompletes(possible, args[0]);
 		} break;
@@ -66,7 +67,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_SET);
 				possible.add(Keys.COMMAND_CTB_SET_ADD);
 				possible.add(Keys.COMMAND_CTB_SET_REMOVE);
-				possible.add(Keys.COMMAND_CTB_SET_LIST );
+				possible.add(Keys.COMMAND_CTB_SET_LIST);
 				possible.add(Keys.COMMAND_CTB_SET_LISTALL);
 				possible.add(Keys.COMMAND_CTB_SET_CLEAR);
 			} break;
@@ -77,6 +78,10 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add("10:00");
 				possible.add("null");
 			} break;
+            case Keys.COMMAND_CTB_MARK: {
+                possible.add(Keys.COMMAND_CTB_MARK_PLAYER);
+                possible.add(Keys.COMMAND_CTB_MARK_TEAM);
+            }
 			}
 			options = getPossibleCompletes(possible, args[1]);
 		} break;
@@ -115,7 +120,21 @@ public class CTBCommandTabComplete implements TabCompleter {
 				} break;
 				}
 				options = getPossibleCompletes(possible, args[2]);
-			}
+			} break;
+            case Keys.COMMAND_CTB_MARK: {
+                switch(args[1]) {
+                case Keys.COMMAND_CTB_MARK_PLAYER: {
+                    for(Team t : plugin.getAllTeams().values()) {
+                        possible.addAll(t.getAllPeoples().values());
+                    }
+                    options = getPossibleCompletes(possible, args[2]);
+                } break;
+                case Keys.COMMAND_CTB_MARK_TEAM: {
+                    possible.addAll(plugin.getAllTeams().keySet());
+                    options = getPossibleCompletes(possible, args[2]);
+                } break;
+                }
+            }
 			}
 		} break;
 		case 4: {
@@ -132,6 +151,10 @@ public class CTBCommandTabComplete implements TabCompleter {
 				} break;
 				}
 			} break;
+            case Keys.COMMAND_CTB_MARK: {
+                possible.add(Keys.COMMAND_CTB_MARK_FOUND);
+                possible.add(Keys.COMMAND_CTB_MARK_NOTFOUND);
+            } break;
 			}
 			options = getPossibleCompletes(possible, args[3]);
 		}

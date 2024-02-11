@@ -7,9 +7,11 @@ public class Strings {
 	public static final String FIND_YOUR_BLOCK = "Find your block!";
 	
 	public static final String YOU_FOUND_BLOCK = "You found your block!";
+	public static final String YOU_LOST_BLOCK = "You lost your block!";
 	public static final String THEY_HAS = "has";
 	public static final String THEY_ALL = "all";
 	public static final String THEY_FOUND_BLOCK = "found their block!";
+	public static final String THEY_LOST_BLOCK = "lost their block!";
 	
 	public static final String GAME_BEGUN = "Capture The Block has begun!";
 	public static final String GAME_INFO = "Find the specified block and stand on/in it within 5 minutes to get the point!";

@@ -6,7 +6,7 @@
 
   <groupId>dev.orangeben.capturetheblock</groupId>
   <artifactId>CaptureTheBlock</artifactId>
-  <version>3.1</version>
+  <version>3.2</version>
 
   <name>capturetheblock</name>
   <!-- FIXME change it to the project's website -->
@@ -29,7 +29,7 @@
 	<dependency>
 	  <groupId>junit</groupId>
 	  <artifactId>junit</artifactId>
-	  <version>4.11</version>
+	  <version>4.13.1</version>
 	  <scope>test</scope>
 	</dependency>
 	<dependency>
@@ -54,7 +54,8 @@
 	  <resource>
 		<directory>${project.basedir}/src/main/resources</directory>
 		<includes>
-		  <include>plugin.yml</include>
+		  <!-- <include>plugin.yml</include> -->
+		  <include>*</include>
 		</includes>
 	  </resource>
       <resource>

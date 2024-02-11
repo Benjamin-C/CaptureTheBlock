@@ -10,15 +10,15 @@ import org.bukkit.Material;
 
 public class BlockSet {
 	
-	// TODO allow removing of blocks
+	/** The plugin this list is working in */
+    private CTBMain plugin;
 	
-	private CTBMain plugin;
-	
+    /** The name of the list */
 	private String name;
+    /** The list of all blocks that are on this list */
 	private List<Material> addBlocks;
-//	private List<Material> removeBlocks;
+    /** The lists that should also be included in this list */
 	private List<String> addSet;
-//	private List<BlockSet> removeSet;
 	
 	public BlockSet(CTBMain plugin, String name, List<Material> addBlocks, List<String> addSet) {
 		super();
@@ -35,52 +35,78 @@ public class BlockSet {
 			this.addSet = addSet;
 		}
 		
-//		this.remove = remove;
 	}
 
+    /**
+     * Gets the name of the set
+     * @return the name of the set
+     */
 	public String getName() {
 		return name;
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
+    /**
+     * Gets the blocks added directly to this set. Does not include blocks added only though other sets
+     * @return The list of blocks
+     */
 	public List<Material> getBlocks() {
 		return addBlocks;
 	}
 
-	public void setBlocks(List<Material> blocks) {
-		this.addBlocks = blocks;
-	}
-
+    /**
+     * Gets the sets that are included with this set
+     * @return the list of other sets
+     */
 	public List<String> getAdd() {
 		return addSet;
 	}
 
-	public void setAdd(List<String> add) {
-		this.addSet = add;
-	}
-
+    /**
+     * Adds a block to the list of included blocks
+     * @param m The material type of the block to add
+     */
 	public void addBlock(Material m) {
 		addBlocks.add(m);
 	}
 	
+    /**
+     * Adds another set to the list of sets to include
+     * @param set The name of the other set
+     */
 	public void addSet(String set) {
 		addSet.add(set);
 	}
-//	public List<BlockSet> getRemove() {
-//		return remove;
-//	}
 
-//	public void setRemove(List<BlockSet> remove) {
-//		this.remove = remove;
-//	}
+    /**
+     * Removes a block to the list of included blocks. The block might still be included through included sets.
+     * @param m The material type of the block to remove
+     */
+	public void removeBlock(Material m) {
+		addBlocks.remove(m);
+	}
+	
+    /**
+     * Removes a set from the list of included sets. Blocks from that set might still be included through other included sets or included blocks.
+     * Adds another set to the list of sets to include
+     * @param set The name of the other set
+     */
+	public void removeSet(String set) {
+		addSet.remove(set);
+	}
 
+    /**
+     * Gets all blocks from the included blocks and all included sets
+     * @return All the blocks
+     */
 	public List<Material> getAllBlocks() {
 		return getAllBlocks(null);
 	}
-	public List<Material> getAllBlocks(List<String> usedSets) {
+    /**
+     * Gets all blocks from the included sets. Does not add blocks from sets named in usedSets, assuming they are included from somewhere else.
+     * @param usedSets The list of previously used sets
+     * @return All the blocks except some that shouldn't be
+     */
+	private List<Material> getAllBlocks(List<String> usedSets) {
 		if(usedSets == null) {
 			usedSets = new ArrayList<String>();
 		}
@@ -99,16 +125,15 @@ public class BlockSet {
 					}
 				}
 			}
-//			if(remove != null) {
-//				for(BlockSet s : remove) {
-//					mat.removeAll(s.getAllBlocks(usedSets));
-//				}
-//			}
 		}
 		return new ArrayList<Material>(mat);
 	}
 	
-	@Override
+    /**
+     * Shows a string representation of the set
+     * @return The string representation
+     */
+    @Override
 	public String toString() {
 		String s = ChatColor.RED + name + ChatColor.RESET + "\n";
 		for(String st : addSet) {
