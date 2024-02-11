@@ -631,6 +631,7 @@ public class CTBMain extends JavaPlugin {
     protected void resetScores() {
     	for(Team t : teams.values()) {
     		t.setScore(0);
+            t.setRoundCount(0);
     	}
     }
     

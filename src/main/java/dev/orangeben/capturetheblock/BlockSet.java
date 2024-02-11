@@ -130,7 +130,7 @@ public class BlockSet {
 	}
 	
     /**
-     * Shows a string representation of the set
+     * Shows a string representation of the set including all direct blocks and subsets
      * @return The string representation
      */
     @Override

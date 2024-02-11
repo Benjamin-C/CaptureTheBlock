@@ -46,6 +46,7 @@ public class CTBGameCommand implements CommandExecutor {
 				if(args.length >= 2) {
 					switch(args[1]) {
 					case Keys.COMMAND_CTB_TEAM_JOIN: {
+                        // PUT SOMEONE ON A TEAM
 						if(args.length >= 3) {
 							if(args.length >= 4 && isAdmin) { // If a player was specified
 								Player pl = Bukkit.getPlayer(args[3]);
@@ -77,7 +78,7 @@ public class CTBGameCommand implements CommandExecutor {
 						return true;
 					}
 					case Keys.COMMAND_CTB_TEAM_LEAVE: {
-						// KICK SOMEONE ELSE OFF TEAM HERE
+						// KICK SOMEONE OFF TEAM
 						if(args.length >= 3 && isAdmin) { // If a player was specified
 							Player pl = Bukkit.getPlayer(args[2]);
 							if(pl != null) {
@@ -105,6 +106,7 @@ public class CTBGameCommand implements CommandExecutor {
 						return true;
 					}
 					case Keys.COMMAND_CTB_TEAM_LIST: {
+                        // LIST TEAMS AND PLAYERS
 						List<Team> ts = new ArrayList<Team>();
 						if(isAdmin) {
 							if(args.length >= 3) {
@@ -153,44 +155,22 @@ public class CTBGameCommand implements CommandExecutor {
 			if(isAdmin) {
 				switch(args[0]) {
 				case Keys.COMMAND_CTB_START: {
+                    // STARTS THE GAME
 					plugin.startGame();
 					return true;
 				}
-				case Keys.COMMAND_CTB_ENDALT:
 				case Keys.COMMAND_CTB_END: {
+                    // ENDS THE GAME
 					plugin.endGame();
 					return true;
 				}
-				case Keys.COMMAND_CTB_TOGGLEDEBUGMSG: {
-					plugin.setDebugMsgVisable(!plugin.getDebugMsgVisable());
-					sender.sendMessage("Debug messages are " + ((plugin.getDebugMsgVisable()) ? "now" : "no longer") + " visable");
-					return true;
-				}
-				case Keys.COMMAND_CTB_FINAL: {
-					if(args.length >= 2) {
-						try {
-							int left = Integer.parseInt(args[1]);
-							if(left >= -1) {
-								plugin.setRoundsLeft(left);
-								sender.sendMessage("Ending after " + args[1] + " more rounds");
-							} else {
-								sender.sendMessage(args[1] + " is not a valid number of rounds. Number must be >= -1");
-							}
-							
-						} catch(NumberFormatException e) {
-							sender.sendMessage(args[1] + " is not a valid number of rounds");
-						}
-					} else {
-						sender.sendMessage("Please specify a number of rounds");
-					}
-					return true;
-				}
-				case Keys.COMMAND_CTB_ENDAT: {
+                case Keys.COMMAND_CTB_ENDAT: {
+                    // ENDS THE GAME AT A TIME
 					if(args.length >= 2) {
 						if(args.length > 2 && args[1].charAt(1) == ':') {
 							args[1] = "0" + args[1];
 						}
-						if(args[1].equals("null")) {
+						if(args[1].equals(Keys.COMMAND_CTB_ENDAT_NEVER)) {
 							plugin.setEndTime(null);
 							sender.sendMessage("End at time disabled");
 						} else {
@@ -215,24 +195,49 @@ public class CTBGameCommand implements CommandExecutor {
 					}
 					return true;
 				}
+				case Keys.COMMAND_CTB_FINAL: {
+                    // SETS THE NUMBER OF REMAINING ROUNDS
+					if(args.length >= 2) {
+						try {
+							int left = Integer.parseInt(args[1]);
+							if(left >= -1) {
+								plugin.setRoundsLeft(left);
+								sender.sendMessage("Ending after " + args[1] + " more rounds");
+							} else {
+								sender.sendMessage(args[1] + " is not a valid number of rounds. Number must be >= -1");
+							}
+							
+						} catch(NumberFormatException e) {
+							sender.sendMessage(args[1] + " is not a valid number of rounds");
+						}
+					} else {
+						sender.sendMessage("Please specify a number of rounds");
+					}
+					return true;
+				}
 				case Keys.COMMAND_CTB_RESET: {
+                    // RESETS GAME
 					plugin.endGame();
 					plugin.resetScores();
 					return true;
 				}
 				case Keys.COMMAND_CTB_RELOADCONFIG: {
+                    // RELOADS CTB CONFIG
 					plugin.reloadMyConfig();
 					sender.sendMessage("Config reloaded. The game changes will take effect next new block.");
 				} return true;
 				case Keys.COMMAND_CTB_BLOCKS: {
+                    // SHOWS THE BLOCKS TEAMS ARE GOING FOR
 					sender.sendMessage(plugin.showScoresStr(true));
 					return true;
 				}
 				case Keys.COMMAND_CTB_ALLBLOCKS: {
+                    // LISTS ALL BLOCKS AND SETS AVAILABLE
 					sender.sendMessage(plugin.listAllBlocks());
 					return true;
 				}
 				case Keys.COMMAND_CTB_MOVEON: {
+                    // GO TO THE NEXT ROUND
 					if(plugin.isRunning()) {
 						plugin.startRound();
 					} else {
@@ -241,9 +246,11 @@ public class CTBGameCommand implements CommandExecutor {
 					return true;
 				}
 				case Keys.COMMAND_CTB_TEAM: {
+                    // TEAM CONTROLS
 					if(args.length >= 2) {
 						switch(args[1]) {
 						case Keys.COMMAND_CTB_TEAM_ADD: {
+                            // ADD A NEW TEAM
 							if(args.length >= 3) {
 								plugin.addTeam(args[2]);
 								sender.sendMessage("Team " + args[2] + " has been added");
@@ -252,6 +259,7 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 						} break;
 						case Keys.COMMAND_CTB_TEAM_REMOVE: {
+                            // REMOVE AN EXISTING TEAM
 							if(args.length >= 3) {
 								plugin.removeTeam(args[2]);
 								sender.sendMessage("Team " + args[2] + " has been removed");
@@ -261,16 +269,17 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 						} break;
 						case Keys.COMMAND_CTB_TEAM_CLEAR: {
+                            // REMOVE ALL PLAYERS FROM A TEAM
 							if(args.length >= 3) {
 								plugin.clearTeam(args[2]);
-								sender.sendMessage("Team " + args[2] + " has been removed");
+								sender.sendMessage("Team " + args[2] + " has been cleared");
 								return true;
 							} else {
 								sender.sendMessage("Please specify a team name to remove");
 							}
 						} break;
 						case Keys.COMMAND_CTB_TEAM_SKIP: {
-
+                            // SKIPS A TEAM'S BLOCK AND GIVES THEM A NEW ONE
 							Team toSkip = null;
 
 							switch(args.length) {
@@ -290,7 +299,7 @@ public class CTBGameCommand implements CommandExecutor {
 								}
 							} break;
 							default: {
-								sender.sendMessage("Error, wrong number of args, expected " );
+								sender.sendMessage("Error, wrong number of args, expected 2 or 3" );
 							} break;
 							}
 							
@@ -305,6 +314,7 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 						} break;
 						case Keys.COMMAND_CTB_TEAM_SCORE: {
+                            // SCORE CONTROLS
 							switch(args.length) {
                             case 2: {
                                 sender.sendMessage("Please specify an action");
@@ -339,6 +349,7 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 						} break;
 						case Keys.COMMAND_CTB_TEAM_ADDALL: {
+                            // PUT EVERYONE ON THEIR OWN TEAM
 							for(Player p : Bukkit.getOnlinePlayers()) {
 								Collection<Player> specs = plugin.getSpectators();
 								if(!specs.contains(p) && plugin.findTeam(p.getUniqueId()) == null) {
@@ -463,6 +474,11 @@ public class CTBGameCommand implements CommandExecutor {
                     }
                     return true;
                 }
+				case Keys.COMMAND_CTB_TOGGLEDEBUGMSG: {
+					plugin.setDebugMsgVisable(!plugin.getDebugMsgVisable());
+					sender.sendMessage("Debug messages are " + ((plugin.getDebugMsgVisable()) ? "now" : "no longer") + " visable");
+					return true;
+				}
 				}
 
 			}

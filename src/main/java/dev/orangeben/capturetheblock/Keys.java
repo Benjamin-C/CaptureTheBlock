@@ -32,15 +32,14 @@ public class Keys {
 	public static final String COMMAND_CTB_SCORE = "score";
 	public static final String COMMAND_CTB_START = "start";
 	public static final String COMMAND_CTB_END = "end";
-	public static final String COMMAND_CTB_ENDALT = "stop";
+	public static final String COMMAND_CTB_ENDAT = "endat";
+        public static final String COMMAND_CTB_ENDAT_NEVER = "never";
 	public static final String COMMAND_CTB_RESET = "reset";
-	public static final String COMMAND_CTB_RELOADBLOCKS = "reloadblocks";
 	public static final String COMMAND_CTB_RELOADCONFIG = "reloadconfig";
 	public static final String COMMAND_CTB_BLOCKS = "blocks";
 	public static final String COMMAND_CTB_ALLBLOCKS = "listallblocksbutitisbig";
 	public static final String COMMAND_CTB_MOVEON = "moveon";
 	public static final String COMMAND_CTB_FINAL = "final";
-	public static final String COMMAND_CTB_ENDAT = "endat";
 	public static final String COMMAND_CTB_TOGGLEDEBUGMSG = "toggledebugmsg";
 	public static final String COMMAND_CTB_TEAM = "team";
 		public static final String COMMAND_CTB_TEAM_LIST = "list";
