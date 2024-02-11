@@ -308,7 +308,7 @@ public class CTBMain extends JavaPlugin {
      * @param t the team of that player
      */
     protected void unfoundBlock(Player pl, Team t) {
-        if(t.hasFound(pl)) {
+        if(t.hasFound(pl.getUniqueId())) {
             pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_LOST_BLOCK + Strings.COLOR_RESET);
             sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_LOST_BLOCK + Strings.COLOR_RESET);
             if(t.hasScored()) {
@@ -328,7 +328,7 @@ public class CTBMain extends JavaPlugin {
      * @param p	the {@link Player} who found their block
      */
     protected void foundBlock(Player pl, Team t) {
-    	if(!t.hasFound(pl)) {
+    	if(!t.hasFound(pl.getUniqueId())) {
             pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_FOUND_BLOCK + Strings.COLOR_RESET);
             sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_FOUND_BLOCK + Strings.COLOR_RESET);
             t.setFound(pl.getUniqueId(), true);
