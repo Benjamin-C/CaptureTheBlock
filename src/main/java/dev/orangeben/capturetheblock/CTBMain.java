@@ -216,7 +216,7 @@ public class CTBMain extends JavaPlugin {
 	public void updatePossibleBlocks() {
 		activeBlocks.clear();
 		for(String s : enabledSets) {
-			activeBlocks.addAll(allSets.get(s).getAllBlocks(null));
+			activeBlocks.addAll(allSets.get(s).getAllBlocks());
 		}
 	}
 	/**
