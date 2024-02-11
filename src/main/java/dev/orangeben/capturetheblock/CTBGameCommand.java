@@ -306,6 +306,9 @@ public class CTBGameCommand implements CommandExecutor {
 						} break;
 						case Keys.COMMAND_CTB_TEAM_SCORE: {
 							switch(args.length) {
+                            case 2: {
+                                sender.sendMessage("Please specify an action");
+                            } break;
 							case 3: {
 								sender.sendMessage("Please specify a team name to remove");
 							} break;

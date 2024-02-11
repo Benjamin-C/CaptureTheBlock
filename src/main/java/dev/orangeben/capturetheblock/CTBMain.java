@@ -470,7 +470,7 @@ public class CTBMain extends JavaPlugin {
 		    		}
 		    	});
 
-		    	gameTimer = new Timer(roundtime*TPS, Strings.FIND_YOUR_BLOCK + " ", clbk, false, this);
+		    	gameTimer = new Timer(roundtime*TPS, Strings.FIND_YOUR_BLOCK + " ", clbk, this);
 				
 //		    	gameTimer.addAllPlayers();
 		    	
