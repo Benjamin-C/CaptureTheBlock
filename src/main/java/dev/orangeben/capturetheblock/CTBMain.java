@@ -18,10 +18,6 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-//import org.bukkit.scoreboard.DisplaySlot;
-//import org.bukkit.scoreboard.Score;
-//import org.bukkit.scoreboard.Scoreboard;
-//import org.bukkit.scoreboard.ScoreboardManager;
 
 import net.md_5.bungee.api.ChatColor;
 import peterTimer.TimeRunnable;
@@ -31,7 +27,7 @@ import peterTimer.Timer;
 // TODO change title bar wording after you find block
 public class CTBMain extends JavaPlugin {
 	
-	// Me, for use in runnables
+    /** Me, for use in runnables */
 	CTBMain me = this;
 	
 	// CONFIGURED VALUES
@@ -61,9 +57,12 @@ public class CTBMain extends JavaPlugin {
 	/** the {@link Random} used for random numbers */
 	private Random rand;
 	
-	private int roundsLeft = -1;
+	/** The number of rounds left in the game after the current round. -1 to disable */
+    private int roundsLeft = -1;
+    /** The time at which the current round will be the final round */
 	private LocalDateTime endTime = null;
 	
+    /** Prefix for timer titles */
 	private String titlePrefix = "";
 	
 //	/** The {@link ScoreboardManager} to manage the scoreboards */
@@ -71,27 +70,44 @@ public class CTBMain extends JavaPlugin {
 //	/** The {@link Scoreboard} that the game score is stored on */
 //	private Scoreboard board;
 	
+    /** If the game is running */
 	private boolean running = false;
 	
+    /** ISO date time formatter */
 	public static DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 	
+    /** Should the plugin show more debug messages */
 	private boolean debugmsgvisable = true;
 	
+    /** The time title messages will fade in for in ticks */
 	private static final int TITLE_FADEIN = 10;
+    /** The time title messages will stay for in ticks */
 	private static final int TITLE_HOLD = 100;
+    /** The time title messages will fade out for in ticks */
 	private static final int TITLE_FADEOUT = 10;
 	
+    /**
+     * Sets weather or not debug messages should be shown
+     * @param visable New state
+     */
 	public void setDebugMsgVisable(boolean visable) {
 		debugmsgvisable = visable;
 	}
 	
+    /** Gets wether or not debug messages are shown */
 	public boolean getDebugMsgVisable() {
 		return debugmsgvisable;
 	}
+
+    /**
+     * If the game is currently running
+     * @return the current running status of the game
+     */
 	public boolean isRunning() {
 		return running;
 	}
 	
+    /** Plugin configuration file */
 	private FileConfiguration cfg = this.getConfig();
 	// Fired when plugin is first enabled
 	
@@ -125,11 +141,17 @@ public class CTBMain extends JavaPlugin {
     	sendDebugMessage("I_WANT_A_MELLON");
 	}
 	
+    /**
+     * Gets all sets available to the game
+     * @return all the sets available
+     */
 	public Map<String, BlockSet> getAllSets() {
 		return allSets;
 	}
 	
-	// TODO add javadoc
+	/**
+     * Loads all block sets from their files
+     */
 	public void loadAllBlocks() {
 		allSets = new HashMap<String, BlockSet>();
     	File folder = getDataFolder();
@@ -158,7 +180,11 @@ public class CTBMain extends JavaPlugin {
     	}
 	}
     
-	// TODO add javadoc
+	/**
+     * Enables a block set in the game
+     * @param name the name of the set
+     * @return if the set existed
+     */
 	public boolean enableSet(String name) {
 		if(allSets.containsKey(name)) {
 			if(!enabledSets.contains(name)) {
@@ -170,8 +196,12 @@ public class CTBMain extends JavaPlugin {
 			return false;
 		}
 	}
-	// TODO add javadoc
-	public boolean disableSet(String name) {
+	/**
+     * Disables a block set in the game
+     * @param name the name of the set
+     * @return if the set existed
+     */
+    public boolean disableSet(String name) {
 		if(enabledSets.contains(name)) {
 			enabledSets.remove(name);
 			updatePossibleBlocks();
@@ -180,18 +210,26 @@ public class CTBMain extends JavaPlugin {
 			return false;
 		}
 	}
-	// TODO add javadoc
+    /**
+     * Updates the list of all possible blocks based on the currently enabled sets
+     */
 	public void updatePossibleBlocks() {
 		activeBlocks.clear();
 		for(String s : enabledSets) {
 			activeBlocks.addAll(allSets.get(s).getAllBlocks(null));
 		}
 	}
-	// TODO add javadoc
+	/**
+     * Gets the list of all enabled sets
+     * @return The list of all enabled sets
+     */
 	public List<String> getEnabledSets() {
 		return enabledSets;
 	}
-	// TODO add javadoc
+	/**
+     * Gets the list of all sets not currently enabled
+     * @return The list of disabled sets
+     */
 	public List<String> getDisabledSets() {
 		List<String> setstrs = new ArrayList<String>();
 		for(String s : allSets.keySet()) {
@@ -202,8 +240,10 @@ public class CTBMain extends JavaPlugin {
 		return setstrs;
 	}
 
-	// TODO add javadoc
-	public void clearSets() {
+	/**
+     * Disable all sets
+     */
+    public void clearSets() {
 		allSets.clear();
 	}
 	
@@ -226,20 +266,10 @@ public class CTBMain extends JavaPlugin {
     	
     	loadMyConfig();
 
-//    	sbm = Bukkit.getScoreboardManager();
-//    	board = sbm.getMainScoreboard();
-
-//    	assignedBlock = new HashMap<UUID, Material>();
-//    	foundBlock = new HashMap<UUID, Boolean>();
     	getServer().getPluginManager().registerEvents(new CTBEvent(this), this);
     	getCommand(Keys.COMMAND_RANDOM_BLOCK_NAME).setExecutor(new RandomBlockCommand(this));
     	getCommand(Keys.COMMAND_CTB_NAME).setExecutor(new CTBGameCommand(this));
     	getCommand(Keys.COMMAND_CTB_NAME).setTabCompleter(new CTBCommandTabComplete(this));
-    	
-//    	if(board.getObjective(Keys.SCORE_NAME) == null) {
-//    		board.registerNewObjective(Keys.SCORE_NAME, "dummy", Keys.SCORE_NAME);
-//    	}
-//    	board.getObjective(Keys.SCORE_NAME).setDisplaySlot(DisplaySlot.PLAYER_LIST);
     }
     
     /*
@@ -247,7 +277,6 @@ public class CTBMain extends JavaPlugin {
      */
     @Override
     public void onDisable() {
-//    	board.clearSlot(DisplaySlot.PLAYER_LIST);
     	saveAllTeams();
     	if(gameTimer != null) {
     		gameTimer.stop();
@@ -273,16 +302,15 @@ public class CTBMain extends JavaPlugin {
     	}
     }
 
+    /**
+     * Marks that a player has lost their block and sends the message
+     * @param p	the {@link Player} who lost their block
+     * @param t the team of that player
+     */
     protected void unfoundBlock(Player pl, Team t) {
-        unfoundBlock(pl, t, false);
-    }
-
-    protected void unfoundBlock(Player pl, Team t, boolean quiet) {
         if(t.hasFound(pl)) {
-            if(!quiet) {
-                pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_LOST_BLOCK + Strings.COLOR_RESET);
-                sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_LOST_BLOCK + Strings.COLOR_RESET);
-            }
+            pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_LOST_BLOCK + Strings.COLOR_RESET);
+            sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_LOST_BLOCK + Strings.COLOR_RESET);
             if(t.hasScored()) {
                 t.addScore(-1);
 	    		sendAllMsg(Strings.COLOR_MAIN + t.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_ALL + " " + Strings.THEY_LOST_BLOCK + Strings.COLOR_RESET);
@@ -294,21 +322,16 @@ public class CTBMain extends JavaPlugin {
     	}
     }
 
-    protected void foundBlock(Player pl, Team t) {
-        foundBlock(pl, t, false);
-    }
     /**
      * Marks that a player found their block and sends the message
      * Also starts the next round if everyone has found their block
      * @param p	the {@link Player} who found their block
      */
-    protected void foundBlock(Player pl, Team t, boolean quiet) {
+    protected void foundBlock(Player pl, Team t) {
     	if(!t.hasFound(pl)) {
-            if(!quiet) {
-                pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_FOUND_BLOCK + Strings.COLOR_RESET);
-                sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_FOUND_BLOCK + Strings.COLOR_RESET);
-            }
-	    	t.setFound(pl.getUniqueId(), true);
+            pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_FOUND_BLOCK + Strings.COLOR_RESET);
+            sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_FOUND_BLOCK + Strings.COLOR_RESET);
+            t.setFound(pl.getUniqueId(), true);
 	    	t.updateTimeBars(gameTimer, titlePrefix);
 	    	gameTimer.removePlayer(pl, t.getName());
 	    	gameTimer.addPlayer(pl, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
@@ -326,14 +349,6 @@ public class CTBMain extends JavaPlugin {
     	}
     }
     
-    /**
-     * Finds the team that a {@link Player} is on
-     * @param p the {@link Player} to find
-     * @return the {@link Team} they are on
-     */
-    protected Team findTeam(Player p) {
-    	return findTeam(p.getUniqueId());
-    }
     /**
      * Finds the team that a {@link Player} is on by their {@link UUID}
      * @param u the {@link UUID} of the {@link Player} to find
@@ -385,6 +400,10 @@ public class CTBMain extends JavaPlugin {
 		startRound();
     }
     
+    /**
+     * Generates a new block for a team
+     * @param t the team to regen for
+     */
     protected void regenTeamTargetBlock(Team t) {
     	Material mat = getRandomBlock();
 		t.sendMessage(Strings.COLOR_MAIN + Strings.NOW_STAND_ON + " " + Strings.COLOR_ACCENT + mat.name() + Strings.COLOR_RESET);
@@ -412,15 +431,11 @@ public class CTBMain extends JavaPlugin {
 	    	showScores(true);
 	    	boolean cont = false;
 	    	if(endTime != null) {
-//		    		sendAdminMessage("Continuing until time " + endTime.format(formatter));
-//		    		sendAdminMessage("How long? " + endTime.until(LocalDateTime.now(), ChronoUnit.SECONDS));
-//		    		sendAdminMessage("Is before? " + endTime.isBefore(LocalDateTime.now()));
 	    		cont = true;
 	    		if(endTime.isBefore(LocalDateTime.now())) {
 	    			endTime = null;
 	    		}
 	    	} else if(roundsLeft != 0) {
-//		    		sendAdminMessage("Continuing for " + roundsLeft);
 		    	if(roundsLeft != -1) {
 		    		roundsLeft--;
 		    	}
@@ -516,23 +531,39 @@ public class CTBMain extends JavaPlugin {
     	showScores(true);
 	}
     
+    /**
+     * Sends the message telling all players that it is the final round
+     */
     private void msgFinalRound() {
     	for(Team t : teams.values()) {
 			t.sendTitle(Strings.COLOR_MAIN + Strings.FINAL_ROUND + Strings.COLOR_RESET, "", TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
 		}
     }
+    /**
+     * Sets the number of rounds left after this round
+     * @param num the number of rounds
+     */
     public void setRoundsLeft(int num) {
     	roundsLeft = num;
     	if(roundsLeft == 0 && running) {
     		msgFinalRound();
     	}
     }
+    /**
+     * Gets the number of rounds left after the current round
+     * @return The number of rounds left
+     */
     public int getRoundsLeft() {
     	return roundsLeft;
     }
+    /**
+     * Sets the time for the game to end at. The game will end at the first round end after this time 
+     * @param end The game end time
+     */
     public void setEndTime(LocalDateTime end) {
     	endTime = end;
     }
+
 	// -----------------------------------------------
 	// SCORE
 	// -----------------------------------------------
@@ -554,13 +585,6 @@ public class CTBMain extends JavaPlugin {
     		String scstr = (t.hasEveryoneFound() ? Strings.COLOR_GOT : Strings.COLOR_MISSED) + "" + sc + "-" + name + ((showBlocks) ? ": " + ((t.getTarget() != null) ? t.getTarget().name() : Strings.NOTHING) : "") + Strings.COLOR_RESET;
     		msgmap.put(name, scstr);
     	}
-    	
-    	// Add some fake scores for testing
-//    	for(int i = 0; i < 3; i++) {
-//    		UUID u = UUID.randomUUID();
-//    		scoremap.put(u, i+3);
-//    		msgmap.put(u, cc + "FakePlayer" + (i+3) + cr);
-//    	}
     	
     	Object uuids[] = scoremap.keySet().toArray();
     	boolean sorted = false;
@@ -632,11 +656,14 @@ public class CTBMain extends JavaPlugin {
 		
     }
     
+    /**
+     * Marks the {@link Player} disconnected from the server so they don't count against the team
+     * @param p the player who is leaving
+     */
     public void disconnectPlayer(Player p) {
-		Team t = findTeam(p);
+		Team t = findTeam(p.getUniqueId());
 		if(t != null) {
 			t.disconnectPerson(p);
-//			gameTimer.removePlayer(p, t.getName());
 			sendDebugMessage(p.getName() + " left the game, and was taken from team " + t.getName());
 		} else {
 			sendDebugMessage(p.getName() + " left the game and was not on a team");
@@ -653,7 +680,7 @@ public class CTBMain extends JavaPlugin {
     }
     
     /**
-     * Load all teams 
+     * Load all teams from files
      */
     protected void loadAllTeams() {
     	File folder = new File(getDataFolder().getAbsolutePath() + File.separatorChar + Bukkit.getServer().getWorlds().get(0).getName());
@@ -719,7 +746,11 @@ public class CTBMain extends JavaPlugin {
     	}
     	return false;
     }
-    // TODO add javadoc
+    /**
+     * Removes a team and deletes their team config file. May not complete other cleanup properly.
+     * @param name the name of the team to remove
+     * @return If the team existed and is now removed
+     */
     protected boolean removeTeam(String name) {
     	if(teams.containsKey(name)) {
     		teams.remove(name);
@@ -730,7 +761,11 @@ public class CTBMain extends JavaPlugin {
     }
     
     
-    // TODO add javadoc
+    /**
+     * Clears all players from a team
+     * @param name the name of the team
+     * @return if the team existed and was cleared
+     */
     protected boolean clearTeam(String name) {
     	if(teams.containsKey(name)) {
     		teams.get(name).clearPlayers();
@@ -739,7 +774,12 @@ public class CTBMain extends JavaPlugin {
     	return false;
     }
     
-    // TODO add javadoc
+    /**
+     * Put a player on a team
+     * @param p the player
+     * @param name the team
+     * @return if the player was added to a team
+     */
     protected boolean joinTeam(Player p, String name) {
     	boolean ret = false;
     	for(Team t : teams.values()) {
@@ -753,16 +793,29 @@ public class CTBMain extends JavaPlugin {
     	return ret;
     }
     
-    // TODO add javadoc
+    /**
+     * Gets all teams in the game
+     * @return All the teams
+     */
     protected Map<String, Team> getAllTeams() {
     	return teams;
     }
     
+    /**
+     * Gets the string list of a team
+     * @param t the team to list
+     * @return the listing
+     */
     protected String listTeam(Team t) {
         return listTeam(t, false);
     }
 
-    // TODO add javadoc
+    /**
+     * Gets the String list of a team
+     * @param t the team to list
+     * @param showStatus If the listing should show the block found status of the team 
+     * @return the listing
+     */
     protected String listTeam(Team t, boolean showStatus) {
         if(t != null) {
             String team = "";
@@ -792,9 +845,13 @@ public class CTBMain extends JavaPlugin {
         }
     }
     
-    // TODO javadoc
+    /**
+     * Removes a player from the team they are on
+     * @param p the player to remove
+     * @return if the player was removed from a team
+     */
     protected boolean leaveTeam(Player p) {
-    	Team t = findTeam(p);
+    	Team t = findTeam(p.getUniqueId());
     	if(t != null) {
     		t.removePerson(p);
     		return true;
@@ -802,7 +859,10 @@ public class CTBMain extends JavaPlugin {
     	return false;
     }
     
-    // TODO add javadoc
+    /**
+     * Sends a message to all team members and spectators
+     * @param msg the message to send
+     */
     protected void sendAllMsg(String msg) {
     	for(Team t : teams.values()) {
     		t.sendMessage(msg);
@@ -812,7 +872,14 @@ public class CTBMain extends JavaPlugin {
     	}
     }
     
-    // TODO add javadoc
+    /**
+     * Sends a title message to all team members and spectators
+     * @param ttl The title
+     * @param sub The subtitle
+     * @param fadein The number of ticks to fade in for
+     * @param hold The number of ticks to show the message for
+     * @param fadeout The number of ticks to fade out for
+     */
     protected void sendAllTitle(String ttl, String sub, int fadein, int hold, int fadeout) {
     	for(Team t : teams.values()) {
     		t.sendTitle(ttl, sub, fadein, hold, fadeout);
@@ -822,13 +889,20 @@ public class CTBMain extends JavaPlugin {
     	}
     }
     
+    /**
+     * Sends a message to all admins
+     * @param msg The message to send
+     */
     public void sendAdminMessage(String msg) {
     	for(Player p : getAdmins()) {
     		p.sendMessage(msg);
     	}
     }
     
-    // TODO add javadoc
+    /**
+     * Sends a debug message, only if debug messages is enabled
+     * @param msg The message
+     */
     public void sendDebugMessage(String msg) {
     	if(debugmsgvisable) {
 	    	for(Player p : getAdmins()) {
@@ -868,6 +942,6 @@ public class CTBMain extends JavaPlugin {
      * @return the boolean of is the player is a spectator
      */
     protected boolean isSpectator(Player p) {
-    	return p.hasPermission(Keys.PERMISSION_SPECTATE) && findTeam(p) == null;
+    	return p.hasPermission(Keys.PERMISSION_SPECTATE) && findTeam(p.getUniqueId()) == null;
     }
 }

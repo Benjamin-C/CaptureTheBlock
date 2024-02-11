@@ -118,7 +118,7 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 						} else {
 							if(sender instanceof Player) {
-								Team mt = plugin.findTeam((Player) sender); 
+								Team mt = plugin.findTeam(((Player) sender).getUniqueId()); 
                                 if(mt != null) {
                                     ts.add(mt);
                                 } else {
@@ -276,7 +276,7 @@ public class CTBGameCommand implements CommandExecutor {
 							switch(args.length) {
 							case 2: {
 								if(sender instanceof Player) {
-									toSkip = plugin.findTeam((Player) sender);
+									toSkip = plugin.findTeam(((Player) sender).getUniqueId());
 								} else {
 									sender.sendMessage("Please specify a team name to skip");
 								}
@@ -341,7 +341,7 @@ public class CTBGameCommand implements CommandExecutor {
 						case Keys.COMMAND_CTB_TEAM_ADDALL: {
 							for(Player p : Bukkit.getOnlinePlayers()) {
 								Collection<Player> specs = plugin.getSpectators();
-								if(!specs.contains(p) && plugin.findTeam(p) == null) {
+								if(!specs.contains(p) && plugin.findTeam(p.getUniqueId()) == null) {
 									if(plugin.findTeam(p.getUniqueId()) != null) {
 										plugin.findTeam(p.getUniqueId()).addPerson(p);
 									} else {
