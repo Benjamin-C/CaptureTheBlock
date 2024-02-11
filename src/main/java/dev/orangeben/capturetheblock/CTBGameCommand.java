@@ -7,6 +7,8 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -116,20 +118,32 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 						} else {
 							if(sender instanceof Player) {
-								ts.add(plugin.findTeam((Player) sender));
+								Team mt = plugin.findTeam((Player) sender); 
+                                if(mt != null) {
+                                    ts.add(mt);
+                                } else {
+                                    sender.sendMessage("You are not on a team.");
+                                }
 							}
 						}
-						String msg = "CTB team list:\n";
-						boolean first = true;
-						for(Team t : ts) {
-							if(first) {
-								first = false;
-							} else {
-								msg += "\n";
-							}
-							msg += plugin.listTeam(t);
-						}
-						sender.sendMessage(msg);
+                        if(!ts.isEmpty()) {
+                            String msg = "";
+                            if(ts.size() > 1) {
+                                msg = "CTB Team List:\n";
+                            } else {
+                                msg = "CTB Team ";
+                            }
+                            boolean first = true;
+                            for(Team t : ts) {
+                                if(first) {
+                                    first = false;
+                                } else {
+                                    msg += "\n";
+                                }
+                                msg += plugin.listTeam(t, true);
+                            }
+                            sender.sendMessage(msg);
+                        }
 						return true;
 					}
 					}
@@ -363,12 +377,6 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 						} break;
 						case Keys.COMMAND_CTB_SET_LIST : {
-//							sender.sendMessage("Listing sets");
-//							sender.sendMessage("l:" + args.length);
-//							for(int i = 0; i < args.length; i++) {
-//								sender.sendMessage(args[i]);
-//							}
-//							sender.sendMessage(":l");
 							if(args.length == 2) {
 								sender.sendMessage("Enabled Sets");
 								for(String s : plugin.getEnabledSets()) {
@@ -396,7 +404,64 @@ public class CTBGameCommand implements CommandExecutor {
 					}
 					return true;
 				}
+                case Keys.COMMAND_CTB_MARK: {
+                    switch(args.length) {
+                    case 1: sender.sendMessage("Please specify weather you want to mark a whole team or one specific player"); break;
+                    case 2: sender.sendMessage("Please specify the " + ((args[1].equals(Keys.COMMAND_CTB_MARK_TEAM)) ? "team" : "player") + " to mark"); break;
+                    default: {
+                        boolean toSet = !(args.length >= 4 && (args[3].equals(Keys.COMMAND_CTB_MARK_NOTFOUND) || args[3].equals("0") || args[3].equalsIgnoreCase("false")));
+                        String name = args[2];
+                        switch(args[1]) {
+                        case Keys.COMMAND_CTB_MARK_TEAM: {
+                            if(plugin.getAllTeams().containsKey(name)) {
+                                Team t = plugin.getAllTeams().get(name);
+                                for(UUID u : t.getAllPeoples().keySet()) {
+                                    if(t.isOnline(u)) {
+                                        if(toSet) {
+                                            plugin.foundBlock(t.getPlayer(u), t);
+                                        } else {
+                                            plugin.unfoundBlock(t.getPlayer(u), t);
+                                        }
+                                    } else {
+                                        t.setFound(u, toSet);
+                                    }
+                                }
+                                sender.sendMessage("All players on " + name + " have now " + ((!toSet) ? "not " : "") + "found their block.");
+                            } else {
+                                sender.sendMessage("Could not find team " + name + ".");
+                            }
+                        } break;
+                        case Keys.COMMAND_CTB_MARK_PLAYER: {
+                            for(Team t : plugin.getAllTeams().values()) {
+                                Map<UUID, String> peoples = t.getAllPeoples();
+                                if(peoples.values().contains(name)) {
+                                    for(UUID u : peoples.keySet()) {
+                                        if(peoples.get(u).equals(name)) {
+                                            if(t.isOnline(u)) {
+                                                if(toSet) {
+                                                    plugin.foundBlock(t.getPlayer(u), t);
+                                                } else {
+                                                    plugin.unfoundBlock(t.getPlayer(u), t);
+                                                }
+                                            } else {
+                                                t.setFound(u, toSet);
+                                                sender.sendMessage("offline");
+                                            }
+                                            sender.sendMessage(name + " has now " + ((!toSet) ? "not " : "") + "found their block.");
+                                            return true;        
+                                        }
+                                    }
+                                }
+                            }
+                            sender.sendMessage("Could not find player " + name + ".");
+                        }
+                        }
+                    } break;
+                    }
+                    return true;
+                }
 				}
+
 			}
 			sender.sendMessage("Please specify a valid action. Valid actions are " + acts);
 			return true;

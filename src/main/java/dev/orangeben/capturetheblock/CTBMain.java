@@ -23,6 +23,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 //import org.bukkit.scoreboard.Scoreboard;
 //import org.bukkit.scoreboard.ScoreboardManager;
 
+import net.md_5.bungee.api.ChatColor;
 import peterTimer.TimeRunnable;
 import peterTimer.Timer;
 
@@ -272,15 +273,41 @@ public class CTBMain extends JavaPlugin {
     	}
     }
 
+    protected void unfoundBlock(Player pl, Team t) {
+        unfoundBlock(pl, t, false);
+    }
+
+    protected void unfoundBlock(Player pl, Team t, boolean quiet) {
+        if(t.hasFound(pl)) {
+            if(!quiet) {
+                pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_LOST_BLOCK + Strings.COLOR_RESET);
+                sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_LOST_BLOCK + Strings.COLOR_RESET);
+            }
+            if(t.hasScored()) {
+                t.addScore(-1);
+	    		sendAllMsg(Strings.COLOR_MAIN + t.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_ALL + " " + Strings.THEY_LOST_BLOCK + Strings.COLOR_RESET);
+	    	}
+            t.setFound(pl.getUniqueId(), false);
+	    	gameTimer.removePlayer(pl, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
+	    	gameTimer.addPlayer(pl, t.getName());
+	    	t.updateTimeBars(gameTimer, titlePrefix);
+    	}
+    }
+
+    protected void foundBlock(Player pl, Team t) {
+        foundBlock(pl, t, false);
+    }
     /**
      * Marks that a player found their block and sends the message
      * Also starts the next round if everyone has found their block
      * @param p	the {@link Player} who found their block
      */
-    protected void foundBlock(Player pl, Team t) {
+    protected void foundBlock(Player pl, Team t, boolean quiet) {
     	if(!t.hasFound(pl)) {
-	    	pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_FOUND_BLOCK + Strings.COLOR_RESET);
-	    	sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_FOUND_BLOCK + Strings.COLOR_RESET);
+            if(!quiet) {
+                pl.sendMessage(Strings.COLOR_MAIN + Strings.YOU_FOUND_BLOCK + Strings.COLOR_RESET);
+                sendAllMsg(Strings.COLOR_MAIN + pl.getName() + " " + Strings.THEY_HAS + " " + Strings.THEY_FOUND_BLOCK + Strings.COLOR_RESET);
+            }
 	    	t.setFound(pl.getUniqueId(), true);
 	    	t.updateTimeBars(gameTimer, titlePrefix);
 	    	gameTimer.removePlayer(pl, t.getName());
@@ -305,12 +332,7 @@ public class CTBMain extends JavaPlugin {
      * @return the {@link Team} they are on
      */
     protected Team findTeam(Player p) {
-    	for(Team t : teams.values()) {
-    		if(t.ifContainsPlayer(p)) {
-    			return t;
-    		}
-    	}
-    	return null;
+    	return findTeam(p.getUniqueId());
     }
     /**
      * Finds the team that a {@link Player} is on by their {@link UUID}
@@ -319,7 +341,7 @@ public class CTBMain extends JavaPlugin {
      */
     protected Team findTeam(UUID u) {
     	for(Team t : teams.values()) {
-    		if(t.ifContainsUUID(u)) {
+    		if(t.isMember(u)) {
     			return t;
     		}
     	}
@@ -458,7 +480,7 @@ public class CTBMain extends JavaPlugin {
 		    		gameTimer.addBar(t.getName(), "");
 		    		gameTimer.addBar(t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX, "");
 		    		t.updateTimeBars(gameTimer, titlePrefix);
-		    		gameTimer.addPlayer(t.getOnlinePeoples(), t.getName());
+		    		gameTimer.addPlayer(new ArrayList<Player>(t.getOnlinePeoples()), t.getName());
 		    	}
 		    	gameTimer.setTitle(ts, "main");
 		    	gameTimer.start();
@@ -723,7 +745,7 @@ public class CTBMain extends JavaPlugin {
     		if(t.getName().equals(name)) {
     			t.addPerson(p);
     			ret = true;
-    		} else if(t.ifContainsPlayer(p)) {
+    		} else if(t.isMember(p.getUniqueId())) {
     			t.removePerson(p);
     		}
     	}
@@ -735,16 +757,38 @@ public class CTBMain extends JavaPlugin {
     	return teams;
     }
     
-    // TODO add javadoc
     protected String listTeam(Team t) {
-    	String team = t.getName() + " (" + t.getOnlinePeoples().size() + "/" + t.getAllPeoples().size() + ")";
-    	for(UUID u : t.getAllPeoples().keySet()) {
-    		team += "\n  " + t.getPlayerName(u);
-    		if(!t.isOnline(u)) {
-    			team += " (offline)";
-    		}
-    	}
-    	return team;
+        return listTeam(t, false);
+    }
+
+    // TODO add javadoc
+    protected String listTeam(Team t, boolean showStatus) {
+        if(t != null) {
+            String team = "";
+            if(showStatus) {
+                team += (t.hasEveryoneFound()) ? ChatColor.GREEN : ((t.hasAnyoneFound()) ? ChatColor.GOLD : ChatColor.RED);
+            }
+            team += t.getName() + " (" + t.getOnlinePeoples().size() + "/" + t.getAllPeoples().size() + ")";
+            if(showStatus) {
+                team += ChatColor.RESET;
+            }
+
+            for(UUID u : t.getAllPeoples().keySet()) {
+                if(showStatus) {
+                    team += (t.hasFound(u)) ? ChatColor.GREEN : ChatColor.RED;
+                }
+                team += "\n  " + t.getPlayerName(u);
+                if(!t.isOnline(u)) {
+                    team += " (offline)";
+                }
+                if(showStatus) {
+                    team += ChatColor.RESET;
+                }
+            }
+            return team;
+        } else {
+            return "";
+        }
     }
     
     // TODO javadoc

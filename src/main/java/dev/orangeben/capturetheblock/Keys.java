@@ -60,4 +60,9 @@ public class Keys {
 		public static final String COMMAND_CTB_SET_LIST = "list";
 		public static final String COMMAND_CTB_SET_LISTALL = "listall";
 		public static final String COMMAND_CTB_SET_CLEAR = "clear";
+    public static final String COMMAND_CTB_MARK = "mark";
+        public static final String COMMAND_CTB_MARK_PLAYER = "player";
+        public static final String COMMAND_CTB_MARK_TEAM = "team";
+        public static final String COMMAND_CTB_MARK_FOUND = "found";
+        public static final String COMMAND_CTB_MARK_NOTFOUND = "not_found";
 }
