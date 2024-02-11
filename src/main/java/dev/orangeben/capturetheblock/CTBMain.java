@@ -508,6 +508,7 @@ public class CTBMain extends JavaPlugin {
      */
     public void endGame() {
     	stopTimer();
+        roundsLeft = -1;
     	Bukkit.getScheduler().cancelTask(messageTaskId);
     	running = false;
     	sendAllTitle(Strings.COLOR_MAIN + Strings.GAME_OVER + Strings.COLOR_RESET, "", TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
