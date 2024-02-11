@@ -431,18 +431,19 @@ public class CTBMain extends JavaPlugin {
 	    	showScores(true);
 	    	boolean cont = false;
 	    	if(endTime != null) {
-	    		cont = true;
+                cont = true;
 	    		if(endTime.isBefore(LocalDateTime.now())) {
-	    			endTime = null;
+                    endTime = null;
 	    		}
 	    	} else if(roundsLeft != 0) {
-		    	if(roundsLeft != -1) {
-		    		roundsLeft--;
+                if(roundsLeft != -1) {
+                    roundsLeft--;
 		    	}
 		    	cont = true;
 			}
 			if(cont) {
-		    	for(Team t : teams.values()) {
+                for(Team t : teams.values()) {
+                    t.incrementRoundCount();
 					t.sendMessage(Strings.COLOR_MAIN + Strings.YOUR_SCORE_IS + " " + t.getScore() + Strings.COLOR_RESET);
 					regenTeamTargetBlock(t);
 					if(roundsLeft != -1) {
@@ -581,7 +582,7 @@ public class CTBMain extends JavaPlugin {
     	Map<String, String> msgmap = new HashMap<String, String>();
     	for(Team t : teams.values()) {
     		String name = t.getName();
-    		int sc = t.getScore();
+    		String sc = t.getScore() + "/" + t.getRoundCount();
     		String scstr = (t.hasEveryoneFound() ? Strings.COLOR_GOT : Strings.COLOR_MISSED) + "" + sc + "-" + name + ((showBlocks) ? ": " + ((t.getTarget() != null) ? t.getTarget().name() : Strings.NOTHING) : "") + Strings.COLOR_RESET;
     		msgmap.put(name, scstr);
     	}
@@ -604,7 +605,11 @@ public class CTBMain extends JavaPlugin {
     	for(int i = 0; i < uuids.length; i++) {
     		scorestr += msgmap.get(uuids[i]) + "\n";
     	}
-    	scorestr += Strings.COLOR_MAIN + "--- Of " + roundcount + " rounds ---\n" + Strings.COLOR_RESET;
+    	scorestr += Strings.COLOR_MAIN + "";
+        for(int i = 0; i < Strings.PLAYER_SCORES.length(); i++) {
+            scorestr += "-";
+        }
+        scorestr += "\n" + Strings.COLOR_RESET;
     	return scorestr;
     }
     
@@ -700,6 +705,7 @@ public class CTBMain extends JavaPlugin {
 	        	}
 	        	t.setScore(c.getInt(Keys.TEAM_SCORE));
 	        	t.setColor(c.getColor(Keys.TEAM_COLOR));
+                t.setRoundCount(c.getInt(Keys.TEAM_ROUNDCOUNT));
 	        	teams.put(tname, t);
 	    	}
     	} else {
@@ -726,6 +732,7 @@ public class CTBMain extends JavaPlugin {
     		c.set(Keys.TEAM_MEMBERS, uuids);
     		c.set(Keys.TEAM_SCORE, t.getScore());
     		c.set(Keys.TEAM_COLOR, t.getColor());
+    		c.set(Keys.TEAM_ROUNDCOUNT, t.getRoundCount());
     		try {
 				c.save(getTeamFile(Bukkit.getServer().getWorlds().get(0).getName() + File.separatorChar + t.getName()));
 			} catch (IOException e) {

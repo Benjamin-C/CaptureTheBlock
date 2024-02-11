@@ -24,6 +24,8 @@ public class Team {
 	private int score;
     /** The team's color */
 	private Color color;
+    /** The number of rounds the team has been in */
+    private int roundCount;
 	
 	// data to not save
     /** The block type the team is attempting to find */
@@ -100,6 +102,29 @@ public class Team {
 	public void setColor(Color color) {
 		this.color = color;
 	}
+
+    /**
+     * Gets the number of rounds the team has been in
+     * @return The number of rounds
+     */
+    public int getRoundCount() {
+        return roundCount;
+    }
+    /**
+     * Sets the number of rounds the team has been in
+     * @param newCount the new number of rounds
+     */
+    public void setRoundCount(int newCount) {
+        roundCount = newCount;
+    }
+    /**
+     * Increments the number of rounds the team has been in
+     */
+    public void incrementRoundCount() {
+        roundCount++;
+    }
+
+
 	
     // ___       __   __   ___ ___ 
     // |   /\  |__) / _` |__   |  

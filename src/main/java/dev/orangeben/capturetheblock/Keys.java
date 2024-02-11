@@ -24,6 +24,7 @@ public class Keys {
 	public static final String TEAM_MEMBERS = "members";
 	public static final String TEAM_SCORE = "score";
 	public static final String TEAM_COLOR = "color";
+	public static final String TEAM_ROUNDCOUNT = "roundcount";
 	
 	public static final String COMMAND_RANDOM_BLOCK_NAME = "randomblock";
 	public static final String COMMAND_CTB_NAME = "capturetheblock";
