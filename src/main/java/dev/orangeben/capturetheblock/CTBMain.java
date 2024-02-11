@@ -43,8 +43,6 @@ public class CTBMain extends JavaPlugin {
 	/** The int warning time before the round is over in seconds */
 	private int roundwarn = 10;
 	
-	// TODO add javadoc
-	private int roundcount = 0;
 	/** The {@link List} of {@link Team} in the game */
 	private Map<String, Team> teams;
 	
