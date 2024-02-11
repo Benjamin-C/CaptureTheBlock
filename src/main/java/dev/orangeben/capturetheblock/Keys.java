@@ -65,4 +65,5 @@ public class Keys {
         public static final String COMMAND_CTB_MARK_TEAM = "team";
         public static final String COMMAND_CTB_MARK_FOUND = "found";
         public static final String COMMAND_CTB_MARK_NOTFOUND = "not_found";
+    public static final String COMMAND_CTB_HELP = "help";
 }

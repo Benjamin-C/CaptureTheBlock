@@ -30,7 +30,8 @@ public class CTBCommandTabComplete implements TabCompleter {
 //			options = possible;
 //		} break;
 		case 1: {
-			possible.add(Keys.COMMAND_CTB_TEAM); // add join leave list remove
+			possible.add(Keys.COMMAND_CTB_HELP);
+            possible.add(Keys.COMMAND_CTB_TEAM); // add join leave list remove
 			possible.add(Keys.COMMAND_CTB_SCORE);
 			if(isAdmin) { 
 				possible.add(Keys.COMMAND_CTB_START);

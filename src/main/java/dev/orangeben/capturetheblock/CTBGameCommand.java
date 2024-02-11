@@ -16,6 +16,13 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.chat.hover.content.Text;
+
 public class CTBGameCommand implements CommandExecutor {
 
 	CTBMain plugin;
@@ -38,7 +45,20 @@ public class CTBGameCommand implements CommandExecutor {
 		
 		if(args.length >= 1) {
 			switch(args[0]) {
-			case Keys.COMMAND_CTB_SCORE: {
+			case Keys.COMMAND_CTB_HELP: {
+                // "See the README on "
+                String message = "See the help page at";
+                String url = "https://github.com/Benjamin-C/CaptureTheBlock";
+                if(sender instanceof Player) {
+                    Player p = (Player) sender;
+                    BaseComponent[] component = new ComponentBuilder(message + " ").color(Strings.COLOR_MAIN).append(url).color(ChatColor.BLUE).underlined(true).event(new ClickEvent(ClickEvent.Action.OPEN_URL, url)).create();
+                    p.spigot().sendMessage(component);
+                } else {
+                    sender.sendMessage(message + " " + url);
+                }
+                return true;
+            }
+            case Keys.COMMAND_CTB_SCORE: {
 				sender.sendMessage(plugin.showScoresStr(false));
 				return true;
 			}

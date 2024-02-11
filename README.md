@@ -2,12 +2,28 @@
 
 Capture The Block (CTB) is a Minecraft minigame implemented through a Spigot plugin.
 
-In this game, players are required to find and stand on a given block within the time limit. If everyone on your team stands on the block before the time limit, your team gets the point. Once all teams have found their blocks, all teams are given new blocks. Admins can select different lists of blocks to select from so that early game teams can be assigned easy blocks, and later teams can be assigned harder blocks. Games can be stoppped and restarted across multiple playsessions.
+In this game, players are required to find and stand on a given block within the time limit. If everyone on your team stands on the block before the time limit, your team gets the point. You do not have to be standing on the block when the timer runs out. Once all teams have found their blocks, all teams are given new blocks. Admins can select different lists of blocks to select from so that early game teams can be assigned easy blocks, and later teams can be assigned harder blocks. Games can be stopped and restarted across multiple playsessions.
 
-## Commannds
+## Running a game
+To run a game, you must have the `capturetheblock.control` permission.
+1. Run `\ctb set add <setname>` for any sets you wish to enable
+2. Do either of the following:
+   * Run `\ctb team add <teamname>` to add any teams you wish to add, then run `\ctb team join <teamname> <playername>` to put players on teams or have the players run `\ctb team join <teamname>` to put themselves on teams.
+   * Run `\ctb team addall` to add everyone to their own teams.
+3. Run `\ctb start` to start the game.
+   * If you believe that a team's block is too hard, run `\ctb team skip <teamname>` to give them a new block.
+   * You can add more sets midgame by running `\ctb set add <setname>`. The new set will take effect next time a block is randomly selected.
+4. When you are ready to end the game, do one of the following: 
+   * Run `\ctb end` to end the game immediately
+   * Run `\ctb endat <hh:mm>` to end the game at hh:mm (hh is in 24 hour format)
+   * Run `\ctb final <number>` to end after number more rounds
+1. To restart the game, simply run `\ctb start`. Note that enabled sets will be reset if the plugin is reloaded.
+
+## Commands
 All commands start with `/ctb <subcommand> [args ...]`
 
 If you are not a game admin, you have access to the following commands:
+* `help` - Shows the link to the help page on GitHub
 * `score` - Shows current team scores
 * `team`
   * `join <team>` - Joins the team *team*
@@ -15,6 +31,7 @@ If you are not a game admin, you have access to the following commands:
   * `list` - Lists all players on your team
 
 If you are an admin, you have access to the following commands:
+* `help` - Shows the link to the help page on GitHub
 * `score` - Shows current team scores
 * `start` - Starts the CTB game
 * `end` - Ends the CTB game
@@ -54,3 +71,21 @@ If you are an admin, you have access to the following commands:
 All permissions use the base node `capturetheblock`
 * `control` - Bearers of this permission are allowed to control the game, doing things like adding and removing block lists, starting and stopping the game, and modifying team scores.
 * `spectate` - Players with this permission are game spectators. This does not necessarily mean they are in gamemode spectator.
+
+## Configuration
+There are only two options in the configuration file.
+* `roundtime` is the length of a round in seconds
+* `warntime` is the number of seconds before the end of the round that players will receive a warning
+
+## Block files
+Block files are stored in YAML files `<server root>/plugins/CaptureTheBlock/<setname>.blocks`. Blocks and subsets are stored in an array with the key `blocks`. Include other files by including a block `include_<othersetname>`. Comments can be included preceded by a `#`. A basic example file:
+
+    blocks:
+    # Include these blocks directly
+    - DIRT
+    - STONE
+    # Include all blocks in diamonds.blocks
+    - include_diamonds
+
+## Team files
+Team information such as members and score are stored in YAML files. The files are stored in `<server root>/plugins/CaptureTheBlock/<worldname>/<teamname>.team`. These files are not intended to be modified by the user, although careful modifications should not cause issues.
