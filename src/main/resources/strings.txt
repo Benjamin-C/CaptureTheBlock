@@ -3,6 +3,7 @@ color.accent: &{AQUA}
 color.got: &{GREEN}
 color.missed: &{RED}
 color.got.some: &{GOLD}
+color.disabled: &{GRAY}
 
 test: &{green} Test &{RED}String {color.accent}%d
 
@@ -60,8 +61,7 @@ sets.enabled: Enabled sets:
 sets.cleared: All sets have been disabled.
 
 mark.specify.type: Please specify weather you want to mark a whole team or one specific player
-mark.specify.team: Please specify the team to mark
-mark.specify.player: Please specify the player to mark
+mark.specify.who: Please specify who you want to mark
 mark.set.all: All players on %s have now %sfound their block.
 mark.set.one: %s has now %sfound their block
 mark.not: not
@@ -84,14 +84,17 @@ game.endtime.error.past   : %s is in the past, try a time in the future
 game.endtime.error.invalid: %s is not a valid end time
 game.endtime.error.missing: Please specify a time to end
 
-game.endct.set    : Ending after %d more round(s)
+game.endct.set    : Ending after %d more round%s
 game.endct.small  : %d is not a valid number of rounds. Number must be >= -1
 game.endct.missing: Please specify a number of rounds
+
+game.reset: The game has been reset
 
 game.warn.usingdefault: No sets were selected, so I'm using the default set.
 game.error.noblock    : No sets were selected, and no default set is present. At least 1 set must be selected to play the game.
 game.error.noteam     : There must be at least 1 team to begin.
 game.error.stopped    : You can only do that while the game is going
+game.error.running    : You can only do that while the game not going
 
 game.info.config.reload: Config reloaded. The game changes will take effect next new block.
 
@@ -101,7 +104,8 @@ error.player.nonexistant: %s is not a player
 error.notplayer: You can't do that since you're not a player
 error.noaction: You need to specify what you want to do
 error.notnum  : %s is not a valid number.
-error.validaction: Please specify a valid action. Valid actions are %s
+error.validaction: Please specify a valid action.
+error.validaction.list: {error.validaction} Valid actions are %s
 
-help.title: {color.main}See the help page at
+help.title: {color.main}See the help page at 
 help.url  : https://github.com/Benjamin-C/CaptureTheBlock

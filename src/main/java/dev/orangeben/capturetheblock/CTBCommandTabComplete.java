@@ -65,7 +65,6 @@ public class CTBCommandTabComplete implements TabCompleter {
 				}
 			} break;
 			case Keys.COMMAND_CTB_SET: {
-				possible.add(Keys.COMMAND_CTB_SET);
 				possible.add(Keys.COMMAND_CTB_SET_ADD);
 				possible.add(Keys.COMMAND_CTB_SET_REMOVE);
 				possible.add(Keys.COMMAND_CTB_SET_LIST);
@@ -77,7 +76,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 			} break;
 			case Keys.COMMAND_CTB_ENDAT: {
 				possible.add("10:00");
-				possible.add("null");
+				possible.add(Keys.COMMAND_CTB_ENDAT_NEVER);
 			} break;
             case Keys.COMMAND_CTB_MARK: {
                 possible.add(Keys.COMMAND_CTB_MARK_PLAYER);
