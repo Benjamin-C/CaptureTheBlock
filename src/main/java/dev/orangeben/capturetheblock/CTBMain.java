@@ -1,7 +1,6 @@
 package dev.orangeben.capturetheblock;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -129,7 +128,6 @@ public class CTBMain extends JavaPlugin {
         File stringFile = new File(getDataFolder(), Keys.FILE_STRINGS);
         if(stringFile.exists()) {
             strings = new StringBank(stringFile);
-            System.out.println(getString("test"));
         } else {
             getLogger().severe("String file not found, no strings will work!");
         }

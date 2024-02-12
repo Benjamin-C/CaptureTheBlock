@@ -2,7 +2,6 @@ package dev.orangeben.capturetheblock;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.security.KeyException;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Locale;
@@ -105,15 +104,9 @@ public class StringBank {
                 bank.put(key, buffer.toString());
             }
         }
-
-        for(String key : bank.keySet()) {
-            System.out.println(key + ":" + bank.get(key));
-        }
-
     }
     
     public String get(String key, Object... parts) {
-        System.out.println(key + " : " + bank.get(key) + "?" + parts);
         if(bank.containsKey(key)) {
             try (Formatter f = new Formatter(Locale.getDefault())) {
                 return f.format(bank.get(key), parts).toString();
