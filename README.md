@@ -89,3 +89,17 @@ Block files are stored in YAML files `<server root>/plugins/CaptureTheBlock/<set
 
 ## Team files
 Team information such as members and score are stored in YAML files. The files are stored in `<server root>/plugins/CaptureTheBlock/<worldname>/<teamname>.team`. These files are not intended to be modified by the user, although careful modifications should not cause issues.
+
+## Strings file
+Strings used by the game are stored in `<server root>/plugins/CaptureTheBlock/strings.txt`.
+* Each line is either blank, a comment (denoted by the first character being `#`), or a string definition.
+* String definitions start with the string key.
+  * String keys can contain `[a-zA-Z0-9_.]`.
+  * Any spaces in the key will be removed.
+  * A colon (`:`) separates the key from the value.
+  * A single space immediately after the colon will be removed if it is present.
+* The remaining line is the value.
+  * Values can contain any character
+  * Some values are used as format strings, you can use [`printf` style format specifiers](https://cplusplus.com/reference/cstdio/printf/) to include dynamic information in the string
+  * Colors can be added to a string with `&{NAME}` where `NAME` is the [minecraft name of the color or effect to use](https://www.digminecraft.com/lists/color_list_pc.php), or a hex encoded color string in the format `#RRGGBB`.
+  * Other strings can be added with `{key}` where `key` is the key of the other string to add.

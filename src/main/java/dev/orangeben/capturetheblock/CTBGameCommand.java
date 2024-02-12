@@ -46,15 +46,13 @@ public class CTBGameCommand implements CommandExecutor {
 		if(args.length >= 1) {
 			switch(args[0]) {
 			case Keys.COMMAND_CTB_HELP: {
-                // "See the README on "
-                String message = "See the help page at";
-                String url = "https://github.com/Benjamin-C/CaptureTheBlock";
+                // "See the README on github"
                 if(sender instanceof Player) {
                     Player p = (Player) sender;
-                    BaseComponent[] component = new ComponentBuilder(message + " ").color(Strings.COLOR_MAIN).append(url).color(ChatColor.BLUE).underlined(true).event(new ClickEvent(ClickEvent.Action.OPEN_URL, url)).create();
+                    BaseComponent[] component = new ComponentBuilder().appendLegacy(plugin.getString("help.title")).append(plugin.getString("help.url")).color(ChatColor.BLUE).underlined(true).event(new ClickEvent(ClickEvent.Action.OPEN_URL, plugin.getString("help.url"))).create();
                     p.spigot().sendMessage(component);
                 } else {
-                    sender.sendMessage(message + " " + url);
+                    sender.sendMessage(plugin.getString("help.title") + " " + plugin.getString("help.url"));
                 }
                 return true;
             }
@@ -133,7 +131,7 @@ public class CTBGameCommand implements CommandExecutor {
 								if(plugin.getAllTeams().containsKey(args[2])) {
 									ts.add(plugin.getAllTeams().get(args[2]));
 								} else {
-									sender.sendMessage(Strings.TEAM_DOESNT_EXIST);
+									sender.sendMessage(plugin.getString("error.team.nonexistant"));
 								}
 							} else {
 								ts.addAll(plugin.getAllTeams().values());

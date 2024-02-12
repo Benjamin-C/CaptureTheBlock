@@ -19,6 +19,7 @@ public class Keys {
 	public static final String FILE_TEAM_SUFFIX = ".team";
 	public static final String FILE_BLOCKLIST_SUFFIX = ".blocks";
 	public static final String FILE_DEFAULTBLOCKS_NAME = "default.blocks";
+    public static final String FILE_STRINGS = "strings.txt";
 	
 	public static final String TEAM_NAME = "name";
 	public static final String TEAM_MEMBERS = "members";

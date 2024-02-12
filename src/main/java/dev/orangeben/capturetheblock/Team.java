@@ -10,6 +10,7 @@ import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import peterTimer.Timer;
 
@@ -36,9 +37,13 @@ public class Team {
 	private Map<UUID, Player> peoples;
     /** If each player has found their block */
 	private Map<UUID, Boolean> foundBlock;
+    /** The plugin this team is currently in */
+    private CTBMain plugin;
 	
-	public Team(String name) {
+	public Team(String name, CTBMain plugin) {
 		this.name = name;
+        this.plugin = plugin;
+
 		peoples = new HashMap<UUID, Player>();
 
 		uuids = new HashMap<UUID, String>();
@@ -60,15 +65,15 @@ public class Team {
 				}
 			}
 			if(gotnum == 0) {
-				got_str += Strings.COLOR_MISSED;
+				got_str += plugin.getString("color.missed");
 			} else if(gotnum < peoples.size()) {
-				got_str += Strings.COLOR_SOME_GOT;
+				got_str += plugin.getString("color.got");
 			} else {
-				got_str += Strings.COLOR_GOT;
+				got_str += plugin.getString("color.got");
 			}
 			got_str += gotnum + "/" + peoples.size();
-			timer.setTitle(Strings.COLOR_MAIN + titleprefix + Strings.COLOR_MISSED + target + " " + got_str + Strings.COLOR_MAIN, name);
-			timer.setTitle(Strings.COLOR_MAIN + titleprefix + ((gotnum == peoples.size()) ? Strings.COLOR_GOT : Strings.COLOR_SOME_GOT) + target + " " + got_str + Strings.COLOR_MAIN, name + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
+			timer.setTitle(plugin.getString("color.main") + titleprefix + plugin.getString("color.missed") + target + " " + got_str + plugin.getString("color.main"), name);
+			timer.setTitle(plugin.getString("color.main") + titleprefix + ((gotnum == peoples.size()) ? plugin.getString("color.got") : plugin.getString("color.got.some")) + target + " " + got_str + plugin.getString("color.main"), name + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
 		}
 	}
 
