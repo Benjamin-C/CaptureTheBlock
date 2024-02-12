@@ -268,7 +268,7 @@ public class CTBMain extends JavaPlugin {
      * Disable all sets
      */
     public void clearSets() {
-		allSets.clear();
+		enabledSets.clear();
 	}
 	
 	// -----------------------------------------------
@@ -611,7 +611,13 @@ public class CTBMain extends JavaPlugin {
     	for(Team t : teams.values()) {
     		String name = t.getName();
     		String sc = t.getScore() + "/" + t.getRoundCount();
-    		String scstr = (t.hasEveryoneFound() ? getString("color.got") : getString("color.missed")) + "" + sc + "-" + name + ((showBlocks) ? ": " + ((t.getTarget() != null) ? t.getTarget().name() : getString("block.target.null")) : "");
+    		String scstr = "";
+            if(t.getPeoples().isEmpty()) {
+                scstr += getString("color.disabled");
+            } else {
+                scstr += (t.hasEveryoneFound() ? getString("color.got") : getString("color.missed"));
+            }
+            scstr += sc + "-" + name + ((showBlocks) ? ": " + ((t.getTarget() != null) ? t.getTarget().name() : getString("block.target.null")) : "");
     		msgmap.put(name, scstr);
     	}
     	
@@ -852,7 +858,11 @@ public class CTBMain extends JavaPlugin {
         if(t != null) {
             String team = "";
             if(showStatus) {
-                team += (t.hasEveryoneFound()) ? ChatColor.GREEN : ((t.hasAnyoneFound()) ? ChatColor.GOLD : ChatColor.RED);
+                if(t.getPeoples().size() > 0) {
+                    team += (t.hasEveryoneFound()) ? getString("color.got") : ((t.hasAnyoneFound()) ? getString("color.got.some") : getString("color.missed"));
+                } else {
+                    team += getString("color.disabled");
+                }
             }
             team += t.getName() + " (" + t.getOnlinePeoples().size() + "/" + t.getAllPeoples().size() + ")";
             if(showStatus) {
@@ -861,7 +871,7 @@ public class CTBMain extends JavaPlugin {
 
             for(UUID u : t.getAllPeoples().keySet()) {
                 if(showStatus) {
-                    team += (t.hasFound(u)) ? ChatColor.GREEN : ChatColor.RED;
+                    team += (t.hasFound(u)) ? getString("color.got") : getString("color.missed");
                 }
                 team += "\n  " + t.getPlayerName(u);
                 if(!t.isOnline(u)) {

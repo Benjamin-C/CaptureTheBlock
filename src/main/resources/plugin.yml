@@ -1,6 +1,6 @@
 name: CaptureTheBlock
 main: dev.orangeben.capturetheblock.CTBMain
-version: 3.4-DEV
+version: 3.4
 api-version: 1.20
 depend: [PeterTimer]
 commands:

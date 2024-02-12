@@ -82,14 +82,14 @@ public class CTBGameCommand implements CommandExecutor {
 									if(!success) {
 										sender.sendMessage(plugin.getString("team.error.nonexistant"));
 									} else {
-										sender.sendMessage(plugin.getString("team.joined.self" + args[2]));
+										sender.sendMessage(plugin.getString("team.joined.self", args[2]));
 									}
 								} else {
 									sender.sendMessage(plugin.getString("error.notplayer"));
 								}
 							}
 						} else {
-							sender.sendMessage(plugin.getString("error.noaction"));
+							sender.sendMessage(plugin.getString("team.error.noname"));
 						}
 						return true;
 					}
@@ -166,19 +166,34 @@ public class CTBGameCommand implements CommandExecutor {
 						return true;
 					}
 					}
-				}
+				} else {
+                    if(isAdmin) {
+                        sender.sendMessage(plugin.getString("error.noaction"));
+                    } else {
+                        sender.sendMessage(plugin.getString("error.validaction", Keys.COMMAND_CTB_TEAM_JOIN + ", " + Keys.COMMAND_CTB_TEAM_LEAVE + ", & " + Keys.COMMAND_CTB_TEAM_LIST));
+                    }
+                    return true;
+                }
 			}
 			}
 			if(isAdmin) {
 				switch(args[0]) {
 				case Keys.COMMAND_CTB_START: {
                     // STARTS THE GAME
-					plugin.startGame();
+                    if(plugin.isRunning()) {
+                        sender.sendMessage(plugin.getString("game.error.running"));
+                    } else {
+                        plugin.startGame();
+                    }
 					return true;
 				}
 				case Keys.COMMAND_CTB_END: {
                     // ENDS THE GAME
-					plugin.endGame();
+                    if(plugin.isRunning()) {
+                        plugin.endGame();
+                    } else {
+                        sender.sendMessage(plugin.getString("game.error.stopped"));
+                    }
 					return true;
 				}
                 case Keys.COMMAND_CTB_ENDAT: {
@@ -219,7 +234,7 @@ public class CTBGameCommand implements CommandExecutor {
 							int left = Integer.parseInt(args[1]);
 							if(left >= -1) {
 								plugin.setRoundsLeft(left);
-								sender.sendMessage(plugin.getString("game.endct.set", left));
+								sender.sendMessage(plugin.getString("game.endct.set", left, StringBank.pluralize(left)));
 							} else {
 								sender.sendMessage(plugin.getString("game.endct.small", left));
 							}
@@ -234,8 +249,11 @@ public class CTBGameCommand implements CommandExecutor {
 				}
 				case Keys.COMMAND_CTB_RESET: {
                     // RESETS GAME
-					plugin.endGame();
+                    if(plugin.isRunning()) {
+                        plugin.endGame();
+                    }
 					plugin.resetScores();
+                    sender.sendMessage(plugin.getString("game.reset"));
 					return true;
 				}
 				case Keys.COMMAND_CTB_RELOADCONFIG: {
@@ -258,7 +276,7 @@ public class CTBGameCommand implements CommandExecutor {
 					if(plugin.isRunning()) {
 						plugin.startRound();
 					} else {
-						sender.sendMessage("game.error.stopped");
+						sender.sendMessage(plugin.getString("game.error.stopped"));
 					}
 					return true;
 				}
@@ -431,18 +449,27 @@ public class CTBGameCommand implements CommandExecutor {
 							plugin.clearSets();
 							sender.sendMessage(plugin.getString("sets.cleared"));
 						} break;
+                        default: {
+                            sender.sendMessage(plugin.getString("error.validaction"));
+                        } break;
 						}
-					}
+					} else {
+                        sender.sendMessage(plugin.getString("error.noaction"));
+                    }
 					return true;
 				}
                 case Keys.COMMAND_CTB_MARK: {
+                    if(!plugin.isRunning()) {
+                        sender.sendMessage(plugin.getString("game.error.stopped"));
+                        return true;
+                    }
                     switch(args.length) {
                     case 1: sender.sendMessage(plugin.getString("mark.specify.type")); break;
                     case 2: {
                         if(args[1].equals(Keys.COMMAND_CTB_MARK_TEAM)) {
-                            sender.sendMessage(plugin.getString("mark.specify.team"));    
+                            sender.sendMessage(plugin.getString("mark.specify.who"));    
                         } else {
-                            sender.sendMessage(plugin.getString("mark.specify.player"));    
+                            sender.sendMessage(plugin.getString("mark.specify.who"));    
                         }
                     } break;
                     default: {
@@ -504,7 +531,7 @@ public class CTBGameCommand implements CommandExecutor {
 				}
 
 			}
-			sender.sendMessage(plugin.getString("error.validaction", acts));
+			sender.sendMessage(plugin.getString("teaerror.validaction.list", acts));
 			return true;
 		}
         sender.sendMessage(plugin.getString("error.validaction", acts));
