@@ -1,0 +1,107 @@
+color.main: &{LIGHT_PURPLE}
+color.accent: &{AQUA}
+color.got: &{GREEN}
+color.missed: &{RED}
+color.got.some: &{GOLD}
+
+test: &{green} Test &{RED}String {color.accent}%d
+
+# Block found/unfound
+block.found.player: {color.main}%s has found their block!
+block.found.you   : {color.main}You found your block!
+block.found.team  : {color.main}%s has all found their block!
+block.lost.player : {color.main}%s has lost their block!
+block.lost.you    : {color.main}You lost your block!
+block.lost.team   : {color.main}%s has all lost their block!
+
+block.next.chat    : {color.main}Now stand on {color.accent}%s
+block.next.title   : {color.main}Find {color.accent}%s
+block.next.subtitle: {color.main}You have {color.accent}%s.
+block.timer.warn   : {color.main}%s!
+block.timer.hurry  : {color.main}Better Hurry!
+block.timer.find   : Find your block! 
+
+block.target.null  : nothing
+
+team.joined.other: %s is now on %s
+team.joined.self : You are now on %s
+team.left.other  : %s has been removed from their team
+team.left.self   : You have been removed from your team
+team.new         : Team %s has been added
+team.removed     : Team %s has been removed
+team.cleared     : Team %s has been cleared
+team.addall.success: All players not on a team have been added to a team
+
+team.error.noname     : Please specify a team name
+team.error.nonexistant: That team doesn't exist
+team.error.leave.self : You can't leave a team
+team.error.leave.other: They can't leave a team
+team.error.noton      : You aren't on a team
+team.error.skip.alreadygot: Can't skip once you've all found your block, just wait for your next block.
+
+team.score.msg : {color.main}Your score is %d
+team.score.list: {color.main}--- Player Scores ---
+team.score.sep : {color.main}---------------------
+team.score.error.action: Please specify a score action <add|remove|set>
+team.score.error.amount: Please specify an amount
+team.score.add: Added %d points to team %s
+team.score.sub: Removed %d points from team %s
+team.score.set: Set team %s's score to %d
+
+timer.prefix.block: {color.main}Find your block!
+timer.prefix.final: {color.main}Final Round!
+
+set.added : %s has been added
+set.removed: %s has been removed
+set.nonexistant: %s doesn't exist
+set.specify: Please specify a set
+sets.all: All sets:
+sets.enabled: Enabled sets:
+sets.cleared: All sets have been disabled.
+
+mark.specify.type: Please specify weather you want to mark a whole team or one specific player
+mark.specify.team: Please specify the team to mark
+mark.specify.player: Please specify the player to mark
+mark.set.all: All players on %s have now %sfound their block.
+mark.set.one: %s has now %sfound their block
+mark.not: not
+
+# Game has begun
+game.begin: {color.main}Capture The Block has begun!
+game.info : {color.main}Find the specified block and stand on/in it within %s to get the point!
+game.over : {color.main}--- CaptureTheBlock Game Over ---
+
+game.spectator.start: {color.main}Starting round
+game.admin.start: Game Started
+
+game.remaining.one  : {color.main}There is {color.accent}1{color.main} round left.
+game.remaining.many : {color.main}There are {color.accent}%d{color.main} rounds left. 
+game.remaining.final: {color.main}Final Round!
+
+game.endtime.disabled     : End at time disabled
+game.endtime.set          : Continuing until just after %s
+game.endtime.error.past   : %s is in the past, try a time in the future
+game.endtime.error.invalid: %s is not a valid end time
+game.endtime.error.missing: Please specify a time to end
+
+game.endct.set    : Ending after %d more round(s)
+game.endct.small  : %d is not a valid number of rounds. Number must be >= -1
+game.endct.missing: Please specify a number of rounds
+
+game.warn.usingdefault: No sets were selected, so I'm using the default set.
+game.error.noblock    : No sets were selected, and no default set is present. At least 1 set must be selected to play the game.
+game.error.noteam     : There must be at least 1 team to begin.
+game.error.stopped    : You can only do that while the game is going
+
+game.info.config.reload: Config reloaded. The game changes will take effect next new block.
+
+# General errors
+error.404: Could not load file %s. See log for details.
+error.player.nonexistant: %s is not a player
+error.notplayer: You can't do that since you're not a player
+error.noaction: You need to specify what you want to do
+error.notnum  : %s is not a valid number.
+error.validaction: Please specify a valid action. Valid actions are %s
+
+help.title: {color.main}See the help page at
+help.url  : https://github.com/Benjamin-C/CaptureTheBlock

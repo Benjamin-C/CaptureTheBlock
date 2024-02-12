@@ -20,8 +20,6 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.chat.hover.content.Text;
 
 public class CTBGameCommand implements CommandExecutor {
 
@@ -46,15 +44,13 @@ public class CTBGameCommand implements CommandExecutor {
 		if(args.length >= 1) {
 			switch(args[0]) {
 			case Keys.COMMAND_CTB_HELP: {
-                // "See the README on "
-                String message = "See the help page at";
-                String url = "https://github.com/Benjamin-C/CaptureTheBlock";
+                // "See the README on github"
                 if(sender instanceof Player) {
                     Player p = (Player) sender;
-                    BaseComponent[] component = new ComponentBuilder(message + " ").color(Strings.COLOR_MAIN).append(url).color(ChatColor.BLUE).underlined(true).event(new ClickEvent(ClickEvent.Action.OPEN_URL, url)).create();
+                    BaseComponent[] component = new ComponentBuilder().appendLegacy(plugin.getString("help.title")).append(plugin.getString("help.url")).color(ChatColor.BLUE).underlined(true).event(new ClickEvent(ClickEvent.Action.OPEN_URL, plugin.getString("help.url"))).create();
                     p.spigot().sendMessage(component);
                 } else {
-                    sender.sendMessage(message + " " + url);
+                    sender.sendMessage(plugin.getString("help.title") + " " + plugin.getString("help.url"));
                 }
                 return true;
             }
@@ -73,27 +69,27 @@ public class CTBGameCommand implements CommandExecutor {
 								if(pl != null) {
 									boolean success = plugin.joinTeam(pl, args[2]);
 									if(!success) {
-										sender.sendMessage("That is not a team!");
+										sender.sendMessage(plugin.getString("team.error.nonexistant"));
 									} else {
-										sender.sendMessage(args[3] + " is now on " + args[2]);
+										sender.sendMessage(plugin.getString("team.joined.other", args[3], args[2]));
 									}
 								} else {
-									sender.sendMessage(args[3] + " is not a player and can not join the team");
+									sender.sendMessage(plugin.getString("error.player.nonexistant", args[3]));
 								}
 							} else { // If the sender is trying to join a team
 								if(sender instanceof Player) {
 									boolean success = plugin.joinTeam((Player) sender, args[2]);
 									if(!success) {
-										sender.sendMessage("That is not a team!");
+										sender.sendMessage(plugin.getString("team.error.nonexistant"));
 									} else {
-										sender.sendMessage("You have joined " + args[2]);
+										sender.sendMessage(plugin.getString("team.joined.self" + args[2]));
 									}
 								} else {
-									sender.sendMessage("You are not a player, so you can not join a team");
+									sender.sendMessage(plugin.getString("error.notplayer"));
 								}
 							}
 						} else {
-							sender.sendMessage("You need to specify what you want to do");
+							sender.sendMessage(plugin.getString("error.noaction"));
 						}
 						return true;
 					}
@@ -104,23 +100,24 @@ public class CTBGameCommand implements CommandExecutor {
 							if(pl != null) {
 								boolean success = plugin.leaveTeam(pl);
 								if(!success) {
-									sender.sendMessage("That player can not leave a team");
+									sender.sendMessage(plugin.getString("team.error.leave.other"));
 								} else {
-									sender.sendMessage(args[2] + " has been removed from their team.");
+                                    sender.sendMessage(plugin.getString("team.left.other", args[2]));
+									pl.sendMessage(plugin.getString("team.left.self"));
 								}
 							} else {
-								sender.sendMessage(args[2] + " is not a player and can not join the team");
+								sender.sendMessage(plugin.getString("error.player.nonexistant", args[2]));
 							}
 						} else { // If the sender is trying to leave a team
 							if(sender instanceof Player) {
 								boolean success = plugin.leaveTeam((Player) sender);
 								if(!success) {
-									sender.sendMessage("You can't leave a team!");
+									sender.sendMessage(plugin.getString("team.error.leave.self"));
 								} else {
-									sender.sendMessage("You have been removed from your team");
+									sender.sendMessage(plugin.getString("team.left.self"));
 								}
 							} else {
-								sender.sendMessage("You are not a player, so you can not leave a team");
+								sender.sendMessage(plugin.getString("error.notplayer"));
 							}
 						}
 						return true;
@@ -133,7 +130,7 @@ public class CTBGameCommand implements CommandExecutor {
 								if(plugin.getAllTeams().containsKey(args[2])) {
 									ts.add(plugin.getAllTeams().get(args[2]));
 								} else {
-									sender.sendMessage(Strings.TEAM_DOESNT_EXIST);
+									sender.sendMessage(plugin.getString("team.error.nonexistant"));
 								}
 							} else {
 								ts.addAll(plugin.getAllTeams().values());
@@ -144,7 +141,7 @@ public class CTBGameCommand implements CommandExecutor {
                                 if(mt != null) {
                                     ts.add(mt);
                                 } else {
-                                    sender.sendMessage("You are not on a team.");
+                                    sender.sendMessage(plugin.getString("team.error.noton"));
                                 }
 							}
 						}
@@ -192,7 +189,7 @@ public class CTBGameCommand implements CommandExecutor {
 						}
 						if(args[1].equals(Keys.COMMAND_CTB_ENDAT_NEVER)) {
 							plugin.setEndTime(null);
-							sender.sendMessage("End at time disabled");
+							sender.sendMessage(plugin.getString("game.endtime.disabled"));
 						} else {
 							try {
 								LocalDateTime ldt = LocalDate.now().atTime(LocalTime.parse(args[1]));
@@ -201,17 +198,17 @@ public class CTBGameCommand implements CommandExecutor {
 									if(plugin.getRoundsLeft() != -1) {
 										plugin.setRoundsLeft(1);
 									}
-									sender.sendMessage("Continuing until just after " + ldt.format(CTBMain.formatter));
+									sender.sendMessage(plugin.getString("game.endtime.set", ldt.format(CTBMain.formatter)));
 								} else {
-									sender.sendMessage(args[1] + " is in the past, try a time in the future");
+									sender.sendMessage(plugin.getString("game.endtime.error.past", args[1]));
 								}
 								
 							} catch(DateTimeParseException e) {
-								sender.sendMessage(args[1] + " is not a valid end time");
+								sender.sendMessage(plugin.getString("game.endtime.error.invalid", args[1]));
 							}
 						}
 					} else {
-						sender.sendMessage("Please specify a time to end");
+						sender.sendMessage(plugin.getString("game.endtime.error.missing"));
 					}
 					return true;
 				}
@@ -222,16 +219,16 @@ public class CTBGameCommand implements CommandExecutor {
 							int left = Integer.parseInt(args[1]);
 							if(left >= -1) {
 								plugin.setRoundsLeft(left);
-								sender.sendMessage("Ending after " + args[1] + " more rounds");
+								sender.sendMessage(plugin.getString("game.endct.set", left));
 							} else {
-								sender.sendMessage(args[1] + " is not a valid number of rounds. Number must be >= -1");
+								sender.sendMessage(plugin.getString("game.endct.small", left));
 							}
 							
 						} catch(NumberFormatException e) {
-							sender.sendMessage(args[1] + " is not a valid number of rounds");
+							sender.sendMessage(plugin.getString("error.notnum", args[1]));
 						}
 					} else {
-						sender.sendMessage("Please specify a number of rounds");
+						sender.sendMessage(plugin.getString("game.endct.missing"));
 					}
 					return true;
 				}
@@ -244,7 +241,7 @@ public class CTBGameCommand implements CommandExecutor {
 				case Keys.COMMAND_CTB_RELOADCONFIG: {
                     // RELOADS CTB CONFIG
 					plugin.reloadMyConfig();
-					sender.sendMessage("Config reloaded. The game changes will take effect next new block.");
+					sender.sendMessage(plugin.getString("game.info.config.reload"));
 				} return true;
 				case Keys.COMMAND_CTB_BLOCKS: {
                     // SHOWS THE BLOCKS TEAMS ARE GOING FOR
@@ -261,7 +258,7 @@ public class CTBGameCommand implements CommandExecutor {
 					if(plugin.isRunning()) {
 						plugin.startRound();
 					} else {
-						sender.sendMessage("You can only move to the next round if the game is running");
+						sender.sendMessage("game.error.stopped");
 					}
 					return true;
 				}
@@ -273,29 +270,29 @@ public class CTBGameCommand implements CommandExecutor {
                             // ADD A NEW TEAM
 							if(args.length >= 3) {
 								plugin.addTeam(args[2]);
-								sender.sendMessage("Team " + args[2] + " has been added");
+								sender.sendMessage(plugin.getString("team.new", args[2]));
 							} else {
-								sender.sendMessage("Please specify a team name to add");
+								sender.sendMessage(plugin.getString("team.error.noname"));
 							}
 						} break;
 						case Keys.COMMAND_CTB_TEAM_REMOVE: {
                             // REMOVE AN EXISTING TEAM
 							if(args.length >= 3) {
 								plugin.removeTeam(args[2]);
-								sender.sendMessage("Team " + args[2] + " has been removed");
+								sender.sendMessage(plugin.getString("team.removed", args[2]));
 								return true;
 							} else {
-								sender.sendMessage("Please specify a team name to remove");
+								sender.sendMessage(plugin.getString("team.error.noname"));
 							}
 						} break;
 						case Keys.COMMAND_CTB_TEAM_CLEAR: {
                             // REMOVE ALL PLAYERS FROM A TEAM
 							if(args.length >= 3) {
 								plugin.clearTeam(args[2]);
-								sender.sendMessage("Team " + args[2] + " has been cleared");
+								sender.sendMessage(plugin.getString("team.cleared", args[2]));
 								return true;
 							} else {
-								sender.sendMessage("Please specify a team name to remove");
+								sender.sendMessage(plugin.getString("team.error.noname"));
 							}
 						} break;
 						case Keys.COMMAND_CTB_TEAM_SKIP: {
@@ -307,7 +304,7 @@ public class CTBGameCommand implements CommandExecutor {
 								if(sender instanceof Player) {
 									toSkip = plugin.findTeam(((Player) sender).getUniqueId());
 								} else {
-									sender.sendMessage("Please specify a team name to skip");
+									sender.sendMessage(plugin.getString("team.error.noname"));  
 								}
 							} break;
 							case 3: {
@@ -315,7 +312,7 @@ public class CTBGameCommand implements CommandExecutor {
 								if(plugin.getAllTeams().containsKey(teamname)) {
 									toSkip = plugin.getAllTeams().get(teamname);
 								} else {
-									sender.sendMessage("Please specify a team name to skip");
+									sender.sendMessage(plugin.getString("team.error.noname"));
 								}
 							} break;
 							default: {
@@ -327,7 +324,7 @@ public class CTBGameCommand implements CommandExecutor {
 								if(!toSkip.hasEveryoneFound()) {
 									plugin.regenTeamTargetBlock(toSkip);
 								} else {
-									sender.sendMessage("Can't skip once you've all found your block, just wait for your next block.");
+									sender.sendMessage(plugin.getString("team.error.skip.alreadygot"));
 								}
 							} else {
 								sender.sendMessage("toSkip was null");
@@ -337,34 +334,34 @@ public class CTBGameCommand implements CommandExecutor {
                             // SCORE CONTROLS
 							switch(args.length) {
                             case 2: {
-                                sender.sendMessage("Please specify an action");
+                                sender.sendMessage(plugin.getString("team.error.noname"));
                             } break;
 							case 3: {
-								sender.sendMessage("Please specify a team name to remove");
+                                sender.sendMessage(plugin.getString("team.score.error.action"));
 							} break;
 							case 4: {
-								sender.sendMessage("Please specify a score action <add|remove|set>");
+                                sender.sendMessage(plugin.getString("team.score.error.amount"));
 							} break;
 							default: {
 								try {
+                                    int amount = Integer.parseInt(args[4]);
 									switch(args[3]) {
 									case Keys.COMMAND_CTB_TEAM_SCORE_ADD: {
-										plugin.getAllTeams().get(args[2]).addScore(Integer.parseInt(args[4]));
-										sender.sendMessage("Added " + args[4] + " points to " + args[2]);
+										plugin.getAllTeams().get(args[2]).addScore(amount);
+										sender.sendMessage(plugin.getString("team.score.add", amount, args[2]));
 									} break;
 									case Keys.COMMAND_CTB_TEAM_SCORE_REMOVE: {
 										plugin.getAllTeams().get(args[2]).subtractScore(Integer.parseInt(args[4]));
-										sender.sendMessage("Subtracted " + args[4] + " points from " + args[2]);
+										sender.sendMessage(plugin.getString("team.score.sub", amount, args[2]));
 									} break;
 									case Keys.COMMAND_CTB_TEAM_SCORE_SET: {
 										plugin.getAllTeams().get(args[2]).setScore(Integer.parseInt(args[4]));
-										sender.sendMessage("Set " + args[2] + "'s score to " + args[4]);
+										sender.sendMessage(plugin.getString("team.score.set", args[2], amount));
 									} break;
 									}
 								} catch(NumberFormatException e) {
-									sender.sendMessage(args[4] + " is not a valid number");
-								}
-								
+									sender.sendMessage(plugin.getString("error.notnum", args[4]));
+								}	
 							}
 							}
 						} break;
@@ -381,7 +378,7 @@ public class CTBGameCommand implements CommandExecutor {
 									}
 								}
 							}
-							sender.sendMessage("All players not on a team have been added to a team");
+							sender.sendMessage(plugin.getString("team.addall.success"));
 						} break;
 						}
 						return true;
@@ -394,25 +391,25 @@ public class CTBGameCommand implements CommandExecutor {
 							if(args.length > 2) {
 								// TODO add better messages
 								for(int i = 2; i < args.length; i++) {
-									sender.sendMessage(plugin.enableSet(args[2]) ? "It worked" : "That set " + args[2] + " doesn't exist");
+									sender.sendMessage(plugin.enableSet(args[2]) ? plugin.getString("set.added", args[2]) : plugin.getString("set.nonexistant", args[2]));
 								}
 							} else {
-								sender.sendMessage("Please specify a set");
+								sender.sendMessage(plugin.getString("set.specify"));
 							}
 						} break;
 						case Keys.COMMAND_CTB_SET_REMOVE: {
 							if(args.length > 2) {
 								// TODO add better messages
 								for(int i = 2; i < args.length; i++) {
-									sender.sendMessage(plugin.disableSet(args[i]) ? "It worked" : "That set " + args[i] + " doesn't exist");
+									sender.sendMessage(plugin.disableSet(args[i]) ? plugin.getString("set.removed", args[2]) : plugin.getString("set.nonexistant", args[2]));
 								}
 							} else {
-								sender.sendMessage("Please specify a set");
+								sender.sendMessage(plugin.getString("set.specify"));
 							}
 						} break;
 						case Keys.COMMAND_CTB_SET_LIST : {
 							if(args.length == 2) {
-								sender.sendMessage("Enabled Sets");
+								sender.sendMessage(plugin.getString("sets.enabled"));
 								for(String s : plugin.getEnabledSets()) {
 									sender.sendMessage(s);
 								}
@@ -420,19 +417,19 @@ public class CTBGameCommand implements CommandExecutor {
 								if(plugin.getAllSets().containsKey(args[2])) {
 									sender.sendMessage(plugin.getAllSets().get(args[2]).toString());
 								} else {
-									sender.sendMessage("Set " + args[2] + " does not exist.");
+									sender.sendMessage(plugin.getString("set.nonexistant", args[2]));
 								}
 							}
 						} break;
 						case Keys.COMMAND_CTB_SET_LISTALL: {
-							sender.sendMessage("All sets:");
+							sender.sendMessage(plugin.getString("sets.all"));
 							for(String s : plugin.getAllSets().keySet()) {
 								sender.sendMessage(s);
 							}
 						} break;
 						case Keys.COMMAND_CTB_SET_CLEAR: {
 							plugin.clearSets();
-							sender.sendMessage("Cleared");
+							sender.sendMessage(plugin.getString("sets.cleared"));
 						} break;
 						}
 					}
@@ -440,8 +437,14 @@ public class CTBGameCommand implements CommandExecutor {
 				}
                 case Keys.COMMAND_CTB_MARK: {
                     switch(args.length) {
-                    case 1: sender.sendMessage("Please specify weather you want to mark a whole team or one specific player"); break;
-                    case 2: sender.sendMessage("Please specify the " + ((args[1].equals(Keys.COMMAND_CTB_MARK_TEAM)) ? "team" : "player") + " to mark"); break;
+                    case 1: sender.sendMessage(plugin.getString("mark.specify.type")); break;
+                    case 2: {
+                        if(args[1].equals(Keys.COMMAND_CTB_MARK_TEAM)) {
+                            sender.sendMessage(plugin.getString("mark.specify.team"));    
+                        } else {
+                            sender.sendMessage(plugin.getString("mark.specify.player"));    
+                        }
+                    } break;
                     default: {
                         boolean toSet = !(args.length >= 4 && (args[3].equals(Keys.COMMAND_CTB_MARK_NOTFOUND) || args[3].equals("0") || args[3].equalsIgnoreCase("false")));
                         String name = args[2];
@@ -460,9 +463,9 @@ public class CTBGameCommand implements CommandExecutor {
                                         t.setFound(u, toSet);
                                     }
                                 }
-                                sender.sendMessage("All players on " + name + " have now " + ((!toSet) ? "not " : "") + "found their block.");
+                                sender.sendMessage(plugin.getString("mark.set.all", name, ((!toSet) ? plugin.getString("mark.not") + " " : "")));
                             } else {
-                                sender.sendMessage("Could not find team " + name + ".");
+                                sender.sendMessage(plugin.getString("team.error.nonexistant"));
                             }
                         } break;
                         case Keys.COMMAND_CTB_MARK_PLAYER: {
@@ -479,15 +482,14 @@ public class CTBGameCommand implements CommandExecutor {
                                                 }
                                             } else {
                                                 t.setFound(u, toSet);
-                                                sender.sendMessage("offline");
                                             }
-                                            sender.sendMessage(name + " has now " + ((!toSet) ? "not " : "") + "found their block.");
+                                            sender.sendMessage(plugin.getString("mark.set.one", name, ((!toSet) ? plugin.getString("mark.not") + " " : "")));
                                             return true;        
                                         }
                                     }
                                 }
                             }
-                            sender.sendMessage("Could not find player " + name + ".");
+                            sender.sendMessage(plugin.getString("error.player.nonexistant", name));
                         }
                         }
                     } break;
@@ -502,10 +504,10 @@ public class CTBGameCommand implements CommandExecutor {
 				}
 
 			}
-			sender.sendMessage("Please specify a valid action. Valid actions are " + acts);
+			sender.sendMessage(plugin.getString("error.validaction", acts));
 			return true;
 		}
-		sender.sendMessage("Please specify an action for the game. Actions are " + acts);
+        sender.sendMessage(plugin.getString("error.validaction", acts));
 		return true;
 	}
 }
