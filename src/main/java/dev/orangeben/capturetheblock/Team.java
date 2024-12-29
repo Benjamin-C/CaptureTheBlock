@@ -1,8 +1,11 @@
 package dev.orangeben.capturetheblock;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -26,7 +29,9 @@ public class Team {
 	private Color color;
     /** The number of rounds the team has been in */
     private int roundCount;
-	
+    /** The number of fails the team has in a row */
+	private int streak;
+
 	// data to not save
     /** The block type the team is attempting to find */
 	private Material target;
@@ -38,10 +43,14 @@ public class Team {
 	private Map<UUID, Boolean> foundBlock;
     /** The plugin this team is currently in */
     private CTBMain plugin;
+    /** RNG source */
+    private Random rand;
 	
 	public Team(String name, CTBMain plugin) {
 		this.name = name;
         this.plugin = plugin;
+
+        rand = new Random(System.nanoTime());
 
 		peoples = new HashMap<UUID, Player>();
 
@@ -264,6 +273,59 @@ public class Team {
 	public void subtractScore(int sub) {
 		score -= sub;
 	}
+
+    /**
+     * Adds a fail to the team's count
+     */
+    public void addStreak() {
+        streak++;
+    }
+
+    /**
+     * Gets the number of fails
+     * @return the number of fails in a row
+     */
+    public int getStreak() {
+        return streak;
+    }
+
+    public void setStreak(int streak) {
+        this.streak = streak;
+    }
+
+    public void checkStreak() {
+        if(streak > 0) {
+            if(!hasEveryoneFound()) {
+                streak = -1;
+            } else {
+                streak++;
+            }
+        } else if(hasEveryoneFound()) {
+            streak = 1;
+        } else {
+            streak--;
+        }
+
+        List<StreakReward> possible = new ArrayList<StreakReward>();
+        for(StreakReward s : plugin.getRewards().values()) {
+            if(((s.getStreakLength() > 0 && streak > 0) || (s.getStreakLength() <= 0 && streak <= 0)) && Math.abs(s.getStreakLength()) <= Math.abs(streak)) {
+                possible.add(s);
+            }
+        }
+        if(possible.size() > 0) {
+            for(Player p : getOnlinePeoples()) {
+                if(streak > 0) {
+                    if(hasFound(p.getUniqueId())) {
+                        possible.get(rand.nextInt(possible.size())).giveTo(p);
+                    }
+                } else {
+                    if(!hasFound(p.getUniqueId())) {
+                        possible.get(rand.nextInt(possible.size())).giveTo(p);
+                    }
+                }
+            }
+        }
+    }
 
     // __                 ___  __   __  
     // |__) |     /\  \ / |__  |__) /__` 

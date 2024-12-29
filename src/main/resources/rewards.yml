@@ -1,0 +1,66 @@
+goldapple:
+  length: 8
+  message: "Nice streak!"
+  item: golden_apple
+diamond:
+  length: 8
+  message: "Nice streak!"
+  item: diamond
+  count: 1
+boing:
+  length: 5
+  effect: jump_boost
+  duration: 300
+nightvis:
+  length: 5
+  effect: night_vision
+  duration: 300
+speed:
+  length: 4
+  message: "Got the zoomies?"
+  effect: speed
+  duration: 300
+medic:
+  length: 4
+  effect: regeneration
+  duration: 30
+  strength: 2
+chicken:
+  length: 3
+  item: cooked_chicken
+  count: 6
+stick:
+  length: 3
+  message: "Have a stick"
+  item: stick
+  count: 2
+first:
+  length: -1
+  message: "Looks like you missed your block, don't do that again!"
+ouch:
+  length: -2
+  message: "That looks like it hurt"
+  effect: instant_damage
+  duration: 1
+coal:
+  length: -3
+  message: "Have you been a bad kid?"
+  item: coal
+  count: 3
+potato:
+  length: -3
+  message: "Hope you like taters"
+  item: poisonous_potato
+  count: 2304
+blind:
+  length: -4
+  message: Better get your eyes checked!
+  effect: blindness
+drunk:
+  length: -4
+  message: Do you feel alright?
+  effect: nausea
+wither:
+  length: -6
+  message: That must hurt
+  effect: wither

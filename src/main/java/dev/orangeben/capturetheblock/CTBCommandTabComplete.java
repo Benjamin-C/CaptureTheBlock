@@ -46,6 +46,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_TOGGLEDEBUGMSG);
 				possible.add(Keys.COMMAND_CTB_MOVEON);
                 possible.add(Keys.COMMAND_CTB_MARK);
+                possible.add(Keys.COMMAND_CTB_REWARD);
 			}
 			options = getPossibleCompletes(possible, args[0]);
 		} break;
@@ -81,7 +82,12 @@ public class CTBCommandTabComplete implements TabCompleter {
             case Keys.COMMAND_CTB_MARK: {
                 possible.add(Keys.COMMAND_CTB_MARK_PLAYER);
                 possible.add(Keys.COMMAND_CTB_MARK_TEAM);
-            }
+            } break;
+            case Keys.COMMAND_CTB_REWARD: {
+                if(isAdmin) {
+                    possible.addAll(plugin.getRewards().keySet());
+                }
+            } break;
 			}
 			options = getPossibleCompletes(possible, args[1]);
 		} break;

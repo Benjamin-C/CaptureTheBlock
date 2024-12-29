@@ -528,10 +528,43 @@ public class CTBGameCommand implements CommandExecutor {
 					sender.sendMessage("Debug messages are " + ((plugin.getDebugMsgVisable()) ? "now" : "no longer") + " visable");
 					return true;
 				}
+                case Keys.COMMAND_CTB_REWARD: {
+                    if(args.length > 1) {
+                        Player target = null;
+                        if(args.length > 2) {
+                            sender.sendMessage("len: " + args.length);
+                            target = Bukkit.getPlayer(args[2]);
+                            if(target == null) {
+                                sender.sendMessage(plugin.getString("error.player.nonexistant", args[2]));
+                                return true;
+                            }
+                        } else {
+                            sender.sendMessage("you");
+                            if(sender instanceof Player) {
+                                target = (Player) sender;
+                            } else {
+                                sender.sendMessage(plugin.getString("error.notplayer"));
+                            }
+                        }
+                        if(target == null) {
+                            sender.sendMessage("COMMAND_CTB_REWARD Player is null, not sure why");
+                        }
+                        String rd = args[1];
+                        if(plugin.getRewards().containsKey(rd)) {
+                            sender.sendMessage(plugin.getString("reward.given", rd, target.getName()));
+                            plugin.getRewards().get(rd).giveTo((Player) sender);
+                        } else {
+                            sender.sendMessage(plugin.getString("error.reward.nonexistant", rd));
+                        }
+                    } else {
+                        sender.sendMessage("Please specify a reward");
+                    }
+                    return true;
+                }
 				}
 
 			}
-			sender.sendMessage(plugin.getString("teaerror.validaction.list", acts));
+			sender.sendMessage(plugin.getString("error.validaction.list", acts));
 			return true;
 		}
         sender.sendMessage(plugin.getString("error.validaction", acts));

@@ -15,6 +15,12 @@ block.lost.player : {color.main}%s has lost their block!
 block.lost.you    : {color.main}You lost your block!
 block.lost.team   : {color.main}%s has all lost their block!
 
+block.notfound.first : {color.main}You didn't find your block. Don't let that happen again!
+block.notfound.potato: {color.main}I just love potatoes!
+block.notfound.throw:  {color.main}Oops, dropped my %s
+block.notfound.hurt:   {color.main}Ouch!
+block.notfound.sick:   {color.main}I'm not feeling so good ...
+
 block.next.chat    : {color.main}Now stand on {color.accent}%s
 block.next.title   : {color.main}Find {color.accent}%s
 block.next.subtitle: {color.main}You have {color.accent}%s.
@@ -40,7 +46,7 @@ team.error.leave.other: They can't leave a team
 team.error.noton      : You aren't on a team
 team.error.skip.alreadygot: Can't skip once you've all found your block, just wait for your next block.
 
-team.score.msg : {color.main}Your score is %d
+team.score.msg : {color.main}Your score is %d with a streak of %d
 team.score.list: {color.main}--- Player Scores ---
 team.score.sep : {color.main}---------------------
 team.score.error.action: Please specify a score action <add|remove|set>
@@ -48,6 +54,8 @@ team.score.error.amount: Please specify an amount
 team.score.add: Added %d points to team %s
 team.score.sub: Removed %d points from team %s
 team.score.set: Set team %s's score to %d
+team.streak.got: {color.main}You'r team got %d in a row
+team.streak.missed: {color.main}You'r team missed %d in a row
 
 timer.prefix.block: {color.main}Find your block!
 timer.prefix.final: {color.main}Final Round!
@@ -106,6 +114,9 @@ error.noaction: You need to specify what you want to do
 error.notnum  : %s is not a valid number.
 error.validaction: Please specify a valid action.
 error.validaction.list: {error.validaction} Valid actions are %s
+error.reward.nonexistant: The reward "%s" doesn't exist
+
+reward.given: Given reward %s to %s
 
 help.title: {color.main}See the help page at 
 help.url  : https://github.com/Benjamin-C/CaptureTheBlock
