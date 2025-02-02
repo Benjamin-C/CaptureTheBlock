@@ -278,7 +278,15 @@ public class Team {
      * Adds a fail to the team's count
      */
     public void addStreak() {
-        streak++;
+        addStreak(1);
+    }
+
+    public void addStreak(int amount) {
+        streak += amount;
+    }
+
+    public void subtractStreak(int amount) {
+        streak -= amount;
     }
 
     /**

@@ -145,12 +145,13 @@ public class CTBMain extends JavaPlugin {
         // Load rewards
         saveResource(Keys.FILE_REWARDS, true);
         File rwfile = new File(getDataFolder(), Keys.FILE_REWARDS);
+        rewards.clear();
         if(rwfile.exists()) {
             YamlConfiguration rc = YamlConfiguration.loadConfiguration(rwfile);        
             Set<String> keys = rc.getKeys(false);
             for(String key : keys) {
                 ConfigurationSection cs = rc.getConfigurationSection(key);
-                rewards.put(key, new StreakReward(key, cs));
+                rewards.put(key, new StreakReward(key, cs, this));
             }
             getLogger().info("Loaded " + rewards.size() + " rewards");
             for(StreakReward sr : rewards.values()) {
@@ -161,12 +162,45 @@ public class CTBMain extends JavaPlugin {
         }
 
         // Load teams
-    	loadAllTeams();
-    	for(Player p : Bukkit.getOnlinePlayers()) {
-    		reconnectPlayer(p);
-    	}
+        if(!running) {
+            loadAllTeams();
+            for(Player p : Bukkit.getOnlinePlayers()) {
+                reconnectPlayer(p);
+            }
+        } else {
+            sendAdminMessage("The game is currently running, so teams have not been reloaded.");
+        }
     	
-    	loadAllBlocks();
+        // Load blocks
+    	allSets = new HashMap<String, BlockSet>();
+    	File folder = getDataFolder();
+    	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_BLOCKLIST_SUFFIX))) {
+    		try {
+	    		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
+	    		String lname = f.getName().substring(0, f.getName().indexOf("."));
+	    		
+	    		List<?> blkstr = c.getList(Keys.CONFIG_BLOCK_LIST);
+	        	BlockSet set = new BlockSet(this, lname, null, null);
+	        	for(Object o : blkstr) {
+	        		if(o instanceof String) {
+	        			String s = ((String) o).toUpperCase();
+	        			if(s.startsWith("INCLUDE_")) {
+	        				set.addSet(s.substring(s.indexOf("_") + 1, s.length()).toLowerCase());
+	        			} else {
+                            try {
+                                set.addBlock(Material.valueOf(s));
+                            } catch (Exception e) {
+                                getLogger().severe("Error loading list " + lname + ". " + e.getMessage());
+                            }
+	        			}
+	        		}
+	        	}
+	        	allSets.put(lname, set);
+    		} catch(Exception e) {
+    			e.printStackTrace();
+    			sendDebugMessage(getString("error.404", f.getName()));
+    		}
+    	}
     	
     	sendDebugMessage("I_WANT_A_MELLON");
 	}
@@ -199,41 +233,6 @@ public class CTBMain extends JavaPlugin {
      */
 	public Map<String, BlockSet> getAllSets() {
 		return allSets;
-	}
-	
-	/**
-     * Loads all block sets from their files
-     */
-	public void loadAllBlocks() {
-		allSets = new HashMap<String, BlockSet>();
-    	File folder = getDataFolder();
-    	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_BLOCKLIST_SUFFIX))) {
-    		try {
-	    		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
-	    		String lname = f.getName().substring(0, f.getName().indexOf("."));
-	    		
-	    		List<?> blkstr = c.getList(Keys.CONFIG_BLOCK_LIST);
-	        	BlockSet set = new BlockSet(this, lname, null, null);
-	        	for(Object o : blkstr) {
-	        		if(o instanceof String) {
-	        			String s = ((String) o).toUpperCase();
-	        			if(s.startsWith("INCLUDE_")) {
-	        				set.addSet(s.substring(s.indexOf("_") + 1, s.length()).toLowerCase());
-	        			} else {
-                            try {
-                                set.addBlock(Material.valueOf(s));
-                            } catch (Exception e) {
-                                getLogger().severe("Error loading list " + lname + ". " + e.getMessage());
-                            }
-	        			}
-	        		}
-	        	}
-	        	allSets.put(lname, set);
-    		} catch(Exception e) {
-    			e.printStackTrace();
-    			sendDebugMessage(getString("error.404", f.getName()));
-    		}
-    	}
 	}
     
 	/**

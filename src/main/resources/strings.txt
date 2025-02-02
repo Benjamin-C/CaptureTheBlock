@@ -54,8 +54,14 @@ team.score.error.amount: Please specify an amount
 team.score.add: Added %d points to team %s
 team.score.sub: Removed %d points from team %s
 team.score.set: Set team %s's score to %d
+team.streak.error.action: Please specify a streak action <add|remove|set>
+team.streak.error.amount: Please specify an amount
+team.streak.add: Increased team %s's streak by %d
+team.streak.sub: Decreased team %s's streak by %d
+team.streak.set: Set team %s's streak to %d
 team.streak.got: {color.main}You'r team got %d in a row
 team.streak.missed: {color.main}You'r team missed %d in a row
+team.streak.got.other: Team %s got %d in a row
 
 timer.prefix.block: {color.main}Find your block!
 timer.prefix.final: {color.main}Final Round!
@@ -117,6 +123,7 @@ error.validaction.list: {error.validaction} Valid actions are %s
 error.reward.nonexistant: The reward "%s" doesn't exist
 
 reward.given: Given reward %s to %s
+reward.message: &{GOLD}[Streak Reward] %s
 
 help.title: {color.main}See the help page at 
 help.url  : https://github.com/Benjamin-C/CaptureTheBlock

@@ -66,6 +66,10 @@ public class Keys {
 			public static final String COMMAND_CTB_TEAM_SCORE_ADD = "add";
 			public static final String COMMAND_CTB_TEAM_SCORE_REMOVE = "remove";
 			public static final String COMMAND_CTB_TEAM_SCORE_SET = "set";
+        public static final String COMMAND_CTB_TEAM_STREAK = "streak";
+            public static final String COMMAND_CTB_TEAM_STREAK_ADD = "add";
+            public static final String COMMAND_CTB_TEAM_STREAK_REMOVE = "remove";
+            public static final String COMMAND_CTB_TEAM_STREAK_SET = "set";
 	public static final String COMMAND_CTB_SET = "set";
 		public static final String COMMAND_CTB_SET_ADD = "add";
 		public static final String COMMAND_CTB_SET_REMOVE = "remove";

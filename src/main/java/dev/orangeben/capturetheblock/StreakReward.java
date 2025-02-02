@@ -28,8 +28,15 @@ public class StreakReward {
     /** The message to send */
     private String message = null;
 
+    private CTBMain plugin;
+
     public StreakReward(String name, ConfigurationSection cs) {
+        this(name, cs, null);
+    }
+    
+    public StreakReward(String name, ConfigurationSection cs, CTBMain plugin) {
         this.name = name;
+        this.plugin = plugin;
         this.length = cs.getInt(Keys.CONFIG_REWARD_LENGTH);
         try {
             if(cs.contains(Keys.CONFIG_REWARD_ITEM)) {
@@ -75,7 +82,11 @@ public class StreakReward {
             p.addPotionEffect(effect.createEffect(duration*20, count));
         }
         if(message != null) {
-            p.sendMessage(message);
+            if(plugin != null) {
+                p.sendMessage(plugin.getString("reward.message", message));
+            } else {
+                p.sendMessage(message);
+            }
         }
     }
 

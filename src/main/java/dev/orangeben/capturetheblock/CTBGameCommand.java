@@ -3,6 +3,7 @@ package dev.orangeben.capturetheblock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -208,6 +209,9 @@ public class CTBGameCommand implements CommandExecutor {
 						} else {
 							try {
 								LocalDateTime ldt = LocalDate.now().atTime(LocalTime.parse(args[1]));
+                                sender.sendMessage("Now is" + LocalDateTime.now().toString());
+                                sender.sendMessage("UTC is" + LocalDateTime.now(ZoneOffset.UTC).toString());
+                                sender.sendMessage("LDT is" + ldt.toString());
 								if(ldt.isAfter(LocalDateTime.now())) {
 									plugin.setEndTime(ldt);
 									if(plugin.getRoundsLeft() != -1) {
@@ -375,6 +379,41 @@ public class CTBGameCommand implements CommandExecutor {
 									case Keys.COMMAND_CTB_TEAM_SCORE_SET: {
 										plugin.getAllTeams().get(args[2]).setScore(Integer.parseInt(args[4]));
 										sender.sendMessage(plugin.getString("team.score.set", args[2], amount));
+									} break;
+									}
+								} catch(NumberFormatException e) {
+									sender.sendMessage(plugin.getString("error.notnum", args[4]));
+								}	
+							}
+							}
+						} break;
+                        case Keys.COMMAND_CTB_TEAM_STREAK: {
+                            // SCORE CONTROLS
+							switch(args.length) {
+                            case 2: {
+                                sender.sendMessage(plugin.getString("team.error.noname"));
+                            } break;
+							case 3: {
+                                sender.sendMessage(plugin.getString("team.streak.got.other", args[2], plugin.getAllTeams().get(args[2]).getStreak()));
+							} break;
+							case 4: {
+                                sender.sendMessage(plugin.getString("team.streak.error.amount"));
+							} break;
+							default: {
+								try {
+                                    int amount = Integer.parseInt(args[4]);
+									switch(args[3]) {
+									case Keys.COMMAND_CTB_TEAM_STREAK_ADD: {
+										plugin.getAllTeams().get(args[2]).addStreak(amount);
+										sender.sendMessage(plugin.getString("team.streak.add", args[2], amount));
+									} break;
+									case Keys.COMMAND_CTB_TEAM_STREAK_REMOVE: {
+										plugin.getAllTeams().get(args[2]).subtractStreak((Integer.parseInt(args[4])));
+										sender.sendMessage(plugin.getString("team.streak.sub", args[2], amount));
+									} break;
+									case Keys.COMMAND_CTB_TEAM_STREAK_SET: {
+										plugin.getAllTeams().get(args[2]).setStreak(Integer.parseInt(args[4]));
+										sender.sendMessage(plugin.getString("team.streak.set", args[2], amount));
 									} break;
 									}
 								} catch(NumberFormatException e) {
