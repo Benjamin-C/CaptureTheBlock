@@ -83,4 +83,12 @@ public class Keys {
         public static final String COMMAND_CTB_MARK_NOTFOUND = "not_found";
     public static final String COMMAND_CTB_REWARD = "reward";
     public static final String COMMAND_CTB_HELP = "help";
+    public static final String COMMAND_CTB_CONFIG = "config";
+        public static final String COMMAND_CTB_CONFIG_RELOAD = "reload";
+        public static final String COMMAND_CTB_CONFIG_GET = "get";
+        public static final String COMMAND_CTB_CONFIG_SET = "set";
+            public static final String COMMAND_CTB_CONFIG_ROUNDTIME = "roundtime";
+            public static final String COMMAND_CTB_CONFIG_WARNTIME = "warntime";
+    public static final String COMMAND_CTB_GETIGT = "getigt";
+
 }

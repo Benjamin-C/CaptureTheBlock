@@ -9,7 +9,7 @@ commands:
     usage: /randomblock
   capturetheblock:
     description: Controls the capturetheblock game
-    usage: /capturetheblock <start|end>
+    usage: /capturetheblock ...
     aliases: [ctb]
 permissions:
   capturetheblock.*:

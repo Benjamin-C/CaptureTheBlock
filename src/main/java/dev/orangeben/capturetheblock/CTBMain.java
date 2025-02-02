@@ -22,8 +22,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import net.md_5.bungee.api.ChatColor;
-import peterTimer.TimeRunnable;
-import peterTimer.Timer;
+
+import com.peter.petertimer.AbstractTimer;
+import com.peter.petertimer.TimeRunnable;
+import com.peter.petertimer.Timer;
 
 // TODO switch player timers when changing teams
 // TODO change title bar wording after you find block
@@ -204,6 +206,23 @@ public class CTBMain extends JavaPlugin {
     	
     	sendDebugMessage("I_WANT_A_MELLON");
 	}
+
+
+    public int getRoundTime() {
+        return roundtime;
+    }
+
+    public int getRoundWarn() {
+        return roundwarn;
+    }
+
+    public void setRoundTime(int val) {
+        roundtime = val;
+    }
+
+    public void setRoundWarn(int val) {
+        roundwarn = val;
+    }
 
     public Map<String, StreakReward> getRewards() {
         return rewards;
@@ -531,8 +550,7 @@ public class CTBMain extends JavaPlugin {
 		    	Map<Integer, TimeRunnable> clbk = new HashMap<Integer, TimeRunnable>();
 		    	final int thisroundwarn = roundwarn;
 		    	clbk.put(thisroundwarn*TPS, new TimeRunnable() { // Warn the players time is almost up
-	//	    		@Override
-		    		public void run(Timer timer) {
+		    		public void run(AbstractTimer timer) {
 		    			sendAllMsg(getString("block.timer.warn", StringBank.formatTime(thisroundwarn)));
 		            	for(Player p : getSpectators()) {
 		            		p.sendTitle(getString("block.timer.warn", StringBank.formatTime(thisroundwarn)), null,  TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
@@ -543,8 +561,7 @@ public class CTBMain extends JavaPlugin {
 		    		}
 		    	});
 		    	clbk.put(0, new TimeRunnable() { // When the timer is done
-	//	    		@Override
-		    		public void run(Timer timer) {
+		    		public void run(AbstractTimer timer) {
                         for(Team t : teams.values()) {
                             t.checkStreak();
                         }

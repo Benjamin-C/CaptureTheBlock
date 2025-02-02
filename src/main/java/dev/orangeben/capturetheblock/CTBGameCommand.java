@@ -12,10 +12,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
+import com.peter.petertimer.WorldDateTime;
 
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
@@ -560,6 +563,58 @@ public class CTBGameCommand implements CommandExecutor {
                         }
                     } break;
                     }
+                    return true;
+                }
+                case Keys.COMMAND_CTB_CONFIG: {
+                    if(args.length > 1) {
+						switch(args[1]) {
+						case Keys.COMMAND_CTB_CONFIG_RELOAD: {
+                            plugin.reloadMyConfig();
+                            sender.sendMessage("Config reloaded. The game changes will take effect next new block.");
+                            return true;
+                        }
+                        case Keys.COMMAND_CTB_CONFIG_GET: {
+                            switch(args[2]) {
+                                case Keys.COMMAND_CTB_CONFIG_ROUNDTIME: {
+                                    sender.sendMessage("Round time is " + plugin.getRoundTime());
+                                }
+                                case Keys.COMMAND_CTB_CONFIG_WARNTIME: {
+                                    sender.sendMessage("Warning time is " + plugin.getRoundWarn());
+                                }
+                            }
+                            return true;
+                        }
+                        case Keys.COMMAND_CTB_CONFIG_SET: {
+                            switch(args[2]) {
+                                case Keys.COMMAND_CTB_CONFIG_ROUNDTIME: {
+                                    try {
+                                        plugin.setRoundTime(Integer.parseInt(args[3]));
+                                        sender.sendMessage("Round time is now " + plugin.getRoundTime() + ". This will take effect next round.");
+                                    } catch (Exception e) {
+                                        sender.sendMessage("Invalid value for round time");
+                                    }
+                                }
+                                case Keys.COMMAND_CTB_CONFIG_WARNTIME: {
+                                    try {
+                                        plugin.setRoundWarn(Integer.parseInt(args[3]));
+                                        sender.sendMessage("Warning time is now " + plugin.getRoundTime() + ". This will take effect next round.");
+                                    } catch (Exception e) {
+                                        sender.sendMessage("Invalid value for round time");
+                                    }
+                                    sender.sendMessage("Warning time is now " + plugin.getRoundWarn() + ". This will take effect next round.");
+                                }
+                            }
+                            return true;
+                        }
+                    }
+                    }
+                    sender.sendMessage("Please specify an action");
+                    return true;
+                }
+                case Keys.COMMAND_CTB_GETIGT: {
+                    World w = (sender instanceof Player) ? ((Player) sender).getWorld() : Bukkit.getWorlds().get(0);
+                    WorldDateTime wdt = WorldDateTime.current(w);
+                    sender.sendMessage("The time in " + w.getName() + " is " + wdt.formattedTime() + " (" + wdt.getTicks() + " ticks)");
                     return true;
                 }
 				case Keys.COMMAND_CTB_TOGGLEDEBUGMSG: {

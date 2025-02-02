@@ -14,7 +14,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
-import peterTimer.Timer;
+import com.peter.petertimer.Timer;
 
 public class Team {
 	

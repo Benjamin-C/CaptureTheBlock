@@ -47,6 +47,8 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_MOVEON);
                 possible.add(Keys.COMMAND_CTB_MARK);
                 possible.add(Keys.COMMAND_CTB_REWARD);
+                possible.add(Keys.COMMAND_CTB_CONFIG);
+                possible.add(Keys.COMMAND_CTB_GETIGT);
 			}
 			options = getPossibleCompletes(possible, args[0]);
 		} break;
@@ -88,6 +90,13 @@ public class CTBCommandTabComplete implements TabCompleter {
                     possible.addAll(plugin.getRewards().keySet());
                 }
             } break;
+            case Keys.COMMAND_CTB_CONFIG: {
+                if(isAdmin) {
+                    possible.add(Keys.COMMAND_CTB_CONFIG_RELOAD);
+                    possible.add(Keys.COMMAND_CTB_CONFIG_GET);
+                    possible.add(Keys.COMMAND_CTB_CONFIG_SET);
+                }
+            }
 			}
 			options = getPossibleCompletes(possible, args[1]);
 		} break;
@@ -112,7 +121,6 @@ public class CTBCommandTabComplete implements TabCompleter {
 					}
 				} break;
 				}
-				options = getPossibleCompletes(possible, args[2]);
 			} break;
 			case Keys.COMMAND_CTB_SET: {
 				switch(args[1]) {
@@ -126,7 +134,6 @@ public class CTBCommandTabComplete implements TabCompleter {
 					possible.addAll(plugin.getAllSets().keySet());
 				} break;
 				}
-				options = getPossibleCompletes(possible, args[2]);
 			} break;
             case Keys.COMMAND_CTB_MARK: {
                 switch(args[1]) {
@@ -134,15 +141,25 @@ public class CTBCommandTabComplete implements TabCompleter {
                     for(Team t : plugin.getAllTeams().values()) {
                         possible.addAll(t.getAllPeoples().values());
                     }
-                    options = getPossibleCompletes(possible, args[2]);
                 } break;
                 case Keys.COMMAND_CTB_MARK_TEAM: {
                     possible.addAll(plugin.getAllTeams().keySet());
-                    options = getPossibleCompletes(possible, args[2]);
                 } break;
                 }
-            }
+            } break;
+            case Keys.COMMAND_CTB_CONFIG: {
+                switch(args[1]) {
+                    case Keys.COMMAND_CTB_CONFIG_SET:
+                    case Keys.COMMAND_CTB_CONFIG_GET: {
+                        if(isAdmin) {
+                            possible.add(Keys.COMMAND_CTB_CONFIG_WARNTIME);
+                            possible.add(Keys.COMMAND_CTB_CONFIG_ROUNDTIME);
+                        }
+                    } break;
+                }
+            } break;
 			}
+            options = getPossibleCompletes(possible, args[2]);
 		} break;
 		case 4: {
 			switch(args[0]) {
