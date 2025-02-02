@@ -33,18 +33,18 @@ public class Team {
 	private int streak;
 
 	// data to not save
-    /** The block type the team is attempting to find */
-	private Material target;
+    /** The block type the team is attempting to find, and which players have found it */
+	private Map<Material, List<UUID>> targets;
     /** If the team has given up */
 	private boolean givenup;
     /** All of the online players on the team */
 	private Map<UUID, Player> peoples;
-    /** If each player has found their block */
-	private Map<UUID, Boolean> foundBlock;
     /** The plugin this team is currently in */
     private CTBMain plugin;
     /** RNG source */
     private Random rand;
+    /** Game timer for current game */
+    private Timer timer;
 	
 	public Team(String name, CTBMain plugin) {
 		this.name = name;
@@ -55,33 +55,73 @@ public class Team {
 		peoples = new HashMap<UUID, Player>();
 
 		uuids = new HashMap<UUID, String>();
-		foundBlock = new HashMap<UUID, Boolean>();
+        targets = new HashMap<Material, List<UUID>>();
 	}
 	
+    /**
+     * Sets the timer the team uses
+     * @param timer the new timer
+     */
+    public void setTimer(Timer timer) {
+        this.timer = timer;
+        for(UUID u : peoples.keySet()) {
+            if(this.timer.getBar(u.toString()) == null) {
+                this.timer.addBar(u.toString(), "");
+                this.timer.addPlayer(peoples.get(u), u.toString());
+            }
+        }
+    }
+
     /**
      * Updates the team's time bars, updating the remaining time and team status info
      * @param timer The timer to update in
      * @param titleprefix The prefix to go in the timer title
      */
-	public void updateTimeBars(Timer timer, String titleprefix) {
+	public void updateTimeBars(String titleprefix) {
 		if(timer != null) {
-			String got_str = "";
-			int gotnum = 0;
-			for(Player p : peoples.values()) {
-				if(foundBlock.get(p.getUniqueId()) == true) {
-					gotnum++;
-				}
-			}
-			if(gotnum == 0) {
-				got_str += plugin.getString("color.missed");
-			} else if(gotnum < peoples.size()) {
-				got_str += plugin.getString("color.got");
-			} else {
-				got_str += plugin.getString("color.got");
-			}
-			got_str += gotnum + "/" + peoples.size();
-			timer.setTitle(plugin.getString("color.main") + titleprefix + plugin.getString("color.missed") + target + " " + got_str + plugin.getString("color.main"), name);
-			timer.setTitle(plugin.getString("color.main") + titleprefix + ((gotnum == peoples.size()) ? plugin.getString("color.got") : plugin.getString("color.got.some")) + target + " " + got_str + plugin.getString("color.main"), name + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
+            String ctstr = "";
+
+            // Select color
+            int gotnum = 0;
+            if(hasEveryoneFoundAll()) {
+                ctstr += plugin.getString("color.got");
+                gotnum = peoples.size();
+            } else {
+                int somenum = 0;
+                for(UUID p : peoples.keySet()) {
+                    if(hasFoundAll(p)) {
+                        gotnum++;
+                    }
+                    if(hasFoundAny(p)) {
+                        somenum++;
+                    }
+                }
+                if(somenum > 0) {
+                    ctstr += plugin.getString("color.got.some");
+                } else {
+                    ctstr += plugin.getString("color.missed");
+                }
+            }
+            ctstr += "(" + gotnum + "/" + peoples.size() + ")";
+
+            for(Player p : peoples.values()) {
+                String matsstr = "";
+                boolean firstMat = true;
+                for(Material m : targets.keySet()) {
+                    if(firstMat) {
+                        firstMat = false;
+                    } else {
+                        matsstr += ", ";
+                    }
+                    if(hasFound(p.getUniqueId(), m)) {
+                        matsstr += plugin.getString("color.got") + m;
+                    } else {
+                        matsstr += plugin.getString("color.missed") + m;
+                    }
+                }
+                timer.setTitle(plugin.getString("color.main") + titleprefix + matsstr + " " + ctstr + plugin.getString("color.main"), p.getUniqueId().toString());
+            }
+
 		}
 	}
 
@@ -148,17 +188,49 @@ public class Team {
      * Gets the block the team is going for
      * @return The block type
      */
-	public Material getTarget() {
-		return target;
+	public List<Material> getTargets() {
+        List<Material> res = new ArrayList<Material>();
+        for(Material m : targets.keySet()) {
+            res.add(m);
+        }
+		return res;
 	}
 
     /**
-     * Sets the block the team is going for
-     * @param target The new block type
+     * Gets the nubmer of targets the team has
+     * @return The number of targets
      */
-	public void setTarget(Material target) {
-		this.target = target;
-	}
+    public int getTargetCount() {
+        return targets.size();
+    }
+
+    /**
+     * Adds a target to the team's target set
+     * @param tgt the new target to add
+     */
+    public void addTarget(Material tgt) {
+        targets.put(tgt, new ArrayList<UUID>());
+    }
+
+    /**
+     * Removes a target from the team
+     * @param tgt The target to remove
+     * @return If the target existed or not
+     */
+    public boolean removeTarget(Material tgt) {
+        if(targets.containsKey(tgt)) {
+            targets.remove(tgt);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Clears the target list
+     */
+    public void clearTargets() {
+        targets.clear();
+    }
 
     /**
      * Gets wether the team has given up on this block or not
@@ -169,13 +241,34 @@ public class Team {
 	}
 
     /**
-     * Sets if the team has given up on this block
+     * Sets if the team has given up on these blocks
      * @param givenup
      */
 	public void setGivenup(boolean givenup) {
 		this.givenup = givenup;
 	}
 
+    /**
+     * Gets a string of all materials the team needs
+     * @return
+     */
+    public String getTargetString() {
+        if(targets.size() > 0) {
+            boolean firstMat = true;
+            String matsstr = "";
+            for(Material m : targets.keySet()) {
+                if(firstMat) {
+                    firstMat = false;
+                } else {
+                    matsstr += ", ";
+                }
+                matsstr += m;
+            }
+            return matsstr;
+        } else {
+            return plugin.getString("block.target.null");
+        }
+    }
     //  __   __   __   __   ___ 
     // /__` /  ` /  \ |__) |__  
     // .__/ \__, \__/ |  \ |___ 
@@ -189,25 +282,70 @@ public class Team {
 		if(peoples.size() < 1) {
 			return false;
 		}
-    	return hasEveryoneFound();
+    	return hasEveryoneFoundAll();
 	}
 
     /**
-     * Checks if a specific player has found their block
+     * Checks if a specific player has found of their blocks
      * @param pl the UUID of the player
-     * @return if they have found their block
+     * @return A map of blocks to found state
      */
-    public boolean hasFound(UUID pl) {
-		return foundBlock.get(pl);
+    public Map<Material, Boolean> hasFound(UUID pl) {
+		Map<Material, Boolean> map = new HashMap<Material, Boolean>();
+        for(Material m : targets.keySet()) {
+            map.put(m, targets.get(m).contains(pl));
+        }
+        return map;
 	}
 
     /**
-     * If everyone who is online has found their block
+     * Checks if a player has found a specific block
+     * @param pl the UUID of the player
+     * @param tgt The specific block to check
+     * @return True if they've found it, false if they haven't or it isn't a target
+     */
+    public boolean hasFound(UUID pl, Material tgt) {
+        if(targets.containsKey(tgt)) {
+            return targets.get(tgt).contains(pl);
+        }
+        return false;
+    }
+
+    /**
+     * Checks if a player has found all of their targets
+     * @param pl the UUID of the player
+     * @return True if the player has, False if they haven't or they have no targets
+     */
+    public boolean hasFoundAll(UUID pl) {
+        boolean all = targets.size() > 0;
+        for(Material m : targets.keySet()) {
+            all &= targets.get(m).contains(pl);
+        }
+        return all;
+    }
+
+        /**
+     * Checks if a player has found any of their targets
+     * @param pl the UUID of the player
+     * @return True if the player has, False if they haven't or they have no targets
+     */
+    public boolean hasFoundAny(UUID pl) {
+        for(Material m : targets.keySet()) {
+            if(targets.get(m).contains(pl)) {
+                return true;
+            };
+        }
+        return false;
+    }
+
+    /**
+     * If everyone who is online has found the given block
+     * @param m The material to check for
      * @return If everyone has found their block
      */
-	public boolean hasEveryoneFound() {
+	public boolean hasEveryoneFound(Material m) {
 		for(UUID u : peoples.keySet()) {
-			if(!foundBlock.get(u)) {
+			if(!hasFound(u, m)) {
 				return false;
     		}
 		}
@@ -215,12 +353,12 @@ public class Team {
 	}
 
     /**
-     * If any online player has found their block
+     * If any online player has found the given block
      * @return If anyone has found their block
      */
-    public boolean hasAnyoneFound() {
+    public boolean hasAnyoneFound(Material m) {
 		for(UUID u : peoples.keySet()) {
-			if(foundBlock.get(u)) {
+			if(hasFound(u, m)) {
 				return true;
     		}
 		}
@@ -228,21 +366,53 @@ public class Team {
 	}
 
     /**
+     * If any online player has found any block
+     * @return If anyone has found their block
+     */
+    public boolean hasAnyoneFoundAny() {
+		for(UUID u : peoples.keySet()) {
+			if(hasFoundAny(u)) {
+				return true;
+    		}
+		}
+		return false;
+	}
+
+    /**
+     * If all online player have found all their blocks
+     * @return If everyone has found all targets
+     */
+    public boolean hasEveryoneFoundAll() {
+        for(UUID u : peoples.keySet()) {
+			if(!hasFoundAll(u)) {
+				return false;
+    		}
+		}
+		return true;
+    }
+
+    /**
      * Sets if a player has found their block. Does not perform any other possibly desired actions.
      * @param uuid The UUID of the player
      * @param found If they have found their block
      */
-	public void setFound(UUID uuid, boolean found) {
-		foundBlock.put(uuid, found);
+	public void setFound(UUID uuid, Material m, boolean found) {
+        if(targets.containsKey(m)) {
+            if(found) {
+                targets.get(m).add(uuid);
+            } else {
+                targets.get(m).remove(uuid);
+            }
+        }
 	}
 
     /**
      * Marks everyone has having not found their block regardless of if they are online right now
      */
     public void clearFound() {
-		for(UUID u : foundBlock.keySet()) {
-			foundBlock.put(u, false);
-		}
+        for(Material m : targets.keySet()) {
+            targets.get(m).clear();
+        }
 	}
 
     /**
@@ -303,12 +473,12 @@ public class Team {
 
     public void checkStreak() {
         if(streak > 0) {
-            if(!hasEveryoneFound()) {
+            if(!hasEveryoneFoundAll()) {
                 streak = -1;
             } else {
                 streak++;
             }
-        } else if(hasEveryoneFound()) {
+        } else if(hasEveryoneFoundAll()) {
             streak = 1;
         } else {
             streak--;
@@ -323,11 +493,11 @@ public class Team {
         if(possible.size() > 0) {
             for(Player p : getOnlinePeoples()) {
                 if(streak > 0) {
-                    if(hasFound(p.getUniqueId())) {
+                    if(hasFoundAll(p.getUniqueId())) {
                         possible.get(rand.nextInt(possible.size())).giveTo(p);
                     }
                 } else {
-                    if(!hasFound(p.getUniqueId())) {
+                    if(!hasFoundAll(p.getUniqueId())) {
                         possible.get(rand.nextInt(possible.size())).giveTo(p);
                     }
                 }
@@ -380,7 +550,6 @@ public class Team {
 	public void addPerson(Player p) {
 		peoples.put(p.getUniqueId(), p);
 		uuids.put(p.getUniqueId(), p.getName());
-		foundBlock.put(p.getUniqueId(), false);
 	}
     /**
      * Adds a new player to the team. The player must be offline
@@ -389,7 +558,6 @@ public class Team {
      */
 	public void addPerson(UUID u, String name) {
 		uuids.put(u, name);
-		foundBlock.put(u, false);
 	}
 	
     /**
@@ -406,6 +574,9 @@ public class Team {
      */
 	public void disconnectPerson(Player p) {
 		peoples.remove(p.getUniqueId());
+        if(timer != null) {
+            timer.removeBar(p.getUniqueId().toString());
+        }
 	}
     /**
      * Marks a player as online
@@ -416,6 +587,10 @@ public class Team {
 		if(uuids.containsKey(p.getUniqueId()) ) {
 			uuids.put(p.getUniqueId(), p.getName());
 		}
+        if(timer != null) {
+            timer.addBar(p.getUniqueId().toString(), "");
+            timer.addPlayer(p, p.getUniqueId().toString());
+        }
 	}
 	
     /**
@@ -489,9 +664,13 @@ public class Team {
      * Removes all players from the team
      */
 	public void clearPlayers() {
+        // TODO remove from title bars
+        for(UUID id : peoples.keySet()) {
+            timer.removeBar(id.toString());
+        }
 		peoples.clear();
 		uuids.clear();
-		foundBlock.clear();
+        clearFound();
 	}
 	
     /**

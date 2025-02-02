@@ -8,12 +8,17 @@ color.disabled: &{GRAY}
 test: &{green} Test &{RED}String {color.accent}%d
 
 # Block found/unfound
-block.found.player: {color.main}%s has found their block!
-block.found.you   : {color.main}You found your block!
-block.found.team  : {color.main}%s has all found their block!
-block.lost.player : {color.main}%s has lost their block!
-block.lost.you    : {color.main}You lost your block!
-block.lost.team   : {color.main}%s has all lost their block!
+block.found.player    : {color.main}%s has found their %s!
+block.found.you       : {color.main}You found your %s!
+block.found.player.all: {color.main}%s has found all their blocks!
+block.found.you.all   : {color.main}You found all your blocks! 
+block.found.team      : {color.main}%s has all found their block!
+block.lost.player     : {color.main}%s has lost their %s!
+block.lost.you        : {color.main}You lost your %s!
+block.lost.team       : {color.main}%s has all lost their %s!
+block.lost.player.all : {color.main}%s has lost their blocks!
+block.lost.you.all    : {color.main}You lost your blocks!
+block.lost.team.all   : {color.main}%s has all lost their blocks!
 
 block.notfound.first : {color.main}You didn't find your block. Don't let that happen again!
 block.notfound.potato: {color.main}I just love potatoes!

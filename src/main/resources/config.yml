@@ -1,3 +1,4 @@
 roundtime: 300
 warntime: 10
 useigt: true
+fulltime: false

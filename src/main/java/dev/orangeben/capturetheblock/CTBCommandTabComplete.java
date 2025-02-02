@@ -154,6 +154,7 @@ public class CTBCommandTabComplete implements TabCompleter {
                         if(isAdmin) {
                             possible.add(Keys.COMMAND_CTB_CONFIG_WARNTIME);
                             possible.add(Keys.COMMAND_CTB_CONFIG_ROUNDTIME);
+                            possible.add(Keys.COMMAND_CTB_CONFIG_FULLTIME);
                         }
                     } break;
                 }

@@ -24,10 +24,11 @@ public class CTBEvent implements Listener {
 			if(t != null) {
 				Material m = p.getLocation().getBlock().getType();
 				Material n = p.getLocation().subtract(0, 1, 0).getBlock().getType();
-				Material tgt = t.getTarget();
-				if((m == tgt || n == tgt) && !t.hasEveryoneFound()) {
-					plugin.foundBlock(p, t);
-				}
+                for(Material tgt : t.getTargets()) {
+                    if((m == tgt || n == tgt)) {
+                        plugin.foundBlock(p, t, tgt);
+                    }
+                }
 			}
 		}
 	}

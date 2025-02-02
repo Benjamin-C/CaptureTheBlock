@@ -6,7 +6,7 @@
 
   <groupId>dev.orangeben.capturetheblock</groupId>
   <artifactId>CaptureTheBlock</artifactId>
-  <version>3.6-DEV</version>
+  <version>3.6.1-DEV</version>
 
   <name>capturetheblock</name>
   <!-- FIXME change it to the project's website -->

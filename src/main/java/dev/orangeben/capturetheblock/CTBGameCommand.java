@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -346,7 +347,7 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 							
 							if(toSkip != null) {
-								if(!toSkip.hasEveryoneFound()) {
+								if(!toSkip.hasEveryoneFoundAll()) {
 									plugin.regenTeamTargetBlock(toSkip);
 								} else {
 									sender.sendMessage(plugin.getString("team.error.skip.alreadygot"));
@@ -453,6 +454,7 @@ public class CTBGameCommand implements CommandExecutor {
 								for(int i = 2; i < args.length; i++) {
 									sender.sendMessage(plugin.enableSet(args[2]) ? plugin.getString("set.added", args[2]) : plugin.getString("set.nonexistant", args[2]));
 								}
+                                
 							} else {
 								sender.sendMessage(plugin.getString("set.specify"));
 							}
@@ -514,9 +516,19 @@ public class CTBGameCommand implements CommandExecutor {
                             sender.sendMessage(plugin.getString("mark.specify.who"));    
                         }
                     } break;
+                    case 3: {
+                        sender.sendMessage("Specify what!");
+                    }
                     default: {
-                        boolean toSet = !(args.length >= 4 && (args[3].equals(Keys.COMMAND_CTB_MARK_NOTFOUND) || args[3].equals("0") || args[3].equalsIgnoreCase("false")));
+                        boolean toSet = !(args.length >= 4 && (args[4].equals(Keys.COMMAND_CTB_MARK_NOTFOUND) || args[4].equals("0") || args[4].equalsIgnoreCase("false")));
                         String name = args[2];
+                        Material mat = null;
+                        try {
+                            mat = Material.valueOf(args[3].toUpperCase());
+                        } catch (Exception e) {
+                            sender.sendMessage("Invalid material");
+                            return true;
+                        }
                         switch(args[1]) {
                         case Keys.COMMAND_CTB_MARK_TEAM: {
                             if(plugin.getAllTeams().containsKey(name)) {
@@ -524,12 +536,12 @@ public class CTBGameCommand implements CommandExecutor {
                                 for(UUID u : t.getAllPeoples().keySet()) {
                                     if(t.isOnline(u)) {
                                         if(toSet) {
-                                            plugin.foundBlock(t.getPlayer(u), t);
+                                            plugin.foundBlock(t.getPlayer(u), t, mat);
                                         } else {
-                                            plugin.unfoundBlock(t.getPlayer(u), t);
+                                            plugin.unfoundBlock(t.getPlayer(u), t, mat);
                                         }
                                     } else {
-                                        t.setFound(u, toSet);
+                                        t.setFound(u, mat, toSet);
                                     }
                                 }
                                 sender.sendMessage(plugin.getString("mark.set.all", name, ((!toSet) ? plugin.getString("mark.not") + " " : "")));
@@ -545,12 +557,12 @@ public class CTBGameCommand implements CommandExecutor {
                                         if(peoples.get(u).equals(name)) {
                                             if(t.isOnline(u)) {
                                                 if(toSet) {
-                                                    plugin.foundBlock(t.getPlayer(u), t);
+                                                    plugin.foundBlock(t.getPlayer(u), t, mat);
                                                 } else {
-                                                    plugin.unfoundBlock(t.getPlayer(u), t);
+                                                    plugin.unfoundBlock(t.getPlayer(u), t, mat);
                                                 }
                                             } else {
-                                                t.setFound(u, toSet);
+                                                t.setFound(u, mat, toSet);
                                             }
                                             sender.sendMessage(plugin.getString("mark.set.one", name, ((!toSet) ? plugin.getString("mark.not") + " " : "")));
                                             return true;        
@@ -581,6 +593,9 @@ public class CTBGameCommand implements CommandExecutor {
                                 case Keys.COMMAND_CTB_CONFIG_WARNTIME: {
                                     sender.sendMessage("Warning time is " + plugin.getRoundWarn());
                                 }
+                                case Keys.COMMAND_CTB_CONFIG_FULLTIME: {
+                                    sender.sendMessage("Game " + ((plugin.getFullTime()) ? "does" : "does not") + " continue for the full round time");
+                                }
                             }
                             return true;
                         }
@@ -601,7 +616,14 @@ public class CTBGameCommand implements CommandExecutor {
                                     } catch (Exception e) {
                                         sender.sendMessage("Invalid value for round time");
                                     }
-                                    sender.sendMessage("Warning time is now " + plugin.getRoundWarn() + ". This will take effect next round.");
+                                }
+                                case Keys.COMMAND_CTB_CONFIG_FULLTIME: {
+                                    try {
+                                        plugin.setFullTime(Boolean.parseBoolean(args[3]));
+                                        sender.sendMessage("Full time is now " + plugin.getFullTime() + ". This will take effect now.");
+                                    } catch (Exception e) {
+                                        sender.sendMessage("Invalid value for round fulltime");
+                                    }
                                 }
                             }
                             return true;

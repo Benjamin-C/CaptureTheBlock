@@ -46,6 +46,8 @@ public class CTBMain extends JavaPlugin {
 	private int roundtime = 300;
 	/** The int warning time before the round is over in seconds */
 	private int roundwarn = 10;
+    /** The bool if the round should continue once everyone has found their block */
+    private boolean fulltime = false;
 	
     /** The rewards for getting your block */
     private Map<String, StreakReward> rewards;
@@ -139,10 +141,11 @@ public class CTBMain extends JavaPlugin {
             getLogger().severe("String file not found, no strings will work!");
         }
 
+    	saveDefaultConfig();
     	cfg = this.getConfig();
     	roundtime = cfg.getInt(Keys.CONFIG_ROUND_TIME);
     	roundwarn = cfg.getInt(Keys.CONFIG_WARN_TIME);
-    	saveDefaultConfig();
+        fulltime = cfg.getBoolean(Keys.CONFIG_FULLTIME);
     	
         // Load rewards
         saveResource(Keys.FILE_REWARDS, true);
@@ -156,9 +159,6 @@ public class CTBMain extends JavaPlugin {
                 rewards.put(key, new StreakReward(key, cs, this));
             }
             getLogger().info("Loaded " + rewards.size() + " rewards");
-            for(StreakReward sr : rewards.values()) {
-                getLogger().info(sr.toString());
-            }
         } else {
             getLogger().severe("Could not find reward file");
         }
@@ -172,6 +172,9 @@ public class CTBMain extends JavaPlugin {
         } else {
             sendAdminMessage("The game is currently running, so teams have not been reloaded.");
         }
+        
+        // Load sets
+        enabledSets = cfg.getStringList(Keys.CONFIG_SETLIST);
     	
         // Load blocks
     	allSets = new HashMap<String, BlockSet>();
@@ -216,12 +219,26 @@ public class CTBMain extends JavaPlugin {
         return roundwarn;
     }
 
+    public boolean getFullTime() {
+        return fulltime;
+    }
+
     public void setRoundTime(int val) {
         roundtime = val;
+        cfg.set(Keys.CONFIG_ROUND_TIME, roundtime);
+        saveConfig();
     }
 
     public void setRoundWarn(int val) {
         roundwarn = val;
+        cfg.set(Keys.CONFIG_WARN_TIME, roundwarn);
+        saveConfig();
+    }
+
+    public void setFullTime(boolean ft) {
+        fulltime = ft;
+        cfg.set(Keys.CONFIG_FULLTIME, fulltime);
+        saveConfig();
     }
 
     public Map<String, StreakReward> getRewards() {
@@ -288,6 +305,10 @@ public class CTBMain extends JavaPlugin {
      * Updates the list of all possible blocks based on the currently enabled sets
      */
 	public void updatePossibleBlocks() {
+        // Save set list
+        cfg.set(Keys.CONFIG_SETLIST, enabledSets);
+        saveConfig();
+        // Recalculate the blocks
 		activeBlocks.clear();
 		for(String s : enabledSets) {
 			activeBlocks.addAll(allSets.get(s).getAllBlocks());
@@ -382,18 +403,17 @@ public class CTBMain extends JavaPlugin {
      * @param p	the {@link Player} who lost their block
      * @param t the team of that player
      */
-    protected void unfoundBlock(Player pl, Team t) {
-        if(t.hasFound(pl.getUniqueId())) {
-            pl.sendMessage(getString("block.lost.you"));
-            sendAllMsg(getString("block.lost.player", pl.getName()));
+    // TODO add remove all function
+    protected void unfoundBlock(Player pl, Team t, Material tgt) {
+        if(t.hasFound(pl.getUniqueId(), tgt)) {
+            pl.sendMessage(getString("block.lost.you", tgt));
+            sendAllMsg(getString("block.lost.player", pl.getName(), tgt), pl);
             if(t.hasScored()) {
                 t.addScore(-1);
-	    		sendAllMsg(getString("block.lost.team", t.getName()));
+	    		sendAllMsg(getString("block.lost.team", t.getName()), pl);
 	    	}
-            t.setFound(pl.getUniqueId(), false);
-	    	gameTimer.removePlayer(pl, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
-	    	gameTimer.addPlayer(pl, t.getName());
-	    	t.updateTimeBars(gameTimer, titlePrefix);
+            t.setFound(pl.getUniqueId(), tgt, false);
+	    	t.updateTimeBars(titlePrefix);
     	}
     }
 
@@ -402,29 +422,37 @@ public class CTBMain extends JavaPlugin {
      * Also starts the next round if everyone has found their block
      * @param p	the {@link Player} who found their block
      */
-    protected void foundBlock(Player pl, Team t) {
-    	if(!t.hasFound(pl.getUniqueId())) {
-            pl.sendMessage(getString("block.found.you"));
-            sendAllMsg(getString("block.found.player", pl.getName()));
-            t.setFound(pl.getUniqueId(), true);
-	    	t.updateTimeBars(gameTimer, titlePrefix);
-	    	gameTimer.removePlayer(pl, t.getName());
-	    	gameTimer.addPlayer(pl, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
+    protected void foundBlock(Player pl, Team t, Material m) {
+    	if(!t.hasFound(pl.getUniqueId(), m)) {
+            pl.sendMessage(getString("block.found.you", m.toString()));
+            sendAllMsg(getString("block.found.player", pl.getName(), m.toString()), pl);
+            if(t.hasFoundAll(pl.getUniqueId())) {
+                pl.sendMessage(getString("block.found.you", m.toString()));
+                sendAllMsg(getString("block.found.player", pl.getName(), m.toString()), pl);
+            }
+            t.setFound(pl.getUniqueId(), m, true);
+	    	t.updateTimeBars(titlePrefix);
 	    	if(t.hasScored()) {
-	    		t.addScore(1);
+	    		t.addScore(t.getTargetCount());
 	    		sendAllMsg(getString("block.found.team", t.getName()));
 	    	}
-	    	Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
-				@Override public void run() {
-					if(hasEveryoneFoundBlock()) {
-                        for(Team t : getAllTeams().values()) {
-                            t.checkStreak();
-                        }
-						startRound();
-					}
-				}
-			});
+            if(!fulltime) {
+                Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
+                    @Override public void run() {
+                        finishRound();
+                    }
+                });
+            }
     	}
+    }
+
+    public void finishRound() {
+        if(hasEveryoneFoundBlock()) {
+            for(Team t : getAllTeams().values()) {
+                t.checkStreak();
+            }
+            startRound();
+        }
     }
     
     /**
@@ -447,7 +475,7 @@ public class CTBMain extends JavaPlugin {
     protected boolean hasEveryoneFoundBlock() {
     	boolean found = true;
     	for(Team p : teams.values()) {
-    		found &= p.hasEveryoneFound();
+    		found &= p.hasEveryoneFoundAll();
     	}
 //    	Bukkit.broadcastMessage("Everyone found their block? " + found);
     	return found;
@@ -487,9 +515,10 @@ public class CTBMain extends JavaPlugin {
 		t.sendMessage(getString("block.next.chat", mat.name()));
 		t.sendTitle(getString("block.next.title", mat.name()),
                     getString("block.next.subtitle", StringBank.formatTime(roundtime)), 20, 200, 20);
-		t.setTarget(mat);
+        t.clearTargets();
+		t.addTarget(mat);
 		t.clearFound();
-		t.updateTimeBars(gameTimer, titlePrefix);
+		t.updateTimeBars(titlePrefix);
     }
     
     /**
@@ -556,16 +585,13 @@ public class CTBMain extends JavaPlugin {
 		            		p.sendTitle(getString("block.timer.warn", StringBank.formatTime(thisroundwarn)), null,  TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
 		            	}
 		            	for(Team t : teams.values()) {
-		            		t.sendTitle(getString("block.timer.warn", StringBank.formatTime(thisroundwarn)), t.hasEveryoneFound() ? null : getString("block.timer.hurry"), TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
+		            		t.sendTitle(getString("block.timer.warn", StringBank.formatTime(thisroundwarn)), t.hasEveryoneFoundAll() ? null : getString("block.timer.hurry"), TITLE_FADEIN, TITLE_HOLD, TITLE_FADEOUT);
 		            	}
 		    		}
 		    	});
 		    	clbk.put(0, new TimeRunnable() { // When the timer is done
 		    		public void run(AbstractTimer timer) {
-                        for(Team t : teams.values()) {
-                            t.checkStreak();
-                        }
-		    			startRound();
+                        finishRound();
 		    		}
 		    	});
 
@@ -573,15 +599,11 @@ public class CTBMain extends JavaPlugin {
 				
 //		    	gameTimer.addAllPlayers();
 		    	
-		    	String ts = "";
 		    	for(Team t : teams.values()) {
-		    		ts += " " + t.getName() + ":" + t.getTarget();
-		    		gameTimer.addBar(t.getName(), "");
-		    		gameTimer.addBar(t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX, "");
-		    		t.updateTimeBars(gameTimer, titlePrefix);
-		    		gameTimer.addPlayer(new ArrayList<Player>(t.getOnlinePeoples()), t.getName());
+                    t.setTimer(gameTimer);
+		    		t.updateTimeBars(titlePrefix);
 		    	}
-		    	gameTimer.setTitle(ts, "main");
+		    	gameTimer.setTitle("TODO fixme [sgheifl]", "main");
 		    	gameTimer.start();
 		    	sendAdminMessage(getString("game.admin.start"));
 	    	} else {
@@ -670,9 +692,9 @@ public class CTBMain extends JavaPlugin {
             if(t.getPeoples().isEmpty()) {
                 scstr += getString("color.disabled");
             } else {
-                scstr += (t.hasEveryoneFound() ? getString("color.got") : getString("color.missed"));
+                scstr += (t.hasEveryoneFoundAll() ? getString("color.got") : getString("color.missed"));
             }
-            scstr += sc + "-" + name + ((showBlocks) ? ": " + ((t.getTarget() != null) ? t.getTarget().name() : getString("block.target.null")) : "");
+            scstr += sc + "-" + name + ((showBlocks) ? ": " + t.getTargetString() : "");
     		msgmap.put(name, scstr);
     	}
     	
@@ -918,7 +940,7 @@ public class CTBMain extends JavaPlugin {
             String team = "";
             if(showStatus) {
                 if(t.getPeoples().size() > 0) {
-                    team += (t.hasEveryoneFound()) ? getString("color.got") : ((t.hasAnyoneFound()) ? getString("color.got.some") : getString("color.missed"));
+                    team += (t.hasEveryoneFoundAll()) ? getString("color.got") : ((t.hasAnyoneFoundAny()) ? getString("color.got.some") : getString("color.missed"));
                 } else {
                     team += getString("color.disabled");
                 }
@@ -930,7 +952,7 @@ public class CTBMain extends JavaPlugin {
 
             for(UUID u : t.getAllPeoples().keySet()) {
                 if(showStatus) {
-                    team += (t.hasFound(u)) ? getString("color.got") : getString("color.missed");
+                    team += (t.hasFoundAll(u)) ? getString("color.got") : getString("color.missed");
                 }
                 team += "\n  " + t.getPlayerName(u);
                 if(!t.isOnline(u)) {
@@ -970,6 +992,22 @@ public class CTBMain extends JavaPlugin {
     	}
     	for(Player p : getSpectators()) {
     		p.sendMessage(msg);
+    	}
+    }
+
+    /**
+     * Sends a message to all team members and spectators, except the sender
+     * @param msg the message to send
+     * @param sender The player who sent the message
+     */
+    protected void sendAllMsg(String msg, Player sender) {
+    	for(Team t : teams.values()) {
+    		t.sendMessage(msg, sender);
+    	}
+    	for(Player p : getSpectators()) {
+    		if(!p.equals(sender)) {
+                p.sendMessage(msg);
+            }
     	}
     }
     
