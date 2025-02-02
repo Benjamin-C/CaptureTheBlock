@@ -46,6 +46,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 				possible.add(Keys.COMMAND_CTB_TOGGLEDEBUGMSG);
 				possible.add(Keys.COMMAND_CTB_MOVEON);
                 possible.add(Keys.COMMAND_CTB_MARK);
+                possible.add(Keys.COMMAND_CTB_REWARD);
 			}
 			options = getPossibleCompletes(possible, args[0]);
 		} break;
@@ -81,7 +82,12 @@ public class CTBCommandTabComplete implements TabCompleter {
             case Keys.COMMAND_CTB_MARK: {
                 possible.add(Keys.COMMAND_CTB_MARK_PLAYER);
                 possible.add(Keys.COMMAND_CTB_MARK_TEAM);
-            }
+            } break;
+            case Keys.COMMAND_CTB_REWARD: {
+                if(isAdmin) {
+                    possible.addAll(plugin.getRewards().keySet());
+                }
+            } break;
 			}
 			options = getPossibleCompletes(possible, args[1]);
 		} break;
@@ -90,6 +96,7 @@ public class CTBCommandTabComplete implements TabCompleter {
 			case Keys.COMMAND_CTB_TEAM: {
 				switch(args[1]) {
 				case Keys.COMMAND_CTB_TEAM_SCORE:
+                case Keys.COMMAND_CTB_TEAM_STREAK:
 				case Keys.COMMAND_CTB_TEAM_CLEAR:
 				case Keys.COMMAND_CTB_TEAM_REMOVE:
 				case Keys.COMMAND_CTB_TEAM_JOIN: {
@@ -148,6 +155,11 @@ public class CTBCommandTabComplete implements TabCompleter {
 					possible.add(Keys.COMMAND_CTB_TEAM_SCORE_ADD);
 					possible.add(Keys.COMMAND_CTB_TEAM_SCORE_REMOVE);
 					possible.add(Keys.COMMAND_CTB_TEAM_SCORE_SET);
+				} break;
+                case Keys.COMMAND_CTB_TEAM_STREAK: {
+					possible.add(Keys.COMMAND_CTB_TEAM_STREAK_ADD);
+					possible.add(Keys.COMMAND_CTB_TEAM_STREAK_REMOVE);
+					possible.add(Keys.COMMAND_CTB_TEAM_STREAK_SET);
 				} break;
 				}
 			} break;

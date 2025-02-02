@@ -3,6 +3,7 @@ package dev.orangeben.capturetheblock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -208,6 +209,9 @@ public class CTBGameCommand implements CommandExecutor {
 						} else {
 							try {
 								LocalDateTime ldt = LocalDate.now().atTime(LocalTime.parse(args[1]));
+                                sender.sendMessage("Now is" + LocalDateTime.now().toString());
+                                sender.sendMessage("UTC is" + LocalDateTime.now(ZoneOffset.UTC).toString());
+                                sender.sendMessage("LDT is" + ldt.toString());
 								if(ldt.isAfter(LocalDateTime.now())) {
 									plugin.setEndTime(ldt);
 									if(plugin.getRoundsLeft() != -1) {
@@ -383,6 +387,41 @@ public class CTBGameCommand implements CommandExecutor {
 							}
 							}
 						} break;
+                        case Keys.COMMAND_CTB_TEAM_STREAK: {
+                            // SCORE CONTROLS
+							switch(args.length) {
+                            case 2: {
+                                sender.sendMessage(plugin.getString("team.error.noname"));
+                            } break;
+							case 3: {
+                                sender.sendMessage(plugin.getString("team.streak.got.other", args[2], plugin.getAllTeams().get(args[2]).getStreak()));
+							} break;
+							case 4: {
+                                sender.sendMessage(plugin.getString("team.streak.error.amount"));
+							} break;
+							default: {
+								try {
+                                    int amount = Integer.parseInt(args[4]);
+									switch(args[3]) {
+									case Keys.COMMAND_CTB_TEAM_STREAK_ADD: {
+										plugin.getAllTeams().get(args[2]).addStreak(amount);
+										sender.sendMessage(plugin.getString("team.streak.add", args[2], amount));
+									} break;
+									case Keys.COMMAND_CTB_TEAM_STREAK_REMOVE: {
+										plugin.getAllTeams().get(args[2]).subtractStreak((Integer.parseInt(args[4])));
+										sender.sendMessage(plugin.getString("team.streak.sub", args[2], amount));
+									} break;
+									case Keys.COMMAND_CTB_TEAM_STREAK_SET: {
+										plugin.getAllTeams().get(args[2]).setStreak(Integer.parseInt(args[4]));
+										sender.sendMessage(plugin.getString("team.streak.set", args[2], amount));
+									} break;
+									}
+								} catch(NumberFormatException e) {
+									sender.sendMessage(plugin.getString("error.notnum", args[4]));
+								}	
+							}
+							}
+						} break;
 						case Keys.COMMAND_CTB_TEAM_ADDALL: {
                             // PUT EVERYONE ON THEIR OWN TEAM
 							for(Player p : Bukkit.getOnlinePlayers()) {
@@ -528,10 +567,43 @@ public class CTBGameCommand implements CommandExecutor {
 					sender.sendMessage("Debug messages are " + ((plugin.getDebugMsgVisable()) ? "now" : "no longer") + " visable");
 					return true;
 				}
+                case Keys.COMMAND_CTB_REWARD: {
+                    if(args.length > 1) {
+                        Player target = null;
+                        if(args.length > 2) {
+                            sender.sendMessage("len: " + args.length);
+                            target = Bukkit.getPlayer(args[2]);
+                            if(target == null) {
+                                sender.sendMessage(plugin.getString("error.player.nonexistant", args[2]));
+                                return true;
+                            }
+                        } else {
+                            sender.sendMessage("you");
+                            if(sender instanceof Player) {
+                                target = (Player) sender;
+                            } else {
+                                sender.sendMessage(plugin.getString("error.notplayer"));
+                            }
+                        }
+                        if(target == null) {
+                            sender.sendMessage("COMMAND_CTB_REWARD Player is null, not sure why");
+                        }
+                        String rd = args[1];
+                        if(plugin.getRewards().containsKey(rd)) {
+                            sender.sendMessage(plugin.getString("reward.given", rd, target.getName()));
+                            plugin.getRewards().get(rd).giveTo((Player) sender);
+                        } else {
+                            sender.sendMessage(plugin.getString("error.reward.nonexistant", rd));
+                        }
+                    } else {
+                        sender.sendMessage("Please specify a reward");
+                    }
+                    return true;
+                }
 				}
 
 			}
-			sender.sendMessage(plugin.getString("teaerror.validaction.list", acts));
+			sender.sendMessage(plugin.getString("error.validaction.list", acts));
 			return true;
 		}
         sender.sendMessage(plugin.getString("error.validaction", acts));

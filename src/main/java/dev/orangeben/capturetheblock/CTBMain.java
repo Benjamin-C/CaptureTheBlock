@@ -10,10 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
@@ -43,6 +45,9 @@ public class CTBMain extends JavaPlugin {
 	/** The int warning time before the round is over in seconds */
 	private int roundwarn = 10;
 	
+    /** The rewards for getting your block */
+    private Map<String, StreakReward> rewards;
+
 	/** The {@link List} of {@link Team} in the game */
 	private Map<String, Team> teams;
 	
@@ -137,15 +142,72 @@ public class CTBMain extends JavaPlugin {
     	roundwarn = cfg.getInt(Keys.CONFIG_WARN_TIME);
     	saveDefaultConfig();
     	
-    	loadAllTeams();
-    	for(Player p : Bukkit.getOnlinePlayers()) {
-    		reconnectPlayer(p);
-    	}
+        // Load rewards
+        saveResource(Keys.FILE_REWARDS, true);
+        File rwfile = new File(getDataFolder(), Keys.FILE_REWARDS);
+        rewards.clear();
+        if(rwfile.exists()) {
+            YamlConfiguration rc = YamlConfiguration.loadConfiguration(rwfile);        
+            Set<String> keys = rc.getKeys(false);
+            for(String key : keys) {
+                ConfigurationSection cs = rc.getConfigurationSection(key);
+                rewards.put(key, new StreakReward(key, cs, this));
+            }
+            getLogger().info("Loaded " + rewards.size() + " rewards");
+            for(StreakReward sr : rewards.values()) {
+                getLogger().info(sr.toString());
+            }
+        } else {
+            getLogger().severe("Could not find reward file");
+        }
+
+        // Load teams
+        if(!running) {
+            loadAllTeams();
+            for(Player p : Bukkit.getOnlinePlayers()) {
+                reconnectPlayer(p);
+            }
+        } else {
+            sendAdminMessage("The game is currently running, so teams have not been reloaded.");
+        }
     	
-    	loadAllBlocks();
+        // Load blocks
+    	allSets = new HashMap<String, BlockSet>();
+    	File folder = getDataFolder();
+    	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_BLOCKLIST_SUFFIX))) {
+    		try {
+	    		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
+	    		String lname = f.getName().substring(0, f.getName().indexOf("."));
+	    		
+	    		List<?> blkstr = c.getList(Keys.CONFIG_BLOCK_LIST);
+	        	BlockSet set = new BlockSet(this, lname, null, null);
+	        	for(Object o : blkstr) {
+	        		if(o instanceof String) {
+	        			String s = ((String) o).toUpperCase();
+	        			if(s.startsWith("INCLUDE_")) {
+	        				set.addSet(s.substring(s.indexOf("_") + 1, s.length()).toLowerCase());
+	        			} else {
+                            try {
+                                set.addBlock(Material.valueOf(s));
+                            } catch (Exception e) {
+                                getLogger().severe("Error loading list " + lname + ". " + e.getMessage());
+                            }
+	        			}
+	        		}
+	        	}
+	        	allSets.put(lname, set);
+    		} catch(Exception e) {
+    			e.printStackTrace();
+    			sendDebugMessage(getString("error.404", f.getName()));
+    		}
+    	}
     	
     	sendDebugMessage("I_WANT_A_MELLON");
 	}
+
+    public Map<String, StreakReward> getRewards() {
+        return rewards;
+    }
 	
     /**
      * Gets a string from the string config file
@@ -171,37 +233,6 @@ public class CTBMain extends JavaPlugin {
      */
 	public Map<String, BlockSet> getAllSets() {
 		return allSets;
-	}
-	
-	/**
-     * Loads all block sets from their files
-     */
-	public void loadAllBlocks() {
-		allSets = new HashMap<String, BlockSet>();
-    	File folder = getDataFolder();
-    	for(File f : folder.listFiles((File tf, String name) -> name.endsWith(Keys.FILE_BLOCKLIST_SUFFIX))) {
-    		try {
-	    		YamlConfiguration c = YamlConfiguration.loadConfiguration(f);
-	    		String lname = f.getName().substring(0, f.getName().indexOf("."));
-	    		
-	    		List<?> blkstr = c.getList(Keys.CONFIG_BLOCK_LIST);
-	        	BlockSet set = new BlockSet(this, lname, null, null);
-	        	for(Object o : blkstr) {
-	        		if(o instanceof String) {
-	        			String s = ((String) o).toUpperCase();
-	        			if(s.startsWith("INCLUDE_")) {
-	        				set.addSet(s.substring(s.indexOf("_") + 1, s.length()).toLowerCase());
-	        			} else {
-	        				set.addBlock(Material.valueOf(s));
-	        			}
-	        		}
-	        	}
-	        	allSets.put(lname, set);
-    		} catch(Exception e) {
-    			e.printStackTrace();
-    			sendDebugMessage(getString("error.404", f.getName()));
-    		}
-    	}
 	}
     
 	/**
@@ -287,6 +318,7 @@ public class CTBMain extends JavaPlugin {
     	
     	enabledSets = new ArrayList<String>();
     	activeBlocks = new ArrayList<Material>();
+        rewards = new HashMap<String, StreakReward>();
     	
     	loadMyConfig();
 
@@ -361,11 +393,14 @@ public class CTBMain extends JavaPlugin {
 	    	gameTimer.addPlayer(pl, t.getName() + Keys.BOSSBAR_GOTBLOCK_SUFFIX);
 	    	if(t.hasScored()) {
 	    		t.addScore(1);
-	    		sendAllMsg(getString("block.found.team", pl.getName()));
+	    		sendAllMsg(getString("block.found.team", t.getName()));
 	    	}
 	    	Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
 				@Override public void run() {
 					if(hasEveryoneFoundBlock()) {
+                        for(Team t : getAllTeams().values()) {
+                            t.checkStreak();
+                        }
 						startRound();
 					}
 				}
@@ -469,7 +504,7 @@ public class CTBMain extends JavaPlugin {
 			if(cont) {
                 for(Team t : teams.values()) {
                     t.incrementRoundCount();
-					t.sendMessage(getString("team.score.msg", t.getScore()));
+					t.sendMessage(getString("team.score.msg", t.getScore(), t.getStreak()));
 					regenTeamTargetBlock(t);
 					if(roundsLeft != -1) {
                         if(roundsLeft == 1) {
@@ -510,6 +545,9 @@ public class CTBMain extends JavaPlugin {
 		    	clbk.put(0, new TimeRunnable() { // When the timer is done
 	//	    		@Override
 		    		public void run(Timer timer) {
+                        for(Team t : teams.values()) {
+                            t.checkStreak();
+                        }
 		    			startRound();
 		    		}
 		    	});
@@ -737,6 +775,9 @@ public class CTBMain extends JavaPlugin {
 	        	t.setScore(c.getInt(Keys.TEAM_SCORE));
 	        	t.setColor(c.getColor(Keys.TEAM_COLOR));
                 t.setRoundCount(c.getInt(Keys.TEAM_ROUNDCOUNT));
+                if(c.contains(Keys.TEAM_STREAK)) {
+                    t.setStreak(c.getInt(Keys.TEAM_STREAK));
+                }
 	        	teams.put(tname, t);
 	    	}
     	} else {
@@ -764,6 +805,7 @@ public class CTBMain extends JavaPlugin {
     		c.set(Keys.TEAM_SCORE, t.getScore());
     		c.set(Keys.TEAM_COLOR, t.getColor());
     		c.set(Keys.TEAM_ROUNDCOUNT, t.getRoundCount());
+            c.set(Keys.TEAM_STREAK, t.getStreak());
     		try {
 				c.save(getTeamFile(Bukkit.getServer().getWorlds().get(0).getName() + File.separatorChar + t.getName()));
 			} catch (IOException e) {

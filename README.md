@@ -103,3 +103,7 @@ Strings used by the game are stored in `<server root>/plugins/CaptureTheBlock/st
   * Some values are used as format strings, you can use [`printf` style format specifiers](https://cplusplus.com/reference/cstdio/printf/) to include dynamic information in the string
   * Colors can be added to a string with `&{NAME}` where `NAME` is the [minecraft name of the color or effect to use](https://www.digminecraft.com/lists/color_list_pc.php), or a hex encoded color string in the format `#RRGGBB`.
   * Other strings can be added with `{key}` where `key` is the key of the other string to add.
+
+TODO:
+* reloadconfig added extra timer, broke getting blocks, and reset streaks
+* Top clock doesn't seem to update when player joins / leaves
