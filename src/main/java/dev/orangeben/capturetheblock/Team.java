@@ -111,7 +111,7 @@ public class Team {
                     if(firstMat) {
                         firstMat = false;
                     } else {
-                        matsstr += ", ";
+                        matsstr += plugin.getString("color.main") + ", ";
                     }
                     if(hasFound(p.getUniqueId(), m)) {
                         matsstr += plugin.getString("color.got") + plugin.matStr(m);
