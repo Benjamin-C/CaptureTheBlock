@@ -348,7 +348,7 @@ public class CTBGameCommand implements CommandExecutor {
 							
 							if(toSkip != null) {
 								if(!toSkip.hasEveryoneFoundAll()) {
-									plugin.regenTeamTargetBlock(toSkip);
+									plugin.regenTeamTargetBlocks(toSkip);
 								} else {
 									sender.sendMessage(plugin.getString("team.error.skip.alreadygot"));
 								}
@@ -580,55 +580,70 @@ public class CTBGameCommand implements CommandExecutor {
                 case Keys.COMMAND_CTB_CONFIG: {
                     if(args.length > 1) {
 						switch(args[1]) {
-						case Keys.COMMAND_CTB_CONFIG_RELOAD: {
-                            plugin.reloadMyConfig();
-                            sender.sendMessage("Config reloaded. The game changes will take effect next new block.");
-                            return true;
-                        }
-                        case Keys.COMMAND_CTB_CONFIG_GET: {
-                            switch(args[2]) {
-                                case Keys.COMMAND_CTB_CONFIG_ROUNDTIME: {
-                                    sender.sendMessage("Round time is " + plugin.getRoundTime());
-                                }
-                                case Keys.COMMAND_CTB_CONFIG_WARNTIME: {
-                                    sender.sendMessage("Warning time is " + plugin.getRoundWarn());
-                                }
-                                case Keys.COMMAND_CTB_CONFIG_FULLTIME: {
-                                    sender.sendMessage("Game " + ((plugin.getFullTime()) ? "does" : "does not") + " continue for the full round time");
-                                }
+                            case Keys.COMMAND_CTB_CONFIG_RELOAD: {
+                                plugin.reloadMyConfig();
+                                sender.sendMessage("Config reloaded. The game changes will take effect next new block.");
+                                return true;
                             }
-                            return true;
-                        }
-                        case Keys.COMMAND_CTB_CONFIG_SET: {
-                            switch(args[2]) {
-                                case Keys.COMMAND_CTB_CONFIG_ROUNDTIME: {
-                                    try {
-                                        plugin.setRoundTime(Integer.parseInt(args[3]));
-                                        sender.sendMessage("Round time is now " + plugin.getRoundTime() + ". This will take effect next round.");
-                                    } catch (Exception e) {
-                                        sender.sendMessage("Invalid value for round time");
-                                    }
+                            case Keys.COMMAND_CTB_CONFIG_GET: {
+                                switch(args[2]) {
+                                    case Keys.CONFIG_ROUNDTIME: {
+                                        sender.sendMessage("Round time is " + plugin.getRoundTime());
+                                    } break;
+                                    case Keys.CONFIG_WARNTIME: {
+                                        sender.sendMessage("Warning time is " + plugin.getRoundWarn());
+                                    } break;
+                                    case Keys.CONFIG_FULLTIME: {
+                                        sender.sendMessage("Game " + ((plugin.getFullTime()) ? "does" : "does not") + " continue for the full round time");
+                                    } break;
+                                    case Keys.CONFIG_BLOCKCOUNT: {
+                                        sender.sendMessage("Teams get " + plugin.getBlockCount() + " blocks");
+                                    } break;
+                                    case Keys.CONFIG_CHATBLOCKS: {
+                                        sender.sendMessage("Players " + ((plugin.getChatBlocks()) ? "do" : "do not") + " see other team's blocks");
+                                    } break;
+                                    default: {
+                                        sender.sendMessage("Unknown config field " + args[2]);
+                                    } break;
                                 }
-                                case Keys.COMMAND_CTB_CONFIG_WARNTIME: {
-                                    try {
-                                        plugin.setRoundWarn(Integer.parseInt(args[3]));
-                                        sender.sendMessage("Warning time is now " + plugin.getRoundTime() + ". This will take effect next round.");
-                                    } catch (Exception e) {
-                                        sender.sendMessage("Invalid value for round time");
-                                    }
-                                }
-                                case Keys.COMMAND_CTB_CONFIG_FULLTIME: {
-                                    try {
-                                        plugin.setFullTime(Boolean.parseBoolean(args[3]));
-                                        sender.sendMessage("Full time is now " + plugin.getFullTime() + ". This will take effect now.");
-                                    } catch (Exception e) {
-                                        sender.sendMessage("Invalid value for round fulltime");
-                                    }
-                                }
+                                return true;
                             }
-                            return true;
+                            case Keys.COMMAND_CTB_CONFIG_SET: {
+                                try {
+                                    switch(args[2]) {
+                                        case Keys.CONFIG_ROUNDTIME: {
+                                            plugin.setRoundTime(Integer.parseInt(args[3]));
+                                            sender.sendMessage("Round time is now " + plugin.getRoundTime() + ". This will take effect next round.");
+                                        } break;
+                                        case Keys.CONFIG_WARNTIME: {
+                                            plugin.setRoundWarn(Integer.parseInt(args[3]));
+                                            sender.sendMessage("Warning time is now " + plugin.getRoundTime() + ". This will take effect next round.");
+                                        } break;
+                                        case Keys.CONFIG_FULLTIME: {
+                                            plugin.setFullTime(Boolean.parseBoolean(args[3]));
+                                            sender.sendMessage("Full time is now " + plugin.getFullTime() + ". This will take effect now.");
+                                        } break;
+                                        case Keys.CONFIG_BLOCKCOUNT: {
+                                            plugin.setBlockCount(Integer.parseInt(args[3]));
+                                            sender.sendMessage("Block count is now " + plugin.getBlockCount() + ". This will take effect next round.");
+                                        } break;
+                                        case Keys.CONFIG_CHATBLOCKS: {
+                                            plugin.setChatBlocks(Boolean.parseBoolean(args[3]));
+                                            sender.sendMessage("Seeing other team's blocks is now " + plugin.getFullTime() + ". This will take effect now.");
+                                        } break;
+                                        default: {
+                                            sender.sendMessage("Unknown config field " + args[2]);
+                                        } break;
+                                    }
+                                } catch (Exception e) {
+                                    sender.sendMessage("Invalid value for " + args[2]);
+                                }
+                                return true;
+                            }
+                            default: {
+                                sender.sendMessage("Invalid action " + args[1]);
+                            }
                         }
-                    }
                     }
                     sender.sendMessage("Please specify an action");
                     return true;

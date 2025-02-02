@@ -48,6 +48,10 @@ public class CTBMain extends JavaPlugin {
 	private int roundwarn = 10;
     /** The bool if the round should continue once everyone has found their block */
     private boolean fulltime = false;
+    /** The number of blocks to assign each team every round */
+    private int blockcount = 1;
+    /** If the blocks should be shown to other teams during a round */
+    private boolean chatblocks = true;
 	
     /** The rewards for getting your block */
     private Map<String, StreakReward> rewards;
@@ -90,7 +94,6 @@ public class CTBMain extends JavaPlugin {
 	private static final int TITLE_HOLD = 100;
     /** The time title messages will fade out for in ticks */
 	private static final int TITLE_FADEOUT = 10;
-
 	
     /**
      * Sets weather or not debug messages should be shown
@@ -143,9 +146,10 @@ public class CTBMain extends JavaPlugin {
 
     	saveDefaultConfig();
     	cfg = this.getConfig();
-    	roundtime = cfg.getInt(Keys.CONFIG_ROUND_TIME);
-    	roundwarn = cfg.getInt(Keys.CONFIG_WARN_TIME);
+    	roundtime = cfg.getInt(Keys.CONFIG_ROUNDTIME);
+    	roundwarn = cfg.getInt(Keys.CONFIG_WARNTIME);
         fulltime = cfg.getBoolean(Keys.CONFIG_FULLTIME);
+        blockcount = cfg.getInt(Keys.CONFIG_BLOCKCOUNT);
     	
         // Load rewards
         saveResource(Keys.FILE_REWARDS, true);
@@ -223,15 +227,23 @@ public class CTBMain extends JavaPlugin {
         return fulltime;
     }
 
+    public int getBlockCount() {
+        return blockcount;
+    }
+
+    public boolean getChatBlocks() {
+        return chatblocks;
+    }
+
     public void setRoundTime(int val) {
         roundtime = val;
-        cfg.set(Keys.CONFIG_ROUND_TIME, roundtime);
+        cfg.set(Keys.CONFIG_ROUNDTIME, roundtime);
         saveConfig();
     }
 
     public void setRoundWarn(int val) {
         roundwarn = val;
-        cfg.set(Keys.CONFIG_WARN_TIME, roundwarn);
+        cfg.set(Keys.CONFIG_WARNTIME, roundwarn);
         saveConfig();
     }
 
@@ -241,6 +253,18 @@ public class CTBMain extends JavaPlugin {
         saveConfig();
     }
 
+    public void setBlockCount(int ct) {
+        blockcount = ct;
+        cfg.set(Keys.CONFIG_BLOCKCOUNT, blockcount);
+        saveConfig();
+    }
+
+    public void setChatBlocks(boolean cb) {
+        chatblocks = cb;
+        cfg.set(Keys.CONFIG_FULLTIME, chatblocks);
+        saveConfig();
+    }
+    
     public Map<String, StreakReward> getRewards() {
         return rewards;
     }
@@ -423,23 +447,37 @@ public class CTBMain extends JavaPlugin {
      * @param p	the {@link Player} who found their block
      */
     protected void foundBlock(Player pl, Team t, Material m) {
+        if(!running) {
+            return;
+        }
     	if(!t.hasFound(pl.getUniqueId(), m)) {
-            pl.sendMessage(getString("block.found.you", m.toString()));
-            sendAllMsg(getString("block.found.player", pl.getName(), m.toString()), pl);
-            if(t.hasFoundAll(pl.getUniqueId())) {
-                pl.sendMessage(getString("block.found.you", m.toString()));
-                sendAllMsg(getString("block.found.player", pl.getName(), m.toString()), pl);
-            }
             t.setFound(pl.getUniqueId(), m, true);
+            int tc = t.getTargetCount();
+            int gc = t.getFoundCount(pl.getUniqueId());
+            String block = (chatblocks) ? matStr(m) : getString("block.found.hidden");
+            if(t.hasFoundAll(pl.getUniqueId())) {
+                if(tc == 1) {
+                    pl.sendMessage(getString("block.found.you.one"));
+                    sendAllMsg(getString("block.found.player.one", pl.getName()), pl);
+                } else {
+                    pl.sendMessage(getString("block.found.you.all"));
+                    sendAllMsg(getString("block.found.player.all", pl.getName()));
+                }
+            } else {
+                pl.sendMessage(getString("block.found.you", matStr(m), gc, tc));
+                sendAllMsg(getString("block.found.player", pl.getName(), block, gc, tc), pl);
+            }
 	    	t.updateTimeBars(titlePrefix);
-	    	if(t.hasScored()) {
+	    	if(t.hasScored() && !(t.getAllPeoples().size() == 1 && t.getName().equals(pl.getName()))) {
 	    		t.addScore(t.getTargetCount());
 	    		sendAllMsg(getString("block.found.team", t.getName()));
 	    	}
             if(!fulltime) {
                 Bukkit.getScheduler().scheduleSyncDelayedTask(this, new Runnable() {
                     @Override public void run() {
-                        finishRound();
+                        if(hasEveryoneFoundBlock()) {
+                            finishRound();
+                        }
                     }
                 });
             }
@@ -447,12 +485,10 @@ public class CTBMain extends JavaPlugin {
     }
 
     public void finishRound() {
-        if(hasEveryoneFoundBlock()) {
-            for(Team t : getAllTeams().values()) {
-                t.checkStreak();
-            }
-            startRound();
+        for(Team t : getAllTeams().values()) {
+            t.checkStreak();
         }
+        startRound();
     }
     
     /**
@@ -510,15 +546,22 @@ public class CTBMain extends JavaPlugin {
      * Generates a new block for a team
      * @param t the team to regen for
      */
-    protected void regenTeamTargetBlock(Team t) {
-    	Material mat = getRandomBlock();
-		t.sendMessage(getString("block.next.chat", mat.name()));
-		t.sendTitle(getString("block.next.title", mat.name()),
-                    getString("block.next.subtitle", StringBank.formatTime(roundtime)), 20, 200, 20);
+    protected void regenTeamTargetBlocks(Team t) {
         t.clearTargets();
-		t.addTarget(mat);
-		t.clearFound();
-		t.updateTimeBars(titlePrefix);
+        for(int i = 0; i < blockcount; i++) {
+            t.addTarget(getRandomBlock());
+        }
+        t.sendMessage(getString("block.next.chat", t.getTargetString()));
+        if(blockcount == 1) {
+            Material mat = t.getTargets().get(0);
+            t.sendTitle(getString("block.next.title", mat.name()),
+                        getString("block.next.subtitle", StringBank.formatTime(roundtime)), 20, 200, 20);
+        } else {
+            t.sendTitle(getString("block.next.title.many"),
+                        getString("block.next.subtitle", StringBank.formatTime(roundtime)), 20, 200, 20);
+        }
+        t.clearFound();
+        t.updateTimeBars(titlePrefix);
     }
     
     /**
@@ -553,7 +596,7 @@ public class CTBMain extends JavaPlugin {
                 for(Team t : teams.values()) {
                     t.incrementRoundCount();
 					t.sendMessage(getString("team.score.msg", t.getScore(), t.getStreak()));
-					regenTeamTargetBlock(t);
+					regenTeamTargetBlocks(t);
 					if(roundsLeft != -1) {
                         if(roundsLeft == 1) {
                             t.sendMessage(getString("game.remaining.one"));
@@ -1082,5 +1125,9 @@ public class CTBMain extends JavaPlugin {
      */
     protected boolean isSpectator(Player p) {
     	return p.hasPermission(Keys.PERMISSION_SPECTATE) && findTeam(p.getUniqueId()) == null;
+    }
+
+    public String matStr(Material m) {
+        return m.toString().charAt(0) + m.toString().substring(1).toLowerCase().replace("_", " ");
     }
 }

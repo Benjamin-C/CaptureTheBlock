@@ -114,9 +114,13 @@ public class Team {
                         matsstr += ", ";
                     }
                     if(hasFound(p.getUniqueId(), m)) {
-                        matsstr += plugin.getString("color.got") + m;
+                        matsstr += plugin.getString("color.got") + plugin.matStr(m);
                     } else {
-                        matsstr += plugin.getString("color.missed") + m;
+                        if(hasAnyoneFound(m)) {
+                            matsstr += plugin.getString("color.got.some") + plugin.matStr(m);
+                        } else {
+                            matsstr += plugin.getString("color.missed") + plugin.matStr(m);
+                        }
                     }
                 }
                 timer.setTitle(plugin.getString("color.main") + titleprefix + matsstr + " " + ctstr + plugin.getString("color.main"), p.getUniqueId().toString());
@@ -262,7 +266,7 @@ public class Team {
                 } else {
                     matsstr += ", ";
                 }
-                matsstr += m;
+                matsstr += plugin.matStr(m);
             }
             return matsstr;
         } else {
@@ -414,6 +418,21 @@ public class Team {
             targets.get(m).clear();
         }
 	}
+
+    /**
+     * Gets the number of blocks a given player has found
+     * @param p The UUID of the player
+     * @return The number of found blocks
+     */
+    public int getFoundCount(UUID p) {
+        int n = 0;
+        for(List<UUID> l : targets.values()) {
+            if(l.contains(p)) {
+                n++;
+            }
+        }
+        return n;
+    }
 
     /**
      * Sets the team's score

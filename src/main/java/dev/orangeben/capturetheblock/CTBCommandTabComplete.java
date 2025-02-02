@@ -152,9 +152,11 @@ public class CTBCommandTabComplete implements TabCompleter {
                     case Keys.COMMAND_CTB_CONFIG_SET:
                     case Keys.COMMAND_CTB_CONFIG_GET: {
                         if(isAdmin) {
-                            possible.add(Keys.COMMAND_CTB_CONFIG_WARNTIME);
-                            possible.add(Keys.COMMAND_CTB_CONFIG_ROUNDTIME);
-                            possible.add(Keys.COMMAND_CTB_CONFIG_FULLTIME);
+                            possible.add(Keys.CONFIG_ROUNDTIME);
+                            possible.add(Keys.CONFIG_WARNTIME);
+                            possible.add(Keys.CONFIG_FULLTIME);
+                            possible.add(Keys.CONFIG_BLOCKCOUNT);
+                            possible.add(Keys.CONFIG_CHATBLOCKS);
                         }
                     } break;
                 }

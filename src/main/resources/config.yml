@@ -1,4 +1,12 @@
+# How long (seconds) / what IGT the round should end at
 roundtime: 300
+# How long before the end of the round / wha time teams should be warned the round is almost over
 warntime: 10
-useigt: true
+# NOT IMPLEMENTED YET If the times specified above are in seconds or target IGT
+useigt: false
+# If the round should continue the full time even if everyone has found their block
 fulltime: false
+# The number of blocks to assign per round
+blockcount: 1
+# If a team's blocks should be shown to other teams in chat
+chatblocks: true

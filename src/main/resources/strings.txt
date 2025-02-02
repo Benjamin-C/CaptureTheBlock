@@ -8,11 +8,16 @@ color.disabled: &{GRAY}
 test: &{green} Test &{RED}String {color.accent}%d
 
 # Block found/unfound
-block.found.player    : {color.main}%s has found their %s!
-block.found.you       : {color.main}You found your %s!
+block.found.hidden    : block
+block.found.player    : {color.main}%s has found their %s! (%d/%d)
+block.found.player.one: {color.main}%s has found their block!
 block.found.player.all: {color.main}%s has found all their blocks!
-block.found.you.all   : {color.main}You found all your blocks! 
-block.found.team      : {color.main}%s has all found their block!
+block.found.you       : {color.main}You found your %s! (%d/%d)
+block.found.you.one   : {color.accent}You found your block!
+block.found.you.all   : {color.accent}You found all your blocks!
+block.found.team      : {color.accent}%s has all found their block!
+block.found.team.many : {color.accent}%s has all found all their blocks!
+
 block.lost.player     : {color.main}%s has lost their %s!
 block.lost.you        : {color.main}You lost your %s!
 block.lost.team       : {color.main}%s has all lost their %s!
@@ -26,12 +31,13 @@ block.notfound.throw:  {color.main}Oops, dropped my %s
 block.notfound.hurt:   {color.main}Ouch!
 block.notfound.sick:   {color.main}I'm not feeling so good ...
 
-block.next.chat    : {color.main}Now stand on {color.accent}%s
-block.next.title   : {color.main}Find {color.accent}%s
-block.next.subtitle: {color.main}You have {color.accent}%s.
-block.timer.warn   : {color.main}%s!
-block.timer.hurry  : {color.main}Better Hurry!
-block.timer.find   : Find your block! 
+block.next.chat      : {color.main}Now stand on {color.accent}%s
+block.next.title     : {color.main}Find {color.accent}%s
+block.next.title.many: {color.main}Find your blocks!
+block.next.subtitle  : {color.main}You have {color.accent}%s.
+block.timer.warn     : {color.main}%s!
+block.timer.hurry    : {color.main}Better Hurry!
+block.timer.find     : Find your block!
 
 block.target.null  : nothing
 

@@ -12,10 +12,13 @@ public class Keys {
 	public static final String PERMISSION_CONTROL = PERMISSION + ".control";
 	public static final String PERMISSION_SPECTATE = PERMISSION + ".spectate";
 	
-	public static final String CONFIG_ROUND_TIME = "roundtime";
-	public static final String CONFIG_WARN_TIME = "warntime";
+	public static final String CONFIG_ROUNDTIME = "roundtime";
+	public static final String CONFIG_WARNTIME = "warntime";
     public static final String CONFIG_FULLTIME = "fulltime";
     public static final String CONFIG_SETLIST = "sets";
+    public static final String CONFIG_BLOCKCOUNT = "blockcount";
+    public static final String CONFIG_CHATBLOCKS = "chatblocks";
+    
 	public static final String CONFIG_BLOCK_LIST = "blocks";
 
     public static final String CONFIG_REWARD_TYPE = "type";
@@ -89,9 +92,6 @@ public class Keys {
         public static final String COMMAND_CTB_CONFIG_RELOAD = "reload";
         public static final String COMMAND_CTB_CONFIG_GET = "get";
         public static final String COMMAND_CTB_CONFIG_SET = "set";
-            public static final String COMMAND_CTB_CONFIG_ROUNDTIME = "roundtime";
-            public static final String COMMAND_CTB_CONFIG_WARNTIME = "warntime";
-            public static final String COMMAND_CTB_CONFIG_FULLTIME = "fulltime";
     public static final String COMMAND_CTB_GETIGT = "getigt";
 
 }
