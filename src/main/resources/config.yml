@@ -10,3 +10,6 @@ fulltime: false
 blockcount: 1
 # If a team's blocks should be shown to other teams in chat
 chatblocks: true
+# The currently enabled sets
+sets:
+- default

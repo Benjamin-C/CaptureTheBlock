@@ -45,6 +45,8 @@ public class Team {
     private Random rand;
     /** Game timer for current game */
     private Timer timer;
+    /** Titlebar of timer */
+    private String titlebarprefix;
 	
 	public Team(String name, CTBMain plugin) {
 		this.name = name;
@@ -74,10 +76,29 @@ public class Team {
 
     /**
      * Updates the team's time bars, updating the remaining time and team status info
-     * @param timer The timer to update in
      * @param titleprefix The prefix to go in the timer title
      */
-	public void updateTimeBars(String titleprefix) {
+    public void updateTimeBars(String titleprefix) {
+        updateSomeTimeBars(titleprefix, null);
+    }
+
+    /**
+     * Updates the team's time bars, updating the remaining time and team status info
+     * @param titleprefix The prefix to go in the timer title
+     */
+    public void updateTimeBars(String titleprefix, Player p) {
+        List<Player> updatees = new ArrayList<Player>();
+        updatees.add(p);
+        updateSomeTimeBars(titleprefix, updatees);
+    }
+
+    /**
+     * Updates the team's time bar for a specific player, updating the remaining time and team status info
+     * @param titleprefix The prefix to go in the timer title
+     * @param plr The players to update for, or null to update for everyeone
+     */
+	public void updateSomeTimeBars(String titleprefix, Collection<Player> plrs) {
+        titlebarprefix = titleprefix;
 		if(timer != null) {
             String ctstr = "";
 
@@ -104,7 +125,10 @@ public class Team {
             }
             ctstr += "(" + gotnum + "/" + peoples.size() + ")";
 
-            for(Player p : peoples.values()) {
+            if(plrs == null) {
+                plrs = peoples.values();
+            }
+            for(Player p : plrs) {
                 String matsstr = "";
                 boolean firstMat = true;
                 for(Material m : targets.keySet()) {
@@ -114,14 +138,19 @@ public class Team {
                         matsstr += plugin.getString("color.main") + ", ";
                     }
                     if(hasFound(p.getUniqueId(), m)) {
-                        matsstr += plugin.getString("color.got") + plugin.matStr(m);
+                        if(hasEveryoneFound(m)) {
+                            matsstr += plugin.getString("color.got");
+                        } else {
+                            matsstr += plugin.getString("color.got.me");
+                        }
                     } else {
                         if(hasAnyoneFound(m)) {
-                            matsstr += plugin.getString("color.got.some") + plugin.matStr(m);
+                            matsstr += plugin.getString("color.got.some");
                         } else {
-                            matsstr += plugin.getString("color.missed") + plugin.matStr(m);
+                            matsstr += plugin.getString("color.missed");
                         }
                     }
+                    matsstr += plugin.matStr(m);
                 }
                 timer.setTitle(plugin.getString("color.main") + titleprefix + matsstr + " " + ctstr + plugin.getString("color.main"), p.getUniqueId().toString());
             }
@@ -596,6 +625,7 @@ public class Team {
         if(timer != null) {
             timer.removeBar(p.getUniqueId().toString());
         }
+        updateTimeBars(titlebarprefix);
 	}
     /**
      * Marks a player as online
@@ -609,6 +639,7 @@ public class Team {
         if(timer != null) {
             timer.addBar(p.getUniqueId().toString(), "");
             timer.addPlayer(p, p.getUniqueId().toString());
+            updateTimeBars(titlebarprefix, p);
         }
 	}
 	

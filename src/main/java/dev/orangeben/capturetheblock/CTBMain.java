@@ -800,9 +800,6 @@ public class CTBMain extends JavaPlugin {
 		if(t != null) {
 			t.reconnectPerson(p);
 			sendDebugMessage(p.getName() + " joined the game, and was put on team " + t.getName());
-			if(gameTimer != null) {
-				gameTimer.addPlayer(p, t.getName());
-			}
 		} else {
 			sendDebugMessage(p.getName() + " joined the game and was not on a team");
 			if(gameTimer != null) {

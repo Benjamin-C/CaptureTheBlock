@@ -1,8 +1,9 @@
-color.main: &{LIGHT_PURPLE}
-color.accent: &{AQUA}
-color.got: &{GREEN}
-color.missed: &{RED}
+color.main    : &{LIGHT_PURPLE}
+color.accent  : &{AQUA}
+color.got     : &{GREEN}
+color.missed  : &{RED}
 color.got.some: &{GOLD}
+color.got.me  : &{AQUA}
 color.disabled: &{GRAY}
 
 test: &{green} Test &{RED}String {color.accent}%d
